@@ -1,0 +1,77 @@
+<!-- 2025-03-05 -->
+<!-- 2025-03-17 beep() removed, inline listeners removed -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MagLoop Control</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <h2>MagLoop Control Panel</h2>
+    <div class="container">
+      <h3>Auto Band Select</h3>
+      <div class="row">
+        <div class="button-column">
+          <button id="btn1" class="controlButton">SCAN UP</button>
+          <button id="btn2" class="controlButton">SCAN DOWN</button>
+        </div>
+        <div class="led-column">
+          <div id="led1" class="led"></div>
+          <div id="led2" class="led"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="horizontal-container">
+      <div class="fine-tune-controls">
+        <h3>Fine Tune</h3>
+        <!-- Use a row for the entire layout -->
+        <div class="row">
+          <!-- Column of Buttons -->
+          <div class="button-column">
+            <button id="btn3" class="controlButton">JOG UP</button>
+            <button id="btn4" class="controlButton">JOG DOWN</button>
+          </div>
+          <!-- Column of LEDs -->
+          <div class="led-column">
+            <div id="led3" class="led"></div>
+            <div id="led4" class="led"></div>
+          </div>
+          <!-- SWR Gauge -->
+          <div class="meter-container">
+            <div id="gauge_div"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scpi-container">
+      <h3>SCPI Commands</h3>
+      <div class="row">
+        <div class="scpi-container">
+          <input
+            id="scpiInput"
+            type="text"
+            class="scpiInput"
+            placeholder="SCPI>"
+          />
+          <button id="clearScpiInputButton" class="clear-button">X</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="scpi-container">
+          <textarea id="scpiResponse" rows="5" cols="50" readonly></textarea>
+          <button id="clearResponseButton" class="clear-button">X</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
