@@ -15,6 +15,8 @@ function initWebSocket() {
   socket.onopen = function (event) {};
 
   socket.onmessage = function (event) {
+    console.log("Message received:", event.data);
+
     var message = event.data;
     var scpiResponseArea = document.getElementById("scpiResponse");
 
@@ -30,9 +32,16 @@ function initWebSocket() {
           break;
         case "SWR":
           var swrValue = parseFloat(parts[1]);
-          if (gaugeData && chart) {
-            gaugeData.setValue(0, 1, swrValue);
-            chart.draw(gaugeData, options);
+          if (gauge && !isNaN(swrValue)) {
+            gauge.value = swrValue; // Update the LinearGauge value
+            console.log("Gauge updated to:", swrValue); // Debug log to confirm updates
+          } else {
+            console.error(
+              "Failed to update gauge. Gauge:",
+              gauge,
+              "SWR value:",
+              swrValue
+            );
           }
           break;
         case "led1":
@@ -93,7 +102,7 @@ function updateButtonState(id, depressed, color) {
     } else {
       button.classList.remove("depressed");
 
-      // Explicitly prevent beeps for OFF state for btn3 and btn4
+      // Explicitly prevent beeps for OFF state for momentary btn3 and btn4
       if (id === "btn1") {
         beep(784, 100); // Frequency for btn1 OFF
       } else if (id === "btn2") {
@@ -119,35 +128,35 @@ function releaseButton(buttonId) {
 }
 
 // Chart drawing function
-function drawChart() {
-  gaugeData = google.visualization.arrayToDataTable([
-    ["Label", "Value"],
-    ["SWR", 2],
-  ]);
+let gauge; // Declare the gauge variable globally
 
-  options = {
+function drawChart() {
+  // Initialize the gauge
+  gauge = new LinearGauge({
+    renderTo: "linearGauge",
     width: 200,
     height: 120,
-    min: 1,
-    max: 10,
-    redFrom: 5,
-    redTo: 10,
-    yellowFrom: 3,
-    yellowTo: 5,
+    minValue: 1,
+    maxValue: 10,
     majorTicks: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
     minorTicks: 2,
-  };
-
-  chart = new google.visualization.Gauge(document.getElementById("gauge_div"));
-  chart.draw(gaugeData, options);
+    value: 2, // Initial value
+    barWidth: 10,
+    colorBarProgress: "#00aaff",
+    colorBar: "#eeeeee",
+    highlights: [
+      { from: 3, to: 5, color: "yellow" },
+      { from: 5, to: 10, color: "red" },
+    ],
+    borders: false,
+    animationDuration: 1500,
+    animationRule: "linear",
+  }).draw();
 
   initWebSocket();
 }
-
 document.addEventListener("DOMContentLoaded", function () {
-  // Existing Google Charts code
-  google.charts.load("current", { packages: ["gauge"] });
-  google.charts.setOnLoadCallback(drawChart);
+  drawChart(); // Call the drawChart function after the DOM is fully loaded
 
   // Add event listener to SCPI input field
   document

@@ -11,49 +11,63 @@ var options;
 
 // WebSocket initialization function
 function initWebSocket() {
-  socket = new WebSocket("ws://" + window.location.hostname + "/ws");
-  socket.onopen = function (event) {};
+  // Create the WebSocket connection
+  const socket = new WebSocket("ws://" + window.location.hostname + "/ws");
+
+  socket.onopen = function (event) {
+    console.log("WebSocket connection established.");
+  };
 
   socket.onmessage = function (event) {
-    var message = event.data;
-    var scpiResponseArea = document.getElementById("scpiResponse");
+    const message = event.data; // Message received from server
+    const scpiResponseArea = document.getElementById("scpiResponse");
 
     if (message.includes("~")) {
-      var parts = message.split("~");
-      var type = parts[0];
+      const parts = message.split("~");
+      const type = parts[0];
+
       switch (type) {
         case "SCPI":
+          // Handle SCPI response
           if (scpiResponseArea) {
             scpiResponseArea.value += parts[1] + "\n";
             scpiResponseArea.scrollTop = scpiResponseArea.scrollHeight;
           }
           break;
+
         case "SWR":
-          var swrValue = parseFloat(parts[1]);
-          if (gaugeData && chart) {
-            gaugeData.setValue(0, 1, swrValue);
-            chart.draw(gaugeData, options);
+          // Update the LinearGauge with the new SWR value
+          const swrValue = parseFloat(parts[1]);
+          if (gauge && !isNaN(swrValue)) {
+            gauge.value = swrValue; // Update the gauge value
           }
           break;
+
         case "led1":
         case "led2":
         case "led3":
         case "led4":
-          var led = document.getElementById(type);
+          // Update LED status
+          const led = document.getElementById(type);
           if (led) {
             led.style.backgroundColor = parts[1];
           }
           break;
+
         case "buttonState":
+          // Update button states if applicable
           if (parts.length >= 4) {
             updateButtonState(parts[1], parts[2] === "true", parts[3]);
           }
           break;
+
         case "beep":
+          // Handle beeps if applicable
           if (parts.length >= 3) {
             beep(parseFloat(parts[1]), parseInt(parts[2]));
           }
           break;
+
         default:
           console.log("Unknown message type:", type);
       }
@@ -61,12 +75,11 @@ function initWebSocket() {
   };
 
   socket.onerror = function (error) {
-    console.error("WebSocket Error: ", error);
+    console.error("WebSocket error:", error);
   };
 
   socket.onclose = function (event) {
-    // Attempt to reconnect after a delay
-    setTimeout(initWebSocket, 5000);
+    console.log("WebSocket connection closed:", event);
   };
 }
 
