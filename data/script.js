@@ -2,6 +2,8 @@
 // 2025-03-16 debug added to initWebSocket()
 // 2025-03-17 added beep function to updateButtonState()
 // 2025-03-18 improved beep function to reuse audio and prevent overlapping
+// 2025-03-19 added beep for btn3 and btn4 OFF states
+// 2025-03-21 canvas-gauges library added to drawChart()
 
 // Global variables
 var gaugeData;
@@ -33,15 +35,18 @@ function initWebSocket() {
         case "SWR":
           var swrValue = parseFloat(parts[1]);
           if (gauge && !isNaN(swrValue)) {
-            gauge.value = swrValue; // Update the LinearGauge value
-            console.log("Gauge updated to:", swrValue); // Debug log to confirm updates
-          } else {
-            console.error(
-              "Failed to update gauge. Gauge:",
-              gauge,
-              "SWR value:",
-              swrValue
-            );
+            gauge.value = swrValue;
+            let color;
+            if (swrValue >= 1 && swrValue < 3) {
+              color = "green";
+            } else if (swrValue >= 3 && swrValue < 5) {
+              color = "yellow";
+            } else if (swrValue >= 5) {
+              color = "red";
+            }
+            gauge.update({
+              colorBarProgress: color,
+            });
           }
           break;
         case "led1":
@@ -131,30 +136,46 @@ function releaseButton(buttonId) {
 let gauge; // Declare the gauge variable globally
 
 function drawChart() {
-  // Initialize the gauge
-  gauge = new LinearGauge({
-    renderTo: "linearGauge",
-    width: 200,
-    height: 120,
-    minValue: 1,
-    maxValue: 10,
-    majorTicks: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-    minorTicks: 2,
-    value: 2, // Initial value
-    barWidth: 10,
-    colorBarProgress: "#00aaff",
-    colorBar: "#eeeeee",
-    highlights: [
-      { from: 3, to: 5, color: "yellow" },
-      { from: 5, to: 10, color: "red" },
-    ],
-    borders: false,
-    animationDuration: 1500,
-    animationRule: "linear",
-  }).draw();
+  if (!gauge) {
+    // Create only once
+    gauge = new LinearGauge({
+      renderTo: document.getElementById("gaugeSWR"),
+      width: 330,
+      height: 150,
+      type: "linear-gauge",
+      minValue: 1,
+      maxValue: 10,
+      majorTicks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      minorTicks: 2,
+      value: 2,
+      barBeginCircle: false,
+      barWidth: 30,
+      colorBarProgress: "green",
+      colorBar: "white",
+      borderShadowWidth: 0,
+      needleCircleSize: 0,
+      needleCircleOuter: false,
+      needleCircleInner: false,
+      colorNeedle: "black",
+      highlights: [
+        { from: 1, to: 3, color: "green" },
+        { from: 3, to: 5, color: "yellow" },
+        { from: 5, to: 10, color: "red" },
+      ],
+      borders: true,
+      valueBox: true,
+      animationDuration: 500,
+      animationRule: "linear",
+      animation: {
+        animateOnInit: false,
+        delay: 0,
+      },
+    }).draw();
+  }
 
-  initWebSocket();
+  initWebSocket(); // get new value from WebSocket
 }
+
 document.addEventListener("DOMContentLoaded", function () {
   drawChart(); // Call the drawChart function after the DOM is fully loaded
 
