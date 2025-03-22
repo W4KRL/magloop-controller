@@ -33,7 +33,7 @@ ButtonState buttonStates[] = {
     {"btn0", false, "dimGray"},
     {"btn1", false, "skyblue"},
     {"btn2", false, "lime"},
-    {"btn3", false, "red"},
+    {"btn3", false, LED_DOWN_RED},
     {"btn4", false, "yellow"}};
 
 //! Color of all buttons when they are not pressed

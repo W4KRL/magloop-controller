@@ -16,16 +16,10 @@ extern AsyncWebSocket ws;
 //! LED indices and ON/OFF colors
 #define LED_UP 0
 #define LED_DOWN 1
-#define LED3 2
-#define LED4 3
-#define LED_UPon "lime"
-#define LED_UPoff "red"
-#define LED_DOWNon "lime"
-#define LED_DOWNoff "red"
-#define led3ON "skyBlue"
-#define led3OFF "#202020"
-#define led4ON "yellow"
-#define led4OFF "#202020"
+#define LED_UP_GREEN "lime"
+#define LED_UP_RED "red"
+#define LED_DOWN_GREEN "lime"
+#define LED_DOWN_RED "red"
 
 struct LedState
 {
@@ -35,10 +29,8 @@ struct LedState
 
 //! changed 2025-02-15 XXX
 LedState ledStates[] = {
-    {"led1", LED_UPon},
-    {"led2", LED_DOWNoff},
-    {"led3", led3OFF},
-    {"led4", led4OFF}};
+    {"led1", LED_UP_GREEN},
+    {"led2", LED_DOWN_GREEN}};
 
 void updateLedState(const String &ledId, const String &color)
 {
@@ -51,7 +43,7 @@ void updateLedState(const String &ledId, const String &color)
     }
   }
   // Broadcast the update to all clients
-  DEBUG_PRINTF("%s: %s~%s","WS msg sent", ledId, color);
+  DEBUG_PRINTF("%s: %s~%s", "WS msg sent", ledId, color);
   ws.textAll(ledId + "~" + color);
 } // updateLedState()
 

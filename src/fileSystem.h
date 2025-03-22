@@ -6,8 +6,8 @@
 // Place files in project \data folder
 // Open PlatformIO Tasks by clicking on Alien Head
 // Under Platform
-// - Build Filesystem Image
-// - Upload Filesystem Image
+//   1. Build Filesystem Image, wait until complete
+//   2. Upload Filesystem Image, wait until complete
 
 void littleFsBegin()
 {

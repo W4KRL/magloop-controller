@@ -15,11 +15,11 @@ void wifiBegin()
     WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
-        toggleLED();
+        toggleLED_BUILTIN();
         delay(250);
         Serial.print(".");
     }
-    setLED(HIGH);
+    setLED_BUILTIN(HIGH); // Turn on the LED when connected
     Serial.printf("\n%s: %s\n", "Connected to IP Address", WiFi.localIP().toString());
 } // wifiBegin()
 

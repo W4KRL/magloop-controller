@@ -55,19 +55,21 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   }
 } // onWsEvent()
 
-void websocketBegin(){
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-    { request->send(LittleFS, "/index.html", "text/html"); });
+void websocketBegin()
+{
+  // Load the web page from LittleFS Filesystem Image
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/index.html", "text/html"); });
 
-server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request)
-    { request->send(LittleFS, "/styles.css", "text/css"); });
+  server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/styles.css", "text/css"); });
 
-server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
-    { request->send(LittleFS, "/script.js", "application/javascript"); });
+  server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/script.js", "application/javascript"); });
 
-ws.onEvent(onWsEvent);
-server.addHandler(&ws);
-server.begin();
+  ws.onEvent(onWsEvent);
+  server.addHandler(&ws);
+  server.begin();
 }
 
 #endif

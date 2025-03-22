@@ -8,6 +8,9 @@
 
 /*
   SCPI Commands:
+  *CLS
+    Clears the storage
+    
   *IDN?
     Gets the instrument identification string
 
