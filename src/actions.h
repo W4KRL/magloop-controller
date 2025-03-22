@@ -32,7 +32,7 @@ void actionsBegin()
   pinMode(LIMIT_UP, INPUT);       // Set the UP limit switch as input
   pinMode(LIMIT_DOWN, INPUT);     // Set the DOWN limit switch as input
   // attach limit switch inputs to interrupt hamdlers
-  // switches are normally closed, so they are LOW when not triggered
+  // switches are normally closed, so inputs are LOW when not triggered
   attachInterrupt(digitalPinToInterrupt(LIMIT_UP), handleLimitUp, RISING);
   attachInterrupt(digitalPinToInterrupt(LIMIT_DOWN), handleLimitDown, RISING);
 }
@@ -41,7 +41,7 @@ void actionsBegin()
  * @brief Sets the state of the built-in LED.
  *
  * This function updates the state of the built-in LED to the specified value.
- * It also updates the internal `ledState` variable to reflect the current state.
+ * It also updates the internal `ledBuiltIn` variable to reflect the current state.
  *
  * @param state A boolean value indicating the desired LED state:
  *              - `true` to turn the LED ON.
@@ -49,8 +49,6 @@ void actionsBegin()
  */
 void setLED_BUILTIN(bool state)
 {
-  // Set the LED to the desired state
-  // LOW turns the LED off, and HIGH turns it on
   ledBuiltIn = state;
   digitalWrite(LED_BUILTIN, ledBuiltIn);
 }
@@ -190,20 +188,11 @@ void processLimitSwitches()
 {
   if (limitUpTriggered)
   {
-    setMotorSpeedDirect(0, IDLE); // Stop the motor
-    buttonStates[1].depressed = false;
-    updateButtonState("btn1");
+    setMotorSpeedDirect(0, IDLE);       // Stop the motor
+    buttonStates[1].depressed = false;  // Reset the Scan Up button state
+    updateButtonState("btn1");          // Send websocket message
     updateLedState("led1", LED_UP_RED); // Set to red
-    limitUpTriggered = false;        // Reset flag
-  }
-
-  if (limitDownTriggered)
-  {
-    setMotorSpeedDirect(0, IDLE); // Stop the motor
-    buttonStates[2].depressed = false;
-    updateButtonState("btn2");
-    updateLedState("led2", LED_DOWN_RED); // Set to red
-    limitDownTriggered = false;      // Reset flag
+    limitUpTriggered = false;           // Reset flag to prevent repeated action
   }
 
   if (motorDir == MOVE_DOWN && !digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_UP_RED)
