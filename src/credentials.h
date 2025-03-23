@@ -21,9 +21,9 @@ IPAddress subnet(255, 255, 255, 0);
 #define VERSION "DevKit 2025-03-14"
 
 //! Web Server File Dates
-#define FW_DATE "2025-03-17"
-#define HTML_DATE "2025-03-17"
-#define SCRIPT_DATE "2025-03-17"
+#define FW_DATE "2025-03-23"
+#define HTML_DATE "2025-03-20"
+#define SCRIPT_DATE "2025-03-21"
 #define STYLES_DATE "2025-02-15"
 
 //! GPIO Pin definitions
