@@ -7,13 +7,13 @@
 /*
   SCPI Commands:
   *CLS
-    Clears the storage
+    Clears the preference settings
 
   *IDN?
-    Gets the instrument identification string
+    Gets the instrument identification
 
   *RST
-    Clears preferences, restores defaults, restarts preocessor
+    Restarts processor, settings unaltered
 
   Help
   Help?
@@ -23,19 +23,19 @@
     Get the enclosure temperature and humidity
 
   SYStem:Dump?
-    Lists the system state
+    Gets the system state
 
   SYStem:Highspeed <value>
-    Sets the high speed scan speed
+    Sets the high speed scan speed in percentage
 
   SYStem:Lowspeed <value>
-    Sets the slow speed in percentage
+    Sets the slow speed jog in percentage
 
   SYStem:Press <value>
-    Sets the button long press time in milliseconds
+    Sets the jog button long press time in milliseconds
 
   SYStem:Repeat <value>
-    Sets the long press repeat interval in milliseconds
+    Sets the jog button long press repeat interval in milliseconds
 
 */
 
@@ -177,16 +177,16 @@ void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("*IDN? device identity\n");
-  interface.print("*CLS clears storage\n");
-  interface.print("*RST resets processor, storage unaltered\n");
-  interface.print("ENVironment?\n");
-  interface.print("SYStem:DUMP?\n");
-  interface.print("SYStem:HIGHspeed <80..100>\n");
-  interface.print("SYStem:JOG <50..200>\n");
-  interface.print("SYStem:LOWspeed <50..80>\n");
-  interface.print("SYStem:PRESS <200..500>\n");
-  interface.print("SYStem:REPeat <100..300>\n");
-  interface.print("help? or help");
+  interface.print("*CLS clears settings\n");
+  interface.print("*RST resets processor, settings unaltered\n");
+  interface.print("ENVironment? get enclosure temp & humidity\n");
+  interface.print("SYStem:DUMP? get system settings\n");
+  interface.print("SYStem:HIGHspeed <80..100>%\n");
+  interface.print("SYStem:JOGduration <50..200>ms\n");
+  interface.print("SYStem:LOWspeed <50..80>%\n");
+  interface.print("SYStem:PRESS <200..500>ms\n");
+  interface.print("SYStem:REPeat <100..300>ms\n");
+  interface.print("Help? or Help");
 } // getHelp()
 
 // system commands
