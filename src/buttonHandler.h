@@ -3,6 +3,7 @@
 // 2025-03-18 comments expanded, actions renamed from action1, etc.
 // 2025-03-19 added inactiveButtonColor
 // 2025-03-20 added isJogActionAllowed()
+// 2025-03-23 revised button colors
 
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
@@ -32,11 +33,11 @@ struct ButtonState
 // button 1 and 2 are latching buttons
 // button 3 and 4 are momentary buttons
 ButtonState buttonStates[] = {
-    {"btn0", false, "dimGray"}, // not used
-    {"btn1", false, "skyblue"}, // scan up
-    {"btn2", false, "lime"},    // scan down
-    {"btn3", false, "red"},     // jog up
-    {"btn4", false, "yellow"}}; // jog down
+    {"btn0", false, "dimGray"},      // not used
+    {"btn1", false, "blue"},         // scan up
+    {"btn2", false, "green"},        // scan down
+    {"btn3", false, "deepskyblue"},  // jog up
+    {"btn4", false, "springgreen"}}; // jog down
 
 //! Color of all buttons when they are not pressed
 String inactiveButtonColor = "dimGray";
