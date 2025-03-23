@@ -4,7 +4,7 @@
 //! !!!!! DO NOT AUTOFORMAT !!!!!
 /* 
    Line 11 must look like this unbroken on one line:
-   #define DEBUG_PRINTF(...) Serial.printf("DEBUG: " __VA_ARGS__); Serial.print("\r\n")
+   #define DEBUG_PRINTF(...) Serial.printf("-> " __VA_ARGS__); Serial.print("\r\n")
    Usage: DEBUG_PRINT("%s %s", "string", StringVariable.c_str());
 */
 
