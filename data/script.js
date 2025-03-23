@@ -1,80 +1,17 @@
-// 2025-02-14
-// 2025-03-16 debug added to initWebSocket()
-// 2025-03-17 added beep function to updateButtonState()
-// 2025-03-18 improved beep function to reuse audio and prevent overlapping
-// 2025-03-19 added beep for btn3 and btn4 OFF states
-// 2025-03-21 canvas-gauges library added to drawChart()
+//  2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
 
 // Global variables
-var gaugeData;
-var chart;
-var socket;
-var options;
+let socket;
 
 // WebSocket initialization function
 function initWebSocket() {
   socket = new WebSocket("ws://" + window.location.hostname + "/ws");
+
   socket.onopen = function (event) {};
 
   socket.onmessage = function (event) {
     console.log("Message received:", event.data);
-
-    var message = event.data;
-    var scpiResponseArea = document.getElementById("scpiResponse");
-
-    if (message.includes("~")) {
-      var parts = message.split("~");
-      var type = parts[0];
-      switch (type) {
-        case "SCPI":
-          if (scpiResponseArea) {
-            scpiResponseArea.value += parts[1] + "\n";
-            scpiResponseArea.scrollTop = scpiResponseArea.scrollHeight;
-          }
-          break;
-        case "SWR":
-          var swrValue = parseFloat(parts[1]);
-          if (gauge && !isNaN(swrValue)) {
-            gauge.value = swrValue;
-            let color;
-            if (swrValue >= 1 && swrValue < 3) {
-              color = "green";
-            } else if (swrValue >= 3 && swrValue < 5) {
-              color = "yellow";
-            } else if (swrValue >= 5) {
-              color = "red";
-            }
-            gauge.update({
-              colorBarProgress: color,
-            });
-          }
-          break;
-        case "led1":
-        case "led2":
-        case "led3":
-        case "led4":
-          var led = document.getElementById(type);
-          if (led) {
-            led.style.backgroundColor = parts[1];
-            if (parts[1] === "red") {
-              beep(180, 100);
-            }
-          }
-          break;
-        case "buttonState":
-          if (parts.length >= 4) {
-            updateButtonState(parts[1], parts[2] === "true", parts[3]);
-          }
-          break;
-        case "beep":
-          if (parts.length >= 3) {
-            beep(parseFloat(parts[1]), parseInt(parts[2]));
-          }
-          break;
-        default:
-          console.log("Unknown message type:", type);
-      }
-    }
+    processWebSocketMessage(event.data);
   };
 
   socket.onerror = function (error) {
@@ -85,6 +22,64 @@ function initWebSocket() {
     // Attempt to reconnect after a delay
     setTimeout(initWebSocket, 5000);
   };
+}
+
+// Function to process WebSocket messages
+function processWebSocketMessage(message) {
+  const scpiResponseArea = document.getElementById("scpiResponse");
+
+  if (message.includes("~")) {
+    const parts = message.split("~");
+    const type = parts[0];
+    switch (type) {
+      case "SCPI":
+        updateSCPIResponse(scpiResponseArea, parts[1]);
+        break;
+      case "SWR":
+        updateGauge(parseFloat(parts[1]));
+        break;
+      case "led1":
+      case "led2":
+        updateLED(type, parts[1]);
+        break;
+      case "buttonState":
+          updateButtonState(parts[1], parts[2] === "true", parts[3]);
+        break;
+      case "beep":
+          beep(parseFloat(parts[1]), parseInt(parts[2]));
+        break;
+      default:
+        console.log("Unknown message type:", type);
+    }
+  }
+}
+
+// Update SCPI response area
+function updateSCPIResponse(scpiResponseArea, response) {
+  if (scpiResponseArea) {
+    scpiResponseArea.value += response + "\n";
+    scpiResponseArea.scrollTop = scpiResponseArea.scrollHeight;
+  }
+}
+
+// Update Gauge
+function updateGauge(swrValue) {
+  if (gauge && !isNaN(swrValue)) {
+    gauge.value = swrValue;
+    const color = swrValue < 3 ? "green" : swrValue < 5 ? "yellow" : "red";
+    gauge.update({ colorBarProgress: color });
+  }
+}
+
+// Update LED state
+function updateLED(ledId, color) {
+  const led = document.getElementById(ledId);
+  if (led) {
+    led.style.backgroundColor = color;
+    if (color === "red") {
+      triggerBeep(180, 100);
+    }
+  }
 }
 
 function updateButtonState(id, depressed, color) {
@@ -115,11 +110,40 @@ function updateButtonState(id, depressed, color) {
         beep(784, 100); // Frequency for btn1 OFF
       } else if (id === "btn2") {
         beep(392, 100); // Frequency for btn2 OFF
-      } else if (id === "btn3" || id === "btn4") {
-        // No beep for OFF state for btn3 and btn4
       }
     }
   }
+}
+
+// beep(Hertz, ms)
+let activeAudioContext = null;
+
+function beep(frequency, duration) {
+  // Close any existing AudioContext to prevent overlapping
+  if (activeAudioContext) {
+    activeAudioContext.close();
+  }
+
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  activeAudioContext = audioContext;
+
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+
+  oscillator.frequency.value = frequency;
+  oscillator.type = "sine";
+  oscillator.start();
+
+  setTimeout(() => {
+    oscillator.stop();
+    audioContext.close();
+    if (activeAudioContext === audioContext) {
+      activeAudioContext = null;
+    }
+  }, duration);
 }
 
 // Button press handlers
@@ -226,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function sendSCPICommand() {
-  var command = document.getElementById("scpiInput").value;
+  const command = document.getElementById("scpiInput").value;
   if (command && socket && socket.readyState === WebSocket.OPEN) {
     socket.send("SCPI~" + command);
     document.getElementById("scpiInput").value = "";
@@ -242,33 +266,4 @@ function clearSCPIResponse() {
   scpiResponse.value = "";
 }
 
-// beep(Hertz, ms)
-let activeAudioContext = null;
 
-function beep(frequency, duration) {
-  // Close any existing AudioContext to prevent overlapping
-  if (activeAudioContext) {
-    activeAudioContext.close();
-  }
-
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  activeAudioContext = audioContext;
-
-  const oscillator = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-
-  oscillator.connect(gain);
-  gain.connect(audioContext.destination);
-
-  oscillator.frequency.value = frequency;
-  oscillator.type = "sine";
-  oscillator.start();
-
-  setTimeout(() => {
-    oscillator.stop();
-    audioContext.close();
-    if (activeAudioContext === audioContext) {
-      activeAudioContext = null;
-    }
-  }, duration);
-}
