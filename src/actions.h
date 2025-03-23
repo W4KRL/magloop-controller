@@ -1,6 +1,5 @@
 //! actions.h
-// 2025-03-18 refactoring, actions renamed from action1, etc.
-// 2025-03-23 restored updateButtonState()
+// 2025-03-23 restored updateButtonState(), improved limit clear detection
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
@@ -11,32 +10,33 @@ extern int jogDuration, speedLow, speedHigh, repeatInterval, pressDuration;
 
 //! Global variables
 static bool ledBuiltIn = LOW;             // Built-in LED LOW = OFF, HIGH = ON
-volatile bool limitUpTriggered = false;   // Flag for limit switch interrupt
-volatile bool limitDownTriggered = false; // Flag for limit switch interrupt
+volatile bool isLimitUpTriggered = false;   // Flag for limit switch interrupt
+volatile bool isLimitDownTriggered = false; // Flag for limit switch interrupt
 
-//! Interrupt Service Routines for limit switches
-void IRAM_ATTR handleLimitUp()
-{
-  limitUpTriggered = true; // Set flag
+// Interrupt Service Routines (ISRs)
+void IRAM_ATTR handleLimitUpTriggered() {
+    isLimitUpTriggered = true; 
+  }
+
+void IRAM_ATTR handleLimitDownTriggered() {
+    isLimitDownTriggered = true;
 }
 
-void IRAM_ATTR handleLimitDown()
+void actionsBegin() 
 {
-  limitDownTriggered = true; // Set flag
-}
+  // Configure LED pin
+  pinMode(LED_BUILTIN, OUTPUT);    // Set LED_BUILTIN as output
+  digitalWrite(LED_BUILTIN, LOW);  // Start with LED off
 
-void actionsBegin()
-//! call this in setup()
-{
-  pinMode(LED_BUILTIN, OUTPUT);   // Set LED_BUILTIN as output
-  digitalWrite(LED_BUILTIN, LOW); // IStart with LED off
-  pinMode(LIMIT_UP, INPUT);       // Set the UP limit switch as input
-  pinMode(LIMIT_DOWN, INPUT);     // Set the DOWN limit switch as input
-  // attach limit switch inputs to interrupt handlers
-  // switches are normally closed, so inputs are LOW when not triggered
-  attachInterrupt(digitalPinToInterrupt(LIMIT_UP), handleLimitUp, RISING);
-  attachInterrupt(digitalPinToInterrupt(LIMIT_DOWN), handleLimitDown, RISING);
-}
+  // Configure limit switch pins
+  pinMode(LIMIT_UP, INPUT_PULLUP);    // Use INPUT_PULLUP for stable signals
+  pinMode(LIMIT_DOWN, INPUT_PULLUP);  // Use INPUT_PULLUP for stable signals
+
+  // Attach interrupt handlers for limit switches
+  // Limit switches are normally closed, triggering interrupts when opened (RISING)
+  attachInterrupt(digitalPinToInterrupt(LIMIT_UP), handleLimitUpTriggered, RISING);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_DOWN), handleLimitDownTriggered, RISING);
+} // actionsBegin()
 
 /**
  * @brief Sets the state of the built-in LED.
@@ -109,7 +109,7 @@ void actionScanUp()
 
 void actionScanDown()
 {
-  if (buttonStates[2].depressed) // button is ON, turn it OFF
+  if (buttonStates[2].depressed)
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[2].depressed = false;
@@ -143,7 +143,7 @@ void actionJogUp(String &action)
       setMotorSpeedDirect(0, IDLE);
     }
   }
-  else if (action == "released")
+  else
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[3].depressed = false;
@@ -168,7 +168,7 @@ void actionJogDown(String &action)
       setMotorSpeedDirect(0, IDLE);
     }
   }
-  else if (action == "released")
+  else 
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[4].depressed = false;
@@ -191,30 +191,31 @@ void actionJogDown(String &action)
 
 void processLimitSwitches()
 {
-  if (limitUpTriggered)
+  if (isLimitUpTriggered)
   {
     setMotorSpeedDirect(0, IDLE);       // Stop the motor
     buttonStates[1].depressed = false;  // Reset the Scan Up button state
     updateButtonState("btn1");          // Send websocket message
     updateLedState("led1", LED_UP_RED); // Set to red
-    limitUpTriggered = false;           // Reset flag to prevent repeated action
-  }
+    isLimitUpTriggered = false;           // Reset flag to prevent repeated action
+  } // if (isLimitUpTriggered)  
 
-  if (limitDownTriggered)
+  if (isLimitDownTriggered)
   {
     setMotorSpeedDirect(0, IDLE); // Stop the motor
     buttonStates[2].depressed = false;
     updateButtonState("btn2");
     updateLedState("led2", LED_DOWN_RED); // Set to red
-    limitDownTriggered = false;      // Reset flag
-  }
+    isLimitDownTriggered = false;      // Reset flag
+  } // if (isLimitDownTriggered)
 
-  if (motorDir == MOVE_DOWN && !digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_UP_RED)
+  // test if limit switches are restored
+  if (!digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_UP_RED)
   {
     updateLedState("led1", LED_UP_GREEN); // Set to green
   }
 
-  if (motorDir == MOVE_UP && !digitalRead(LIMIT_DOWN) && ledStates[LED_DOWN].color == LED_DOWN_RED)
+  if (!digitalRead(LIMIT_DOWN) && ledStates[LED_DOWN].color == LED_DOWN_RED)
   {
     updateLedState("led2", LED_DOWN_GREEN); // Set to green
   }
