@@ -56,6 +56,9 @@ function initWebSocket() {
           var led = document.getElementById(type);
           if (led) {
             led.style.backgroundColor = parts[1];
+            if (parts[1] === "red") {
+              beep(180, 100);
+            }
           }
           break;
         case "buttonState":
