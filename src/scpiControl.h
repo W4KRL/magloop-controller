@@ -1,66 +1,40 @@
 //! scpiControl.h
-// 2025-02-15
-// eliminate setMotorDirectionDirect()
-// fix typos
+// 2025-03-23 removed motor commands, added ENVironment command
 
-// Uses '~' as a delimiter for web socket commands
+// Use '~' as a delimiter for web socket commands
 // to avoid conflict with SCPI commands using ':' and ';' as delimiters
 
 /*
   SCPI Commands:
   *CLS
     Clears the storage
-    
+
   *IDN?
     Gets the instrument identification string
 
   *RST
     Clears preferences, restores defaults, restarts preocessor
 
-  HELP
-  HELP?
+  Help
+  Help?
     Get a list of SCPI command
 
-  Motor:Direction <value>
-    Sets the motor direction to <value>
-    Valid values : Forward, Reverse, IDLEe
+  ENVironment?
+    Get the enclosure temperature and humidity
 
-  Motor:Direction?
-    Queries the current Motor mode
-
-  Motor:Speed <value>
-    Valid values : 0..100
-
-  Motor:Speed?
-    Queries the current Motor speed
-
-  Motor:Condition?
-    Queries the current motor's speed and direction
-    Example response: Spd 30% Forward
-
-  Example commands:
-
-    mot:speed 60 - set motor speed to 60%
-    mot:dir f set direction to forward
-    mot:con? gets motor condition. Response is "Spd 60% Forward"
-
-    commands may be cocatenated:
-    mot:speed 60; mot:dir r
-    sets speed to 60% reverse
-
-  System:Dump?
+  SYStem:Dump?
     Lists the system state
 
-  System:Highspeed <value>
+  SYStem:Highspeed <value>
     Sets the high speed scan speed
 
-  System:Lowspeed <value>
+  SYStem:Lowspeed <value>
     Sets the slow speed in percentage
 
-  System:Press <value>
+  SYStem:Press <value>
     Sets the button long press time in milliseconds
 
-  System:Repeat <value>
+  SYStem:Repeat <value>
     Sets the long press repeat interval in milliseconds
 
 */
@@ -68,21 +42,19 @@
 #ifndef SCPICONTROL_H
 #define SCPICONTROL_H
 
-#include <Arduino.h>
-#include "debug.h"
+#include <Arduino.h>             // Required for platformio
+#include "debug.h"               // DEBUG_PRINT, DEBUG_PRINTLN
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
-#include "h_bridge.h"
-#include <Preferences.h> // store controller settings in flash with LittleFS
-;                        //
-SCPI_Parser scpi;        // instantiate the parser
-Preferences preferences; // instantiate the Preferences storage
-;                        //
-;                        // declare global variables for preferences
-int speedHigh;           // motor high speed % for scan
-int speedLow;            // motor low speed % for fine tune
-int pressDuration;       // long button press duration ms
-int jogDuration;         // motor jog duration ms
-int repeatInterval;      // jog repeat interval ms
+#include "h_bridge.h"            // Motor control
+#include <Preferences.h>         // Store controller settings in flash with LittleFS
+SCPI_Parser scpi;                // instantiate the parser
+Preferences preferences;         // instantiate the Preferences storage
+;                                // Declare global variables for preferences:
+int speedHigh;                   // motor high speed % for scan
+int speedLow;                    // motor low speed % for fine tune
+int pressDuration;               // long button press duration ms
+int jogDuration;                 // motor jog duration ms
+int repeatInterval;              // jog repeat interval ms
 
 void restorePreferences()
 {
@@ -95,23 +67,60 @@ void restorePreferences()
 
 //! Functions to handle SCPI commands for web sockets
 
+/**
+ * @class CaptureStream
+ * @brief A custom implementation of the Stream class to capture SCPI command responses.
+ *
+ * This class is used to capture the output of SCPI commands executed by the SCPI parser.
+ * Instead of sending the output to a hardware interface, it stores the output in a string
+ * for further processing, such as sending it back to a client over a WebSocket.
+ */
 class CaptureStream : public Stream
 {
   // written by Copilot AI
 public:
+  /// Captured output from the SCPI parser.
   String captured;
 
+  /**
+   * @brief Writes a single byte to the captured string.
+   * @param c The byte to write.
+   * @return Always returns 1 to indicate success.
+   */
   virtual size_t write(uint8_t c)
   {
     captured += (char)c;
     return 1;
   }
 
+  /**
+   * @brief Indicates the number of bytes available for reading.
+   * @return Always returns 0 as this stream is write-only.
+   */
   virtual int available() { return 0; }
+
+  /**
+   * @brief Reads a byte from the stream.
+   * @return Always returns -1 as this stream is write-only.
+   */
   virtual int read() { return -1; }
+
+  /**
+   * @brief Peeks at the next byte in the stream without removing it.
+   * @return Always returns -1 as this stream is write-only.
+   */
   virtual int peek() { return -1; }
 };
 
+/**
+ * @brief Processes an SCPI command received via WebSocket and sends the response back to the client.
+ * 
+ * @param client Pointer to the WebSocket client that sent the command.
+ * @param command The SCPI command string received from the client.
+ * 
+ * This function captures the SCPI command response using a custom stream and sends it back to the client
+ * if the response is not empty. It also logs the command and response for debugging purposes.
+ */
 void processSCPICommand(AsyncWebSocketClient *client, String command)
 {
   // written by Copilot AI
@@ -158,16 +167,19 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
   ESP.restart();
 }
 
+void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
+{
+  // get the temperature and humidity
+  interface.printf("Temperature: %i C\n", 25);
+  interface.printf("Humidity: %i%%\n", 50);
+} // getEnvironment()
+
 void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("*IDN? device identity\n");
   interface.print("*CLS clears storage\n");
   interface.print("*RST resets processor, storage unaltered\n");
-  interface.print("MOTor:CONdition?\n");
-  interface.print("MOTor:DIRection <I|F|R>\n");
-  interface.print("MOTor:DIRection?\n");
-  interface.print("MOTor:SPEeed <50..100>\n");
-  interface.print("MOTor:SPEeed?\n");
+  interface.print("ENVironment?\n");
   interface.print("SYStem:DUMP?\n");
   interface.print("SYStem:HIGHspeed <80..100>\n");
   interface.print("SYStem:JOG <50..200>\n");
@@ -176,58 +188,6 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print("SYStem:REPeat <100..300>\n");
   interface.print("help? or help");
 } // getHelp()
-
-void setMotorSpeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
-{
-  if (parameters.Size() > 0)
-  {
-    motorSpeed = String(parameters[0]).toInt();
-    motorSpeed = constrain(motorSpeed, 0, 100);
-    interface.printf("%s: %i%%", "Speed", motorSpeed);
-    setMotorSpeedDirect(motorSpeed, motorDir);
-  }
-  else
-  {
-    interface.print("Speed missing");
-  }
-} // setMotorSpeed()
-
-void getMotorSpeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
-{
-  interface.printf("%s: %i%%", "Speed", motorSpeed);
-} // getMotorSpeed()
-
-void setMotorDirection(SCPI_C commands, SCPI_P parameters, Stream &interface)
-{
-  String first_parameter = parameters.First();
-  first_parameter.toUpperCase();
-
-  if (first_parameter.startsWith("F"))
-  {
-    motorDir = MOVE_UP;
-  }
-  else if (first_parameter.startsWith("R"))
-  {
-    motorDir = MOVE_DOWN;
-  }
-  else
-  { // anything except F or R
-    // consider set duty = 0
-    motorDir = IDLE;
-  }
-  setMotorSpeedDirect(motorSpeed, motorDir);
-  interface.printf("%s: %s", "Dir: ", motorDirString[motorDir]);
-} // setMotorDirection()
-
-void getMotorDirection(SCPI_C commands, SCPI_P parameters, Stream &interface)
-{
-  interface.printf("%s: %s", "Dir: ", motorDirString[motorDir]);
-} // getMotorDirection()
-
-void getMotorCondition(SCPI_C commands, SCPI_P parameters, Stream &interface)
-{
-  interface.printf("%s: %i%% %s: %s", "SPD", motorSpeed, "DIR", motorDirString[motorDir]);
-} // getMotorCondition()
 
 // system commands
 void getSystemDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -287,7 +247,7 @@ void setSystemLowspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
   }
 } // setSystemLowspeed()
 
-void setSystemPressduration(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setSystemPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -331,15 +291,7 @@ void scpiBegin()
   scpi.RegisterCommand("*RST", &deviceReset);
   scpi.RegisterCommand("HELP", &getHelp);
   scpi.RegisterCommand("HELP?", &getHelp);
-
-  scpi.SetCommandTreeBase("MOTor");
-  scpi.RegisterCommand(":DIRection", &setMotorDirection);
-  scpi.RegisterCommand(":DIRection?", &getMotorDirection);
-  scpi.RegisterCommand(":CONdition?", &getMotorCondition);
-  scpi.RegisterCommand(":SPD", &setMotorSpeed);
-  scpi.RegisterCommand(":SPD?", &getMotorSpeed);
-  scpi.RegisterCommand(":SPEed", &setMotorSpeed);
-  scpi.RegisterCommand(":SPEed?", &getMotorSpeed);
+  scpi.RegisterCommand("ENVironment?", &getEnvironment);
 
   scpi.SetCommandTreeBase("SYStem");
   scpi.RegisterCommand(":DUMp", &getSystemDump);
@@ -347,7 +299,7 @@ void scpiBegin()
   scpi.RegisterCommand(":HIGHspeed", &setSystemHighspeed);
   scpi.RegisterCommand(":JOG", &setSystemJog);
   scpi.RegisterCommand(":LOWspeed", &setSystemLowspeed);
-  scpi.RegisterCommand(":PREss", &setSystemPressduration);
+  scpi.RegisterCommand(":PREss", &setSystemPressDuration);
   scpi.RegisterCommand(":REPeat", &setSystemRepeatInterval);
 } // scpiBegin()
 
