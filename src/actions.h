@@ -1,5 +1,6 @@
 //! actions.h
 // 2025-03-18 refactoring, actions renamed from action1, etc.
+// 2025-03-23 restored updateButtonState()
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
@@ -31,7 +32,7 @@ void actionsBegin()
   digitalWrite(LED_BUILTIN, LOW); // IStart with LED off
   pinMode(LIMIT_UP, INPUT);       // Set the UP limit switch as input
   pinMode(LIMIT_DOWN, INPUT);     // Set the DOWN limit switch as input
-  // attach limit switch inputs to interrupt hamdlers
+  // attach limit switch inputs to interrupt handlers
   // switches are normally closed, so inputs are LOW when not triggered
   attachInterrupt(digitalPinToInterrupt(LIMIT_UP), handleLimitUp, RISING);
   attachInterrupt(digitalPinToInterrupt(LIMIT_DOWN), handleLimitDown, RISING);
@@ -133,6 +134,7 @@ void actionJogUp(String &action)
     {
       setMotorSpeedDirect(speedLow, MOVE_UP);
       buttonStates[3].depressed = true;
+      updateButtonState("btn3");
       const long endTime = millis() + jogDuration;
       while (millis() < endTime)
       {
@@ -145,6 +147,7 @@ void actionJogUp(String &action)
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[3].depressed = false;
+    updateButtonState("btn3");
   }
 }
 
@@ -156,6 +159,7 @@ void actionJogDown(String &action)
     {
       setMotorSpeedDirect(speedLow, MOVE_DOWN);
       buttonStates[4].depressed = true;
+      updateButtonState("btn4");
       const long endTime = millis() + jogDuration;
       while (millis() < endTime)
       {
@@ -168,6 +172,7 @@ void actionJogDown(String &action)
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[4].depressed = false;
+    updateButtonState("btn4");
   }
 }
 
@@ -193,6 +198,15 @@ void processLimitSwitches()
     updateButtonState("btn1");          // Send websocket message
     updateLedState("led1", LED_UP_RED); // Set to red
     limitUpTriggered = false;           // Reset flag to prevent repeated action
+  }
+
+  if (limitDownTriggered)
+  {
+    setMotorSpeedDirect(0, IDLE); // Stop the motor
+    buttonStates[2].depressed = false;
+    updateButtonState("btn2");
+    updateLedState("led2", LED_DOWN_RED); // Set to red
+    limitDownTriggered = false;      // Reset flag
   }
 
   if (motorDir == MOVE_DOWN && !digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_UP_RED)
