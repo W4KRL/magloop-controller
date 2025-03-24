@@ -1,4 +1,5 @@
 //  2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
+//  2025-03-24 added valueboxSWR
 
 // Global variables
 let socket;
@@ -68,6 +69,9 @@ function updateGauge(swrValue) {
     gauge.value = swrValue;
     const color = swrValue < 3 ? "green" : swrValue < 5 ? "yellow" : "red";
     gauge.update({ colorBarProgress: color });
+    valueboxSWR = document.getElementById("valueboxSWR"); 
+    valueboxSWR.value = "";
+    valueboxSWR.value += swrValue + ":1";   
   }
 }
 
