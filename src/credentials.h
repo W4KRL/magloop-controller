@@ -1,6 +1,6 @@
 //! credentials.h
 //! 2025-02-18
-//! 2025-02-26 added static IP address
+//! 2025-03-24 added static IP address
 
 #ifndef CREDENTIALS_H
 #define CREDENTIALS_H
@@ -8,7 +8,7 @@
 #define SSID "DCMNET"
 #define PASSWORD "0F1A2D3E4D5G6L7O8R9Y"
 // Set your Static IP address & hostname
-IPAddress local_IP(192, 168, 0, 234);
+IPAddress localIP(192, 168, 0, 234);
 // Set your Gateway IP address
 IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);

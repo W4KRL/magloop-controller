@@ -12,6 +12,12 @@
 void wifiBegin()
 {
     Serial.printf("\n%s %s\n", "Connecting to", SSID);
+        // Set static IP configuration
+        if (!WiFi.config(localIP, gateway, subnet))
+        {
+            Serial.println("Static IP Configuration Failed!");
+            return;
+        }
     WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
