@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MagLoop Control</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/canvas-gauges@2.1.7/gauge.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" defer></script>
   </head>
 
@@ -51,8 +51,10 @@
 
     <div class="container">
       <h3>SWR</h3>
-      <canvas id="gaugeSWR"> </canvas>
-      <textarea id="valueboxSWR" rows="1" cols="7" readonly></textarea>
+      <div class="gauge-container">
+        <canvas id="gaugeSWR"></canvas>
+        <textarea id="valueboxSWR" rows="1" cols="7" readonly></textarea>
+      </div>
     </div>
 
     <div class="container">
@@ -65,12 +67,11 @@
             class="scpiInput"
             placeholder="SCPI>"
           />
-          <button id="clearScpiInputButton" class="clear-button">X</button>
         </div>
       </div>
       <div class="row">
         <div class="scpi-container">
-          <textarea id="scpiResponse" rows="5" cols="50" readonly></textarea>
+          <textarea id="scpiResponse" rows="5" cols="30" readonly></textarea>
           <button id="clearResponseButton" class="clear-button">X</button>
         </div>
       </div>
