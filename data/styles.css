@@ -119,17 +119,40 @@ h3 {
   text-align: center;
 }
 
+.gauge-container {
+  position: relative; /* Enable positioning of children relative to this container */
+  width: 100%; /* Expand width to fill the container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px; /* Set container height explicitly to 150px */
+}
+
+#gaugeSWR {
+  width: 100%; /* Expand width to fill the container */
+  border: 3px solid #ccc; /* Add a border to differentiate visually */
+  border-radius: 8px; /* Slight rounding for aesthetics */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for better visibility */
+}
+
+#valueboxSWR {
+  position: absolute; /* Position textarea in relation to gauge-container */
+  background: white; /* Opaque white background */
+  text-align: center; /* Center text within the textarea */
+  border: 2px solid #ccc; /* Add a border to differentiate visually */
+  border-radius: 3px; /* Slight rounding for aesthetics */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for better visibility */
+}
+
 /* Specific styles for the SCPI input box */
 .scpi-container {
   position: relative;
   display: inline-block;
-  width: var(
-    --overall-width
+  width: 100%
   ); /* Ensure the container takes up the full width */
 }
 
 .scpiInput {
-  padding-right: 40px; /* Space for the clear button */
   height: 24px;
   line-height: 24px;
   box-sizing: border-box;
@@ -154,7 +177,7 @@ h3 {
   position: absolute;
   right: 2px;
   top: 12px;
-  width: 20px;
+  width: 25px;
   height: 20px;
   border: 1px solid #ccc;
   background: none;
