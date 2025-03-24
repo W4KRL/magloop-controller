@@ -1,8 +1,10 @@
-//  2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
-//  2025-03-24 added valueboxSWR
+// 2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
+// 2025-03-24 added valueboxSWR
+// 2025-03-25 moved to chart.js
 
 // Global variables
 let socket;
+let chart; // Declare chart in the global scope
 
 // WebSocket initialization function
 function initWebSocket() {
@@ -44,10 +46,10 @@ function processWebSocketMessage(message) {
         updateLED(type, parts[1]);
         break;
       case "buttonState":
-          updateButtonState(parts[1], parts[2] === "true", parts[3]);
+        updateButtonState(parts[1], parts[2] === "true", parts[3]);
         break;
       case "beep":
-          beep(parseFloat(parts[1]), parseInt(parts[2]));
+        beep(parseFloat(parts[1]), parseInt(parts[2]));
         break;
       default:
         console.log("Unknown message type:", type);
@@ -63,25 +65,13 @@ function updateSCPIResponse(scpiResponseArea, response) {
   }
 }
 
-// Update Gauge
-function updateGauge(swrValue) {
-  if (gauge && !isNaN(swrValue)) {
-    gauge.value = swrValue;
-    const color = swrValue < 3 ? "green" : swrValue < 5 ? "yellow" : "red";
-    gauge.update({ colorBarProgress: color });
-    valueboxSWR = document.getElementById("valueboxSWR"); 
-    valueboxSWR.value = "";
-    valueboxSWR.value += swrValue + ":1";   
-  }
-}
-
 // Update LED state
 function updateLED(ledId, color) {
   const led = document.getElementById(ledId);
   if (led) {
     led.style.backgroundColor = color;
     if (color === "red") {
-      triggerBeep(180, 100);
+      beep(180, 100);
     }
   }
 }
@@ -163,48 +153,87 @@ function releaseButton(buttonId) {
   }
 }
 
-// Chart drawing function
-let gauge; // Declare the gauge variable globally
-
 function drawChart() {
-  if (!gauge) {
-    // Create only once
-    gauge = new LinearGauge({
-      renderTo: document.getElementById("gaugeSWR"),
-      width: 330,
-      height: 150,
-      type: "linear-gauge",
-      minValue: 1,
-      maxValue: 10,
-      majorTicks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      minorTicks: 2,
-      value: 2,
-      barBeginCircle: false,
-      barWidth: 30,
-      colorBarProgress: "green",
-      colorBar: "white",
-      borderShadowWidth: 0,
-      needleCircleSize: 0,
-      needleCircleOuter: false,
-      needleCircleInner: false,
-      colorNeedle: "black",
-      highlights: [
-        { from: 1, to: 3, color: "green" },
-        { from: 3, to: 5, color: "yellow" },
-        { from: 5, to: 10, color: "red" },
-      ],
-      borders: true,
-      valueBox: true,
-      animationDuration: 500,
-      animationRule: "linear",
-      animation: {
-        animateOnInit: false,
-        delay: 0,
+  // swr gauge
+  const ctx = document.getElementById("gaugeSWR").getContext("2d");
+  const data = {
+    labels: ["Gauge"],
+    datasets: [
+      {
+        data: [2.5], // Initial gauge value
+        backgroundColor: "green",
+        barPercentage: 0.6, // Bar width %
+        categoryPercentage: 1,
       },
-    }).draw();
-  }
+    ],
+  };
+  const config = {
+    type: "bar",
+    data: data,
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      scales: {
+        x: {
+          type: "logarithmic",
+          min: 1,
+          max: 10,
+          ticks: {
+            callback: function (value, index, values) {
+              if (
+                value === 1 ||
+                value === 1.5 ||
+                value === 2 ||
+                value === 3 ||
+                value === 5 ||
+                value === 7 ||
+                value === 10
+              ) {
+                return value.toString();
+              }
+              return "";
+            },
+            color: "black",
+            font: {
+              size: 12,
+            },
+            maxRotation: 0,
+            autoSkip: false,
+          },
+          grid: {
+            display: true,
+            color: "rgba(0, 0, 0, 0.5)", // Darker grid lines
+          },
+        },
+        y: { display: false },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
+    },
+  };
 
-  initWebSocket(); // get new value from WebSocket
+  chart = new Chart(ctx, config);
+}
+
+function updateGaugeValue(newValue) {
+  chart.data.datasets[0].data = [newValue];
+  chart.update();
+}
+
+function updateGauge(swrValue) {
+  if (!isNaN(swrValue)) {
+    const color = swrValue < 3 ? "green" : swrValue < 5 ? "yellow" : "red";
+    chart.data.datasets[0].backgroundColor = color;
+    chart.data.datasets[0].data = [swrValue];
+    chart.update();
+
+    const valueboxSWR = document.getElementById("valueboxSWR");
+    if (valueboxSWR) {
+      valueboxSWR.value = swrValue.toFixed(2) + ":1";
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -238,19 +267,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Add event listener for the "clear SCPI input" button
-  document
-    .getElementById("clearScpiInputButton")
-    .addEventListener("click", function () {
-      clearSCPIInput(); // Call clearSCPIInput() on click
-    });
-
   // Add event listener for the "clear response" button
   document
     .getElementById("clearResponseButton")
     .addEventListener("click", function () {
       clearSCPIResponse(); // Call clearSCPIResponse() on click
     });
+  initWebSocket();
 });
 
 function sendSCPICommand() {
@@ -269,5 +292,3 @@ function clearSCPIResponse() {
   const scpiInput = document.getElementById("scpiResponse");
   scpiResponse.value = "";
 }
-
-
