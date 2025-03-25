@@ -1,23 +1,20 @@
 # Notes for Mag Loop Controller
-02/06/2025
-
+2025-03-25
 
 ## Programming Environment
+```
 [env:esp32doit-devkit-v1]
 platform = espressif32
 board = esp32doit-devkit-v1
 framework = arduino
 monitor_speed = 115200
-monitor_filters = send_on_enter
-monitor_echo = yes
-monitor_eol = LF
 upload_speed = 921600
 board_build.filesystem = littlefs
-
 lib_deps = 
 	https://github.com/me-no-dev/ESPAsyncWebServer.git
 	https://github.com/me-no-dev/AsyncTCP.git
 	vrekrer/Vrekrer SCPI parser@^0.5.0
+```
 
 ## How to load web server files
 - PlatformIO defaults to SPIFFS unless board_build.filesystem = littlefs is in platformio.ini
@@ -26,17 +23,18 @@ lib_deps =
 - Connect a USB cable to the device. 
 - Ensure the COM port is not in use by clicking the plug icon for the Serial Monitor and click Terminate the Task
 - Click the PlatformIO alien head on the left of the screen
-- Open the Platform branch
-- Click Erase Flash
-- Click Build Filesystem Image
-- Click Upload Filesystem Image
+- Open **PLATFORM TASKS**
+- Open the **Platform** branch
+- Click **Erase Flash** if starting fresh
+- Click **Build Filesystem Image**
+- Click **Upload Filesystem Image**
 - Compile the program
 - Repeat Build, Upload, Compile if a file is changed
 
-## script.js
+## script.js Event Listeners
 
 Question: 
-The eventlistener is only for the SCPI send button. The other buttons are handled elsewhere. Why should they be handled differently?
+Whys is the eventlistener used in JavaScript?
 
 Perplexity:
 The document.addEventListener was needed for several important reasons:
@@ -54,6 +52,7 @@ The document.addEventListener was needed for several important reasons:
 By using document.addEventListener, developers can create more robust, interactive, and maintainable web applications that respond effectively to user interactions and browser events[6][7][8].
 
 Citations:
+```
 [1] https://www.freecodecamp.org/news/javascript-addeventlistener-example-code/
 [2] https://www.w3schools.com/jsref/met_document_addeventlistener.asp
 [3] https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
@@ -62,9 +61,7 @@ Citations:
 [6] https://webdesign.tutsplus.com/introduction-to-javascript-event-listeners--cms-35236t
 [7] https://www.shecodes.io/athena/67582-what-is-addeventlistener-in-javascript
 [8] https://education.launchcode.org/intro-to-web-dev-curriculum/dom-and-events/reading/event-listeners/index.html
-
----
-Answer from Perplexity: pplx.ai/share
+```
 
 ## Wrapping Header Code
 
@@ -76,3 +73,25 @@ Answer from Perplexity: pplx.ai/share
 #endif
 - It is good practice to #include <Arduino.h> in every header file.
 - Other includes or function prototypes may be needed to resolve definitions.
+
+## Setting a Static IP in the router
+
+When the ESP32 connects to your local Wi-Fi network, it is assigned an IP address from the available pool. This address is displayed on the Serial Monitor at startup, and you’ll need it to access the antenna controller through your browser. If the same IP address is still available during the next startup, the ESP32 will retain it. However, if it’s no longer available, a new address will be assigned, requiring you to update the browser with this new address to reconnect to the controller. To avoid this inconvenience, you can configure your router to assign a static IP address to the ESP32. The method for setting up a static IP depends on your router’s make and model.
+
+### TP-Link Router static IP
+
+- Log in to the router configuration page (usually 192.168.0.1)
+- Click **Advanced Routing** button on the left side of the screen, then select Static Routing List
+- Click **Add New...**
+- Enter the IP address you have chosen for the Mag Loop Controller
+- Subnet mask: 255.255.255.255
+- Gateway: 192.168.0.1
+- Status: Enabled
+- Click **Save**
+
+## Logarithmic Gauge
+See https://www.chartjs.org/
+
+The chart is modified from the Bar Chart type. Basically, it is a single bar shown horizontally. All configuration is done in script.js. The scale has type set to "logarithmic".
+
+initWebSocket calls updateGauge() when an "SWR" webssocket message is received. This function passes the SWR value to chart dataset. It also chooses a background color based on teh SWR value.
