@@ -1,14 +1,18 @@
 // 2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
-// 2025-03-24 added valueboxSWR
 // 2025-03-25 moved to chart.js
+// 2025-03-25 reorganized the code, lots of cleanup
 
 // Global variables
 let socket;
-let chart; // Declare chart in the global scope
+let chart;
 
 // WebSocket initialization function
 function initWebSocket() {
-  socket = new WebSocket("ws://" + window.location.hostname + "/ws");
+  if (socket && socket.readyState !== WebSocket.CLOSED) {
+    socket.close();
+  }
+  const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+  socket = new WebSocket(protocol + window.location.hostname + "/ws");
 
   socket.onopen = function (event) {};
 
@@ -35,76 +39,24 @@ function processWebSocketMessage(message) {
     const parts = message.split("~");
     const type = parts[0];
     switch (type) {
-      case "SCPI":
-        updateSCPIResponse(scpiResponseArea, parts[1]);
+      case "beep":
+        beep(parseFloat(parts[1]), parseInt(parts[2]));
         break;
-      case "SWR":
-        updateGauge(parseFloat(parts[1]));
+      case "buttonState":
+        updateButtonState(parts[1], parts[2] === "true", parts[3]);
         break;
       case "led1":
       case "led2":
         updateLED(type, parts[1]);
         break;
-      case "buttonState":
-        updateButtonState(parts[1], parts[2] === "true", parts[3]);
+      case "SCPI":
+        updateSCPIResponse(scpiResponseArea, parts[1]);
         break;
-      case "beep":
-        beep(parseFloat(parts[1]), parseInt(parts[2]));
+      case "SWR":
+        updateSWRgauge(parseFloat(parts[1]));
         break;
       default:
         console.log("Unknown message type:", type);
-    }
-  }
-}
-
-// Update SCPI response area
-function updateSCPIResponse(scpiResponseArea, response) {
-  if (scpiResponseArea) {
-    scpiResponseArea.value += response + "\n";
-    scpiResponseArea.scrollTop = scpiResponseArea.scrollHeight;
-  }
-}
-
-// Update LED state
-function updateLED(ledId, color) {
-  const led = document.getElementById(ledId);
-  if (led) {
-    led.style.backgroundColor = color;
-    if (color === "red") {
-      beep(180, 100);
-    }
-  }
-}
-
-function updateButtonState(id, depressed, color) {
-  const button = document.getElementById(id);
-  if (button) {
-    // Update the button appearance
-    button.style.setProperty("background-color", color);
-
-    if (depressed) {
-      button.classList.add("depressed");
-
-      // Trigger beep for ON state only
-      switch (id) {
-        case "btn1":
-        case "btn3":
-          beep(880, 100); // Frequency for btn1/btn3 ON
-          break;
-        case "btn2":
-        case "btn4":
-          beep(440, 100); // Frequency for btn2/btn4 ON
-          break;
-      }
-    } else {
-      button.classList.remove("depressed");
-
-      // Explicitly prevent beeps for OFF state for momentary btn3 and btn4
-      if (id === "btn1") {
-        beep(784, 100); // Frequency for btn1 OFF
-      } else if (id === "btn2") {
-        beep(392, 100); // Frequency for btn2 OFF
-      }
     }
   }
 }
@@ -140,6 +92,39 @@ function beep(frequency, duration) {
   }, duration);
 }
 
+function updateButtonState(id, depressed, color) {
+  const button = document.getElementById(id);
+  if (button) {
+    // Update the button appearance
+    button.style.setProperty("background-color", color);
+
+    if (depressed) {
+      button.classList.add("depressed");
+
+      // Trigger beep for ON state only
+      switch (id) {
+        case "btn1":
+        case "btn3":
+          beep(880, 100); // Frequency for btn1/btn3 ON
+          break;
+        case "btn2":
+        case "btn4":
+          beep(440, 100); // Frequency for btn2/btn4 ON
+          break;
+      }
+    } else {
+      button.classList.remove("depressed");
+
+      // Explicitly prevent beeps for OFF state for momentary btn3 and btn4
+      if (id === "btn1") {
+        beep(784, 100); // Frequency for btn1 OFF
+      } else if (id === "btn2") {
+        beep(392, 100); // Frequency for btn2 OFF
+      }
+    }
+  }
+}
+
 // Button press handlers
 function sendButtonPress(buttonId) {
   if (socket && socket.readyState === WebSocket.OPEN) {
@@ -153,8 +138,47 @@ function releaseButton(buttonId) {
   }
 }
 
-function drawChart() {
-  // swr gauge
+// Update LED state
+function updateLED(ledId, color) {
+  const led = document.getElementById(ledId);
+  if (led) {
+    led.style.backgroundColor = color;
+    if (color === "red") {
+      beep(180, 100);
+    }
+  }
+}
+
+// Update SCPI response area
+function updateSCPIResponse(scpiResponseArea, response) {
+  if (scpiResponseArea) {
+    scpiResponseArea.value += response + "\n";
+    scpiResponseArea.scrollTop = scpiResponseArea.scrollHeight;
+  }
+}
+
+function updateSWRgauge(swrValue) {
+  if (!isNaN(swrValue)) {
+    let color;
+    if (swrValue < 3) {
+      color = "green";
+    } else if (swrValue < 5) {
+      color = "yellow";
+    } else {
+      color = "red";
+    }
+    chart.data.datasets[0].backgroundColor = color;
+    chart.data.datasets[0].data = [swrValue];
+    chart.update();
+
+    const valueboxSWR = document.getElementById("valueboxSWR");
+    if (valueboxSWR) {
+      valueboxSWR.value = swrValue.toFixed(2) + ":1";
+    }
+  }
+}
+
+function drawSWRgauge() {
   const ctx = document.getElementById("gaugeSWR").getContext("2d");
   const data = {
     labels: ["Gauge"],
@@ -162,7 +186,7 @@ function drawChart() {
       {
         data: [2.5], // Initial gauge value
         backgroundColor: "green",
-        barPercentage: 0.6, // Bar width %
+        barPercentage: 0.6, // Bar height %
         categoryPercentage: 1,
       },
     ],
@@ -217,27 +241,11 @@ function drawChart() {
   chart = new Chart(ctx, config);
 }
 
-function updateGaugeValue(newValue) {
-  chart.data.datasets[0].data = [newValue];
-  chart.update();
-}
-
-function updateGauge(swrValue) {
-  if (!isNaN(swrValue)) {
-    const color = swrValue < 3 ? "green" : swrValue < 5 ? "yellow" : "red";
-    chart.data.datasets[0].backgroundColor = color;
-    chart.data.datasets[0].data = [swrValue];
-    chart.update();
-
-    const valueboxSWR = document.getElementById("valueboxSWR");
-    if (valueboxSWR) {
-      valueboxSWR.value = swrValue.toFixed(2) + ":1";
-    }
-  }
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-  drawChart(); // Call the drawChart function after the DOM is fully loaded
+  // Initialize the SWR gauge to display initial values and set up its configuration
+  drawSWRgauge();
+
+  // Establish a WebSocket connection to enable real-time communication with the server
 
   // Add event listener to SCPI input field
   document
@@ -289,6 +297,6 @@ function clearSCPIInput() {
   scpiInput.value = "";
 }
 function clearSCPIResponse() {
-  const scpiInput = document.getElementById("scpiResponse");
+  const scpiResponse = document.getElementById("scpiResponse");
   scpiResponse.value = "";
 }
