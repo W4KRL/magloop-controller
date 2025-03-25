@@ -5,8 +5,8 @@
 #ifndef CREDENTIALS_H
 #define CREDENTIALS_H
 
-#define SSID "DCMNET"
-#define PASSWORD "0F1A2D3E4D5G6L7O8R9Y"
+#define WIFI_SSID "DCMNET"
+#define WIFI_PASSWORD "0F1A2D3E4D5G6L7O8R9Y"
 // Set your Static IP address & hostname
 IPAddress localIP(192, 168, 0, 234);
 // Set your Gateway IP address
@@ -18,13 +18,13 @@ IPAddress subnet(255, 255, 255, 0);
 #define MAKER "W4KRL"
 #define MODEL "Mag Loop Controller"
 #define SERIAL_NUMBER "S/N: 001"
-#define VERSION "DevKit 2025-03-14"
+#define VERSION "DevKit 2025-03-25"
 
 //! Web Server File Dates
 #define FW_DATE "2025-03-23"
-#define HTML_DATE "2025-03-20"
-#define SCRIPT_DATE "2025-03-21"
-#define STYLES_DATE "2025-02-15"
+#define HTML_DATE "2025-03-25"
+#define SCRIPT_DATE "2025-03-25"
+#define STYLES_DATE "2025-03-25"
 
 //! GPIO Pin definitions
 #define HB_IN1 23	  // pin IN1 logic
@@ -33,9 +33,17 @@ IPAddress subnet(255, 255, 255, 0);
 #define LIMIT_DOWN 18 // pin lower limit switch
 #define SWR_RFL 35	  // SWR reflected ADC input
 #define SWR_FWD 34	  // SWR forward ADC input
-// #define I2C_SDA 7         // I2C SDA
-// #define LED_BUILTIN 8     // onboard LED
-// #define I2C_SCL 9         // I2C SCL
+
+//! Web Button and LED colors
+// used in ledControl.h & actions.h
+#define LED_GREEN "LimeGreen"
+#define LED_RED "Red"
+// used in buttonControl.h
+#define SCAN_UP "RoyalBlue"	
+#define SCAN_DOWN "LimeGreen"
+#define JOG_UP "DodgerBlue"
+#define JOG_DOWN "Lime"
+#define UNPRESSED "DimGray"
 
 #endif
 

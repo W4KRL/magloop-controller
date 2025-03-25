@@ -33,14 +33,11 @@ struct ButtonState
 // button 1 and 2 are latching buttons
 // button 3 and 4 are momentary buttons
 ButtonState buttonStates[] = {
-    {"btn0", false, "dimGray"},      // not used
-    {"btn1", false, "blue"},         // scan up
-    {"btn2", false, "green"},        // scan down
-    {"btn3", false, "deepskyblue"},  // jog up
-    {"btn4", false, "springgreen"}}; // jog down
-
-//! Color of all buttons when they are not pressed
-String inactiveButtonColor = "dimGray";
+    {"btn0", false, UNPRESSED}, // not used
+    {"btn1", false, SCAN_UP},   // scan up
+    {"btn2", false, SCAN_DOWN}, // scan down
+    {"btn3", false, JOG_UP},    // jog up
+    {"btn4", false, JOG_DOWN}}; // jog down
 
 //! Send a button state update to all connected clients
 void updateButtonState(const String &buttonId)
@@ -50,7 +47,7 @@ void updateButtonState(const String &buttonId)
     if (button.id == buttonId)
     {
       String message = "buttonState~" + buttonId + "~";
-      message += button.depressed ? "true~" + button.color : "false~" + inactiveButtonColor;
+      message += button.depressed ? "true~" + button.color : "false~" + (String)UNPRESSED;
       DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
       // Broadcast the update to all clients
       ws.textAll(message);

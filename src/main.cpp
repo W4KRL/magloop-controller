@@ -51,6 +51,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #define DEBUG_MAGLOOP //! uncomment for debug output to Serial Monitor
 
 #include <Arduino.h>        // required by PlatformIO
+
 #include "actions.h"        // responses to button commands & sensors
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials

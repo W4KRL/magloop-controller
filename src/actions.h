@@ -196,7 +196,7 @@ void processLimitSwitches()
     setMotorSpeedDirect(0, IDLE);       // Stop the motor
     buttonStates[1].depressed = false;  // Reset the Scan Up button state
     updateButtonState("btn1");          // Send websocket message
-    updateLedState("led1", LED_UP_RED); // Set to red
+    updateLedState("led1", LED_RED); // Set to red
     isLimitUpTriggered = false;           // Reset flag to prevent repeated action
   } // if (isLimitUpTriggered)  
 
@@ -205,19 +205,19 @@ void processLimitSwitches()
     setMotorSpeedDirect(0, IDLE); // Stop the motor
     buttonStates[2].depressed = false;
     updateButtonState("btn2");
-    updateLedState("led2", LED_DOWN_RED); // Set to red
+    updateLedState("led2", LED_RED); // Set to red
     isLimitDownTriggered = false;      // Reset flag
   } // if (isLimitDownTriggered)
 
   // test if limit switches are restored
-  if (!digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_UP_RED)
+  if (!digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_RED)
   {
-    updateLedState("led1", LED_UP_GREEN); // Set to green
+    updateLedState("led1", LED_GREEN); // Set to green
   }
 
-  if (!digitalRead(LIMIT_DOWN) && ledStates[LED_DOWN].color == LED_DOWN_RED)
+  if (!digitalRead(LIMIT_DOWN) && ledStates[LED_DOWN].color == LED_RED)
   {
-    updateLedState("led2", LED_DOWN_GREEN); // Set to green
+    updateLedState("led2", LED_GREEN); // Set to green
   }
 } // processLimitSwitches()
 

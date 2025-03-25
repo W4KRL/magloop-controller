@@ -11,14 +11,14 @@
 //! Connect to WiFi
 void wifiBegin()
 {
-    Serial.printf("\n%s %s\n", "Connecting to", SSID);
+    Serial.printf("\n%s %s\n", "Connecting to", WIFI_SSID);
         // Set static IP configuration
         if (!WiFi.config(localIP, gateway, subnet))
         {
             Serial.println("Static IP Configuration Failed!");
             return;
         }
-    WiFi.begin(SSID, PASSWORD);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
         toggleLED_BUILTIN();

@@ -8,18 +8,16 @@
 #define LED_CONTROL_H
 
 #include <Arduino.h>
+#include "credentials.h"
 #include <ESPAsyncWebServer.h>
 
 // Declare ws as an external variable defined elsewhere
 extern AsyncWebSocket ws;
 
-//! LED indices and ON/OFF colors
+//! LED indices and colors
+// see credentials.h for colors
 #define LED_UP 0
 #define LED_DOWN 1
-#define LED_UP_GREEN "lime"
-#define LED_UP_RED "red"
-#define LED_DOWN_GREEN "lime"
-#define LED_DOWN_RED "red"
 
 struct LedState
 {
@@ -29,8 +27,8 @@ struct LedState
 
 //! changed 2025-02-15 XXX
 LedState ledStates[] = {
-    {"led1", LED_UP_GREEN},
-    {"led2", LED_DOWN_GREEN}};
+    {"led1", LED_GREEN},
+    {"led2", LED_GREEN}};
 
 void updateLedState(const String &ledId, const String &color)
 {
