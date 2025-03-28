@@ -3,13 +3,15 @@
 // 2025-03-19
 // removed AsyncTCP include
 // revise colors add defines
+// 2025-03-28 changed to notifyClients(), added initLedStates()
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
 
 #include <Arduino.h>
 #include "credentials.h"
-#include <ESPAsyncWebServer.h>
+// #include <ESPAsyncWebServer.h>
+#include "webSocket.h"
 
 // Declare ws as an external variable defined elsewhere
 extern AsyncWebSocket ws;
@@ -40,9 +42,15 @@ void updateLedState(const String &ledId, const String &color)
       break;
     }
   }
-  // Broadcast the update to all clients
-  DEBUG_PRINTF("%s: %s~%s", "WS msg sent", ledId, color);
-  ws.textAll(ledId + "~" + color);
+  notifyClients(ledId + "~" + color);
 } // updateLedState()
+
+void initLedStates()
+{
+  for (int i = 0; i < sizeof(ledStates) / sizeof(ledStates[0]); i++)
+  {
+    notifyClients(ledStates[i].id + "~" + ledStates[i].color);
+  }
+} // initLedStates()
 
 #endif

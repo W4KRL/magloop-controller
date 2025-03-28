@@ -2,6 +2,7 @@
 // 2025-03-19 save this file
 // added preferences save/restore, list all libraries
 // moved code out of loop()
+// 2025-03-28 changes fornotifyClients() and elimination of fileSystem.h
 
 //! 2025-03-18 extensive changes for interupts, limit switches, actions
 //! leds not going grey when limit is restored
@@ -56,11 +57,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials
 #include "debug.h"          // for debug print to Serial Monitor
-#include "fileSystem.h"     // LittleFS for html/js/css
+// #include "fileSystem.h"     // LittleFS for html/js/css
 #include "h_bridge.h"       // for motor control
 #include "ledControl.h"     // for LED control by web sockets
-#include "scpiControl.h"    // for SCPI commands
 #include "webSocket.h"      // set up webSocket
+#include "scpiControl.h"    // for SCPI commands
 #include "wifiConnection.h" // local WiFi
 
 //! Additional libraries called in local headers:
@@ -79,7 +80,6 @@ void setup()
   wifiBegin();          // connect to WiFi
   scpiBegin();          // initialize SCPI parser, define commands, load Preferences
   h_bridgeBegin();      // initialize h-bridge for motor control
-  littleFsBegin();      // initialize LittleFS for webserver html/js/css files
   websocketBegin();     // initialize webSocket for bi-directional communication
 } // setup()
 

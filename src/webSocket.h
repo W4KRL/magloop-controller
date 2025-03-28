@@ -1,12 +1,19 @@
 //! webSocket.h
 //! 2025-02-10
 //! 2025-03-16 added DEBUG to onWsEvent
+// 2025-03-28 changes for notifyClients() and elimination of fileSystem.h
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
 
 #include <Arduino.h>
+#include <LittleFS.h>          // for index.html, styles.css, and script.js
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
+
+void initLedStates();                                                  // forward declaration
+void initButtonStates();                                               // forward declaration
+void buttonHandler(String &buttonId, String &action);                  // forward declaration
+void processSCPICommand(AsyncWebSocketClient *client, String command); // forward declaration
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -14,23 +21,14 @@ AsyncWebSocket ws("/ws");
 //! Web Socket event handler
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {
-
   switch (type)
   {
   case WS_EVT_CONNECT:
-    // Push the current state of the buttons, LEDs, and SWR gauge to all clients
     DEBUG_PRINTF("%s", "WS client connected");
     DEBUG_PRINTF("Free Heap: %u bytes", ESP.getFreeHeap());
     DEBUG_PRINTF("WiFi Signal Strength (RSSI): %d dBm", WiFi.RSSI());
-    for (auto &led : ledStates)
-    {
-      client->text(led.id + "~" + led.color);
-    }
-    for (auto &button : buttonStates)
-    {
-      client->text("buttonState~" + button.id + "~false~dimGray");
-    }
-    client->text("SWR" + String(swrValue(), 2));
+    initLedStates();    // Initialize LEDs
+    initButtonStates(); // Initialize button states
     break;
   case WS_EVT_DISCONNECT:
     DEBUG_PRINTF("%s", "WS client disconnected");
@@ -55,8 +53,28 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   }
 } // onWsEvent()
 
+void notifyClients(const String &message)
+{
+  if (ws.count() > 0) // Check if there are connected clients
+  {
+    DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
+    ws.textAll(message);
+  }
+  else
+  {
+    DEBUG_PRINTF("%s", "No clients connected to WebSocket");
+  }
+}
+
 void websocketBegin()
 {
+  // Initialize LittleFS for serving files
+  if (!LittleFS.begin())
+  {
+    Serial.println("Error mounting LittleFS");
+    return;
+  }
+
   // Load the web page from LittleFS Filesystem Image
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/index.html", "text/html"); });

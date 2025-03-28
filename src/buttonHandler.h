@@ -4,6 +4,7 @@
 // 2025-03-19 added inactiveButtonColor
 // 2025-03-20 added isJogActionAllowed()
 // 2025-03-23 revised button colors
+// 2025-03-28 changed to notifyClients, added initButtonStates()
 
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
@@ -39,6 +40,14 @@ ButtonState buttonStates[] = {
     {"btn3", false, JOG_UP},    // jog up
     {"btn4", false, JOG_DOWN}}; // jog down
 
+void initButtonStates()
+{
+  for (int i = 0; i < sizeof(buttonStates) / sizeof(buttonStates[0]); i++)
+  {
+    notifyClients(buttonStates[i].id + "~" + buttonStates[i].color);
+  }
+} // initButtonStates()
+
 //! Send a button state update to all connected clients
 void updateButtonState(const String &buttonId)
 {
@@ -48,9 +57,7 @@ void updateButtonState(const String &buttonId)
     {
       String message = "buttonState~" + buttonId + "~";
       message += button.depressed ? "true~" + button.color : "false~" + (String)UNPRESSED;
-      DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
-      // Broadcast the update to all clients
-      ws.textAll(message);
+      notifyClients(message);
       break;
     }
   }

@@ -1,5 +1,6 @@
 //! actions.h
 // 2025-03-23 restored updateButtonState(), improved limit clear detection
+// 2025-03-28 changed to notifyClients() if no change
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
@@ -237,7 +238,7 @@ void processSWR()
   if (millis() - lastTime > 5000)
   {
     String swrValueString = "SWR~" + String(swrValue(), 2);
-    ws.textAll(swrValueString);
+    notifyClients(swrValueString); // send to all clients
     lastTime = millis();
   }
 }
