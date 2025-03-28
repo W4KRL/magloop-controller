@@ -74,12 +74,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 void setup()
 {
-  Serial.begin(115200); // Serial Monitor
+  Serial.begin(115200); // start Serial Monitor
   actionsBegin();       // initialize sensors and limit switches
   wifiBegin();          // connect to WiFi
   scpiBegin();          // initialize SCPI parser, define commands, load Preferences
   h_bridgeBegin();      // initialize h-bridge for motor control
-  littleFsBegin();      // initialize LittleFS for webserver html/js/css
+  littleFsBegin();      // initialize LittleFS for webserver html/js/css files
   websocketBegin();     // initialize webSocket for bi-directional communication
 } // setup()
 
