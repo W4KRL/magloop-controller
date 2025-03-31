@@ -1,19 +1,18 @@
 //! webSocket.h
-//! 2025-02-10
-//! 2025-03-16 added DEBUG to onWsEvent
-// 2025-03-28 changes for notifyClients() and elimination of fileSystem.h
+//! 2025-03-28 changes for notifyClients() and elimination of fileSystem.h
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
 
-#include <Arduino.h>
+#include <Arduino.h>           // PlatformIO requires this for ESP32
 #include <LittleFS.h>          // for index.html, styles.css, and script.js
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
 
-void initLedStates();                                                  // forward declaration
-void initButtonStates();                                               // forward declaration
-void buttonHandler(String &buttonId, String &action);                  // forward declaration
-void processSCPICommand(AsyncWebSocketClient *client, String command); // forward declaration
+// Function prototypes
+void initLedStates();                                                  // ledControl.h
+void initButtonStates();                                               // buttonHandler.h
+void buttonHandler(String &buttonId, String &action);                  // buttonHandler.h
+void processSCPICommand(AsyncWebSocketClient *client, String command); // scpiControl.h
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -53,6 +52,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   }
 } // onWsEvent()
 
+//! Notify all connected clients with a message
 void notifyClients(const String &message)
 {
   if (ws.count() > 0) // Check if there are connected clients
@@ -68,7 +68,7 @@ void notifyClients(const String &message)
 
 void websocketBegin()
 {
-  // Initialize LittleFS for serving files
+  // Initialize LittleFS for html/css/js files in <project>\data
   if (!LittleFS.begin())
   {
     Serial.println("Error mounting LittleFS");
