@@ -10,11 +10,9 @@
 #define BUTTONHANDLER_H
 
 #include <Arduino.h>
-#include "actions.h"
-#include "debug.h"
 #include "ledControl.h"
-#include "h_bridge.h"
 
+// function prototypes from actions.h
 void actionScanUp();                // latching button, pressed toggles .depressed
 void actionScanDown();              // latching button
 void actionJogUp(String &action);   // momentary button, action is "pressed" or "released"
