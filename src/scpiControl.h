@@ -17,7 +17,7 @@
 
   Help
   Help?
-    Get a list of SCPI command
+    Get the SCPI command list
 
   ENVironment?
     Get the enclosure temperature and humidity
@@ -26,15 +26,15 @@
     Gets the system state
 
   SYStem:Highspeed <value>
-    Sets the high speed scan speed in percentage
+    Sets the motor high speed scan speed in percentage
 
   SYStem:Lowspeed <value>
-    Sets the slow speed jog in percentage
+    Sets the motor slow speed jog in percentage
 
   SYStem:Press <value>
-    Sets the jog button long press time in milliseconds
-
-  SYStem:Repeat <value>
+    Sets the motor jog time in milliseconds
+ 
+  SYStem:Repeat <value> ! NOT IN USE !
     Sets the jog button long press repeat interval in milliseconds
 
 */
@@ -47,6 +47,8 @@
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include "h_bridge.h"            // Motor control
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
+#include "webSocket.h"
+
 SCPI_Parser scpi;                // instantiate the parser
 Preferences preferences;         // instantiate the Preferences storage
 ;                                // Declare global variables for preferences:
