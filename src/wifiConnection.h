@@ -5,8 +5,8 @@
 #define WIFICONNECTION_H
 
 #include <WiFi.h>        // for WiFi
-#include "credentials.h" // for SSID, password, static IP
-#include "actions.h"     // for setLED()
+// #include "credentials.h" // for SSID, password, static IP
+// #include "actions.h"     // for setLED()
 
 //! Connect to WiFi
 void wifiBegin()
