@@ -6,32 +6,35 @@
 #define ACTIONS_H
 
 #include "buttonHandler.h"
-extern int jogDuration, speedLow, speedHigh, repeatInterval, pressDuration;
-#include "h_bridge.h"
 
 //! Global variables
-static bool ledBuiltIn = LOW;             // Built-in LED LOW = OFF, HIGH = ON
+static bool ledBuiltIn = LOW;               // Built-in LED LOW = OFF, HIGH = ON
 volatile bool isLimitUpTriggered = false;   // Flag for limit switch interrupt
 volatile bool isLimitDownTriggered = false; // Flag for limit switch interrupt
 
-// Interrupt Service Routines (ISRs)
-void IRAM_ATTR handleLimitUpTriggered() {
-    isLimitUpTriggered = true; 
-  }
-
-void IRAM_ATTR handleLimitDownTriggered() {
-    isLimitDownTriggered = true;
+//! Interrupt Service Routines (ISRs)
+// Triggered when capacitor has hit upper frequency limit
+void IRAM_ATTR handleLimitUpTriggered()
+{
+  isLimitUpTriggered = true;
 }
 
-void actionsBegin() 
+// Triggered when capacitor has hit lower frequency limit
+void IRAM_ATTR handleLimitDownTriggered()
+{
+  isLimitDownTriggered = true;
+}
+
+//! Call in setup() to initialize the actions
+void actionsBegin()
 {
   // Configure LED pin
-  pinMode(LED_BUILTIN, OUTPUT);    // Set LED_BUILTIN as output
-  digitalWrite(LED_BUILTIN, LOW);  // Start with LED off
+  pinMode(LED_BUILTIN, OUTPUT);   // Set LED_BUILTIN as output
+  digitalWrite(LED_BUILTIN, LOW); // Start with LED off
 
   // Configure limit switch pins
-  pinMode(LIMIT_UP, INPUT_PULLUP);    // Use INPUT_PULLUP for stable signals
-  pinMode(LIMIT_DOWN, INPUT_PULLUP);  // Use INPUT_PULLUP for stable signals
+  pinMode(LIMIT_UP, INPUT_PULLUP);   // Use INPUT_PULLUP for stable signals
+  pinMode(LIMIT_DOWN, INPUT_PULLUP); // Use INPUT_PULLUP for stable signals
 
   // Attach interrupt handlers for limit switches
   // Limit switches are normally closed, triggering interrupts when opened (RISING)
@@ -169,7 +172,7 @@ void actionJogDown(String &action)
       setMotorSpeedDirect(0, IDLE);
     }
   }
-  else 
+  else
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[4].depressed = false;
@@ -194,12 +197,12 @@ void processLimitSwitches()
 {
   if (isLimitUpTriggered)
   {
-    setMotorSpeedDirect(0, IDLE);       // Stop the motor
-    buttonStates[1].depressed = false;  // Reset the Scan Up button state
-    updateButtonState("btn1");          // Send websocket message
-    updateLedState("led1", LED_RED); // Set to red
-    isLimitUpTriggered = false;           // Reset flag to prevent repeated action
-  } // if (isLimitUpTriggered)  
+    setMotorSpeedDirect(0, IDLE);      // Stop the motor
+    buttonStates[1].depressed = false; // Reset the Scan Up button state
+    updateButtonState("btn1");         // Send websocket message
+    updateLedState("led1", LED_RED);   // Set to red
+    isLimitUpTriggered = false;        // Reset flag to prevent repeated action
+  } // if (isLimitUpTriggered)
 
   if (isLimitDownTriggered)
   {
@@ -207,7 +210,7 @@ void processLimitSwitches()
     buttonStates[2].depressed = false;
     updateButtonState("btn2");
     updateLedState("led2", LED_RED); // Set to red
-    isLimitDownTriggered = false;      // Reset flag
+    isLimitDownTriggered = false;    // Reset flag
   } // if (isLimitDownTriggered)
 
   // test if limit switches are restored
@@ -224,23 +227,13 @@ void processLimitSwitches()
 
 //******************** ************ */
 //! create a random SWR value to demonstrate the gauge web socket
+//! call this in loop()
 
-float swrValue()
+String processSWR()
 {
   float swrValue = 1 + static_cast<float>(rand()) / static_cast<float>(RAND_MAX / (9.0));
-  return swrValue;
-}
-
-void processSWR()
-{
-  //! call this in loop()
-  static unsigned long lastTime = 0;
-  if (millis() - lastTime > 5000)
-  {
-    String swrValueString = "SWR~" + String(swrValue(), 2);
-    notifyClients(swrValueString); // send to all clients
-    lastTime = millis();
-  }
+  String swrValueString = "SWR~" + String(swrValue, 2);
+  return swrValueString;
 }
 
 #endif
