@@ -1,5 +1,6 @@
 //! webSocket.h
 //! 2025-03-28 changes for notifyClients() and elimination of fileSystem.h
+// 2025-04-02 added favicon.ico to web server
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
@@ -84,6 +85,9 @@ void websocketBegin()
 
   server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/script.js", "application/javascript"); });
+
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/favicon.ico", "image/x-icon"); });
 
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
