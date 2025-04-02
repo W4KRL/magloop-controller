@@ -1,6 +1,6 @@
 // 2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
 // 2025-03-25 moved to chart.js
-// 2025-03-25 reorganized the code, lots of cleanup
+// 2025-04-02 improved led parsing
 
 // Global variables
 let socket;
@@ -11,8 +11,7 @@ function initWebSocket() {
   if (socket && socket.readyState !== WebSocket.CLOSED) {
     socket.close();
   }
-  const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-  socket = new WebSocket(protocol + window.location.hostname + "/ws");
+  socket = new WebSocket("ws://" + window.location.hostname + "/ws");
 
   socket.onopen = function (event) {};
 
@@ -40,20 +39,19 @@ function processWebSocketMessage(message) {
     const type = parts[0];
     switch (type) {
       case "beep":
-        beep(parseFloat(parts[1]), parseInt(parts[2]));
+        beep(parseFloat(parts[1]), parseInt(parts[2])); // frequency, duration
         break;
-      case "buttonState":
-        updateButtonState(parts[1], parts[2] === "true", parts[3]);
+      case "btn":
+        updateButtonState(parts[1], parts[2] === "true", parts[3]); // id, depressed, color
         break;
-      case "led1":
-      case "led2":
-        updateLED(type, parts[1]);
+      case "led":
+        updateLedState(parts[1], parts[2]); // id, color
         break;
       case "SCPI":
-        updateSCPIResponse(scpiResponseArea, parts[1]);
+        updateSCPIResponse(scpiResponseArea, parts[1]); // response
         break;
       case "SWR":
-        updateSWRgauge(parseFloat(parts[1]));
+        updateSWRgauge(parseFloat(parts[1])); // swrValue
         break;
       default:
         console.log("Unknown message type:", type);
@@ -92,7 +90,8 @@ function beep(frequency, duration) {
   }, duration);
 }
 
-function updateButtonState(id, depressed, color) {
+function updateButtonState(buttonId, depressed, color) {
+  const id = "btn" + buttonId; // Construct the button ID
   const button = document.getElementById(id);
   if (button) {
     // Update the button appearance
@@ -139,7 +138,8 @@ function releaseButton(buttonId) {
 }
 
 // Update LED state
-function updateLED(ledId, color) {
+function updateLedState(id, color) {
+  const ledId = "led" + id;
   const led = document.getElementById(ledId);
   if (led) {
     led.style.backgroundColor = color;

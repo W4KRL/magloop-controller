@@ -200,7 +200,7 @@ void processLimitSwitches()
     setMotorSpeedDirect(0, IDLE);      // Stop the motor
     buttonStates[1].depressed = false; // Reset the Scan Up button state
     updateButtonState("btn1");         // Send websocket message
-    updateLedState("led1", LED_RED);   // Set to red
+    updateLedState(LED_UP, LED_RED);   // Set to red
     isLimitUpTriggered = false;        // Reset flag to prevent repeated action
   } // if (isLimitUpTriggered)
 
@@ -209,26 +209,26 @@ void processLimitSwitches()
     setMotorSpeedDirect(0, IDLE); // Stop the motor
     buttonStates[2].depressed = false;
     updateButtonState("btn2");
-    updateLedState("led2", LED_RED); // Set to red
+    updateLedState(LED_DOWN, LED_RED); // Set to red
     isLimitDownTriggered = false;    // Reset flag
   } // if (isLimitDownTriggered)
 
   // test if limit switches are restored
   if (!digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_RED)
   {
-    updateLedState("led1", LED_GREEN); // Set to green
+    Serial.println("Limit switch UP cleared");
+    updateLedState(LED_UP, LED_GREEN); // Set to green
   }
 
   if (!digitalRead(LIMIT_DOWN) && ledStates[LED_DOWN].color == LED_RED)
   {
-    updateLedState("led2", LED_GREEN); // Set to green
+    Serial.println("Limit switch DOWN cleared");
+    updateLedState(LED_DOWN, LED_GREEN); // Set to green
   }
 } // processLimitSwitches()
 
-//******************** ************ */
 //! create a random SWR value to demonstrate the gauge web socket
 //! call this in loop()
-
 String processSWR()
 {
   float swrValue = 1 + static_cast<float>(rand()) / static_cast<float>(RAND_MAX / (9.0));

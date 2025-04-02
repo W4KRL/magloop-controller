@@ -1,55 +1,42 @@
 //! ledControl.h
 //! LED control functions
-// 2025-03-19
-// removed AsyncTCP include
-// revise colors add defines
-// 2025-03-28 changed to notifyClients(), added initLedStates()
+//! 2025-04-02 improved/simplified ledStates
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
 
 #include <Arduino.h>
-#include "credentials.h"
-// #include <ESPAsyncWebServer.h>
-#include "webSocket.h"
+#include "credentials.h" // for LED colors
 
-// Declare ws as an external variable defined elsewhere
-extern AsyncWebSocket ws;
-
-//! LED indices and colors
-// see credentials.h for colors
+//! LED indices
 #define LED_UP 0
 #define LED_DOWN 1
 
+//! Structure to store an LED id and color
 struct LedState
 {
   String id;
   String color;
 };
 
-//! changed 2025-02-15 XXX
+//! Array to store the id and initial state of each LED
 LedState ledStates[] = {
-    {"led1", LED_GREEN},
-    {"led2", LED_GREEN}};
+    {"1", LED_GREEN},  // LED_UP = 'led~1
+    {"2", LED_GREEN}}; // LED_DOWN = 'led~2'
 
-void updateLedState(const String &ledId, const String &color)
+//! Update LED state on all connected clients
+void updateLedState(int ledIndex, const String &color)
 {
-  for (auto &led : ledStates)
-  {
-    if (led.id == ledId)
-    {
-      led.color = color;
-      break;
-    }
-  }
-  notifyClients(ledId + "~" + color);
+  ledStates[ledIndex].color = color; // Update the color in the array
+  notifyClients("led~" + ledStates[ledIndex].id + "~" + color);
 } // updateLedState()
 
+//! Initialize all LED states for newly connected clients
 void initLedStates()
 {
   for (int i = 0; i < sizeof(ledStates) / sizeof(ledStates[0]); i++)
   {
-    notifyClients(ledStates[i].id + "~" + ledStates[i].color);
+    updateLedState(i, ledStates[i].color);
   }
 } // initLedStates()
 
