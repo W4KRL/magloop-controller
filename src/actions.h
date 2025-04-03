@@ -94,38 +94,38 @@ void toggleLED_BUILTIN()
 
 void actionScanUp()
 {
-  if (buttonStates[1].depressed) // toggle off
+  if (buttonStates[0].depressed) // toggle off
   {
     setMotorSpeedDirect(0, IDLE);
-    buttonStates[1].depressed = false;
-    updateButtonState("btn1");
+    buttonStates[0].depressed = false;
+    updateButtonState(0);
   }
   else
   {
     if (!digitalRead(LIMIT_UP))
     {
       setMotorSpeedDirect(speedHigh, MOVE_UP);
-      buttonStates[1].depressed = true; // toggle on
-      updateButtonState("btn1");
+      buttonStates[0].depressed = true; // toggle on
+      updateButtonState(0);
     }
   }
 }
 
 void actionScanDown()
 {
-  if (buttonStates[2].depressed)
+  if (buttonStates[1].depressed)
   {
     setMotorSpeedDirect(0, IDLE);
-    buttonStates[2].depressed = false;
-    updateButtonState("btn2");
+    buttonStates[1].depressed = false;
+    updateButtonState(1);
   }
   else
   {
     if (!digitalRead(LIMIT_DOWN))
     {
       setMotorSpeedDirect(speedHigh, MOVE_DOWN);
-      buttonStates[2].depressed = true;
-      updateButtonState("btn2");
+      buttonStates[1].depressed = true;
+      updateButtonState(1);
     }
   }
 }
@@ -137,8 +137,33 @@ void actionJogUp(String &action)
     if (!digitalRead(LIMIT_UP))
     {
       setMotorSpeedDirect(speedLow, MOVE_UP);
+      buttonStates[2].depressed = true;
+      updateButtonState(2);
+      const long endTime = millis() + jogDuration;
+      while (millis() < endTime)
+      {
+        // wait for jogDuration to jog motor
+      }
+      setMotorSpeedDirect(0, IDLE);
+    }
+  }
+  else
+  {
+    setMotorSpeedDirect(0, IDLE);
+    buttonStates[2].depressed = false;
+    updateButtonState(2);
+  }
+}
+
+void actionJogDown(String &action)
+{
+  if (action == "pressed")
+  {
+    if (!digitalRead(LIMIT_DOWN))
+    {
+      setMotorSpeedDirect(speedLow, MOVE_DOWN);
       buttonStates[3].depressed = true;
-      updateButtonState("btn3");
+      updateButtonState(3);
       const long endTime = millis() + jogDuration;
       while (millis() < endTime)
       {
@@ -151,32 +176,7 @@ void actionJogUp(String &action)
   {
     setMotorSpeedDirect(0, IDLE);
     buttonStates[3].depressed = false;
-    updateButtonState("btn3");
-  }
-}
-
-void actionJogDown(String &action)
-{
-  if (action == "pressed")
-  {
-    if (!digitalRead(LIMIT_DOWN))
-    {
-      setMotorSpeedDirect(speedLow, MOVE_DOWN);
-      buttonStates[4].depressed = true;
-      updateButtonState("btn4");
-      const long endTime = millis() + jogDuration;
-      while (millis() < endTime)
-      {
-        // wait for jogDuration to jog motor
-      }
-      setMotorSpeedDirect(0, IDLE);
-    }
-  }
-  else
-  {
-    setMotorSpeedDirect(0, IDLE);
-    buttonStates[4].depressed = false;
-    updateButtonState("btn4");
+    updateButtonState(3);
   }
 }
 
@@ -199,7 +199,7 @@ void processLimitSwitches()
   {
     setMotorSpeedDirect(0, IDLE);      // Stop the motor
     buttonStates[1].depressed = false; // Reset the Scan Up button state
-    updateButtonState("btn1");         // Send websocket message
+    updateButtonState(0);         // Send websocket message
     updateLedState(LED_UP, LED_RED);   // Set to red
     isLimitUpTriggered = false;        // Reset flag to prevent repeated action
   } // if (isLimitUpTriggered)
@@ -208,7 +208,7 @@ void processLimitSwitches()
   {
     setMotorSpeedDirect(0, IDLE); // Stop the motor
     buttonStates[2].depressed = false;
-    updateButtonState("btn2");
+    updateButtonState(1);
     updateLedState(LED_DOWN, LED_RED); // Set to red
     isLimitDownTriggered = false;    // Reset flag
   } // if (isLimitDownTriggered)
