@@ -32,56 +32,53 @@ struct ButtonState
 // button 1 and 2 are latching buttons
 // button 3 and 4 are momentary buttons
 ButtonState buttonStates[] = {
-    {"btn0", false, UNPRESSED}, // not used
-    {"btn1", false, SCAN_UP},   // scan up
-    {"btn2", false, SCAN_DOWN}, // scan down
-    {"btn3", false, JOG_UP},    // jog up
-    {"btn4", false, JOG_DOWN}}; // jog down
+    {"1", false, SCAN_UP},   // scan up
+    {"2", false, SCAN_DOWN}, // scan down
+    {"3", false, JOG_UP},    // jog up
+    {"4", false, JOG_DOWN}}; // jog down
+
+//! Send a button state update to all connected clients
+void updateButtonState(int btnIndx)
+{
+  String id = buttonStates[btnIndx].id;
+  ButtonState &button = buttonStates[btnIndx]; // Reference to the button state
+  String message = "btn~" + id + "~";
+  message += button.depressed ? "true~" + button.color : "false~" + String(UNPRESSED);
+  notifyClients(message);
+} // updateButtonState()
 
 void initButtonStates()
 {
   for (int i = 0; i < sizeof(buttonStates) / sizeof(buttonStates[0]); i++)
   {
-    notifyClients(buttonStates[i].id + "~" + buttonStates[i].color);
+    updateButtonState(i); // Send initial states to all clients
   }
 } // initButtonStates()
-
-//! Send a button state update to all connected clients
-void updateButtonState(const String &buttonId)
-{
-  for (auto &button : buttonStates)
-  {
-    if (button.id == buttonId)
-    {
-      String message = "buttonState~" + buttonId + "~";
-      message += button.depressed ? "true~" + button.color : "false~" + (String)UNPRESSED;
-      notifyClients(message);
-      break;
-    }
-  }
-} // updateButtonState()
 
 //! Helper function to check if jog actions are allowed
 bool isJogActionAllowed()
 {
-  return !buttonStates[1].depressed && !buttonStates[2].depressed;
+  return true; // Allow jog actions by default
+  // return !buttonStates[0].depressed && !buttonStates[1].depressed;
 }
 
 //! Call the action responses for all buttons
 void buttonHandler(String &buttonId, String &action)
 {
+  Serial.printf("Button rcvd: %s, Action: %s\n", buttonId.c_str(), action.c_str());
   // interlocking for latching buttons
-  if ((buttonId == "btn1" && !buttonStates[2].depressed))
+  if ((buttonId == "btn1" && !buttonStates[1].depressed))
   {
     actionScanUp();
   }
-  else if ((buttonId == "btn2" && !buttonStates[1].depressed))
+  else if ((buttonId == "btn2" && !buttonStates[0].depressed))
   {
     actionScanDown();
   }
   else if (buttonId == "btn3" && isJogActionAllowed())
   {
     actionJogUp(action);
+    Serial.printf("Btn3 rcvd: %s, Action: %s\n", buttonId.c_str(), action.c_str());
   }
   else if (buttonId == "btn4" && isJogActionAllowed())
   {
