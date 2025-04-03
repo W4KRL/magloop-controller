@@ -44,7 +44,6 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     {
       String buttonId = message.substring(4, 5); // Extract button ID
       String action = message.substring(6);      // Extract action (pressed/released)
-      Serial.printf("Button event: %s, Action: %s\n", buttonId.c_str(), action.c_str());
       processButtonEvent(buttonId, action);
     }
     else if (initStr == "scp")
