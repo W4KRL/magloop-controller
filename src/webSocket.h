@@ -1,6 +1,5 @@
 //! webSocket.h
-//! 2025-03-28 changes for notifyClients() and elimination of fileSystem.h
-// 2025-04-02 added favicon.ico to web server
+//! 2025-04-03 revised message parsing for button events
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
@@ -12,7 +11,7 @@
 // Function prototypes
 void initLedStates();                                                  // ledControl.h
 void initButtonStates();                                               // buttonHandler.h
-void buttonHandler(String &buttonId, String &action);                  // buttonHandler.h
+void processButtonEvent(String &buttonId, String &action);             // buttonHandler.h
 void processSCPICommand(AsyncWebSocketClient *client, String command); // scpiControl.h
 
 AsyncWebServer server(80);
@@ -36,19 +35,26 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   case WS_EVT_DATA:
     String message = String((char *)data).substring(0, len);
     DEBUG_PRINTF("%s: %s", "WS msg rcvd", message.c_str());
-    //! Handle button press events
-    if (message.startsWith("btn"))
+
+    // Extract the part of the message before the "~" character
+    // All messages are prefixed with four characters: "btn~" or "scp~"
+    String initStr = message.substring(0, message.indexOf("~"));
+
+    if (initStr == "btn")
     {
-      String buttonId = message.substring(0, 4);
-      String action = message.substring(5);
+      String buttonId = message.substring(4, 5); // Extract button ID
+      String action = message.substring(6);      // Extract action (pressed/released)
       Serial.printf("Button event: %s, Action: %s\n", buttonId.c_str(), action.c_str());
-      buttonHandler(buttonId, action);
+      processButtonEvent(buttonId, action);
     }
-    //! Handle SCPI commands
-    else if (message.startsWith("SCPI~"))
+    else if (initStr == "scp")
     {
-      String scpiCommand = message.substring(5); // Remove "SCPI~" prefix
+      String scpiCommand = message.substring(4); // Remove "scp~" prefix
       processSCPICommand(client, scpiCommand);
+    }
+    else
+    {
+      DEBUG_PRINTF("Rcvd unknown message type.");
     }
     break;
   }
