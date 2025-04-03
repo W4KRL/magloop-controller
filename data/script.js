@@ -1,6 +1,7 @@
 // 2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
 // 2025-03-25 moved to chart.js
 // 2025-04-02 improved led parsing
+// 2025-04-03 fixed beep() to close AudioContext only if it's not closed already
 
 // Global variables
 let socket;
@@ -38,7 +39,7 @@ function processWebSocketMessage(message) {
     const parts = message.split("~");
     const type = parts[0];
     switch (type) {
-      case "beep":
+      case "bep":
         beep(parseFloat(parts[1]), parseInt(parts[2])); // frequency, duration
         break;
       case "btn":
@@ -47,10 +48,10 @@ function processWebSocketMessage(message) {
       case "led":
         updateLedState(parts[1], parts[2]); // id, color
         break;
-      case "SCPI":
+      case "scp":
         updateSCPIResponse(scpiResponseArea, parts[1]); // response
         break;
-      case "SWR":
+      case "swr":
         updateSWRgauge(parseFloat(parts[1])); // swrValue
         break;
       default:
@@ -63,9 +64,9 @@ function processWebSocketMessage(message) {
 let activeAudioContext = null;
 
 function beep(frequency, duration) {
-  // Close any existing AudioContext to prevent overlapping
-  if (activeAudioContext) {
-    activeAudioContext.close();
+  // Close any existing AudioContext if it's still open
+  if (activeAudioContext && activeAudioContext.state !== "closed") {
+    activeAudioContext.close(); // Only close if the state is not "closed"
   }
 
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -83,9 +84,12 @@ function beep(frequency, duration) {
 
   setTimeout(() => {
     oscillator.stop();
-    audioContext.close();
-    if (activeAudioContext === audioContext) {
-      activeAudioContext = null;
+    // Check the state before closing
+    if (audioContext.state !== "closed") {
+      audioContext.close(); // Close only if it's valid to do so
+      if (activeAudioContext === audioContext) {
+        activeAudioContext = null;
+      }
     }
   }, duration);
 }
@@ -126,14 +130,16 @@ function updateButtonState(buttonId, depressed, color) {
 
 // Button press handlers
 function sendButtonPress(buttonId) {
+  const newID = buttonId.replace("btn", "btn~");
   if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(buttonId + "~pressed");
+    socket.send(newID + "~pressed");
   }
 }
 
 function releaseButton(buttonId) {
+  const newID = buttonId.replace("btn", "btn~");
   if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(buttonId + "~released");
+    socket.send(newID + "~released");
   }
 }
 
@@ -287,7 +293,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function sendSCPICommand() {
   const command = document.getElementById("scpiInput").value;
   if (command && socket && socket.readyState === WebSocket.OPEN) {
-    socket.send("SCPI~" + command);
+    socket.send("scp~" + command);
     document.getElementById("scpiInput").value = "";
   }
 }
