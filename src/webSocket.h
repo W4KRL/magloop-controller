@@ -41,6 +41,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     {
       String buttonId = message.substring(0, 4);
       String action = message.substring(5);
+      Serial.printf("Button event: %s, Action: %s\n", buttonId.c_str(), action.c_str());
       buttonHandler(buttonId, action);
     }
     //! Handle SCPI commands
@@ -65,7 +66,7 @@ void notifyClients(const String &message)
   {
     DEBUG_PRINTF("%s", "No clients connected to WebSocket");
   }
-}
+} // notifyClients()
 
 void websocketBegin()
 {
@@ -92,6 +93,6 @@ void websocketBegin()
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
   server.begin();
-}
+} // websocketBegin()
 
 #endif
