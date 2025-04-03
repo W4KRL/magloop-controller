@@ -1,5 +1,5 @@
 //! scpiControl.h
-// 2025-03-23 removed motor commands, added ENVironment command
+//! 2025-04-03 revised message parsing for SCPI commands
 
 // Use '~' as a delimiter for web socket commands
 // to avoid conflict with SCPI commands using ':' and ';' as delimiters
@@ -137,7 +137,7 @@ void processSCPICommand(AsyncWebSocketClient *client, String command)
 
   if (captureStream.captured.length() > 0)
   {
-    String response = "SCPI~" + captureStream.captured;
+    String response = "scp~" + captureStream.captured;
     DEBUG_PRINTF("%s: %s", "SCPI response", response.c_str());
     client->text(response);
   }
