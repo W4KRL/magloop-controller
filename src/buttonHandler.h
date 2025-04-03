@@ -65,7 +65,6 @@ bool isJogActionAllowed()
 //! Call the action responses for all buttons
 void processButtonEvent(String &buttonId, String &action)
 {
-  Serial.printf("Button rcvd: %s, Action: %s\n", buttonId.c_str(), action.c_str());
   // interlocking for latching buttons
   if ((buttonId == "1" && !buttonStates[BTN2].depressed))
   {

@@ -18,7 +18,7 @@ IPAddress subnet(255, 255, 255, 0);
 #define MAKER "W4KRL"
 #define MODEL "Mag Loop Controller"
 #define SERIAL_NUMBER "S/N: 001"
-#define VERSION "DevKit 2025-03-25"
+#define VERSION "DevKit 2025-04-03"
 
 //! Web Server File Dates
 #define FW_DATE "2025-04-03"
