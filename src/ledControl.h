@@ -7,6 +7,7 @@
 
 #include <Arduino.h>
 #include "credentials.h" // for LED colors
+#include "webSocket.h" // for notifyClients()
 
 //! LED indices
 #define LED_UP 0
