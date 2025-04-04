@@ -95,3 +95,66 @@ See https://www.chartjs.org/
 The chart is modified from the Bar Chart type. Basically, it is a single bar shown horizontally. All configuration is done in script.js. The scale has type set to "logarithmic".
 
 initWebSocket calls updateGauge() when an "SWR" webssocket message is received. This function passes the SWR value to chart dataset. It also chooses a background color based on teh SWR value.
+
+## Perplexity Verkrer interface
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <Vrekrer_scpi_parser.h>
+
+SCPI_Parser mySCPI;
+AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
+
+const char* ssid = "YOUR_SSID";
+const char* password = "YOUR_PASSWORD";
+const int ledPin = 2;
+
+// Define SCPI commands
+void scpiLED(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+  if (parameters.Size() > 0) {
+    String param = parameters[0];
+    if (param.equalsIgnoreCase("ON")) {
+      digitalWrite(ledPin, HIGH);
+      ws.textAll("LED:ON");
+    } else if (param.equalsIgnoreCase("OFF")) {
+      digitalWrite(ledPin, LOW);
+      ws.textAll("LED:OFF");
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
+  
+  // Initialize SCPI commands
+  mySCPI.RegisterCommand("OUTPut:LED", &scpiLED);
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) delay(1000);
+  Serial.println(WiFi.localIP());
+
+  // WebSocket setup
+  ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+              void *arg, uint8_t *data, size_t len) {
+    if (type == WS_EVT_DATA) {
+      data[len] = '\0';
+      String message = (char*)data;
+      mySCPI.ProcessCommand(message); // Pass WebSocket message to SCPI parser
+    }
+  });
+
+  server.addHandler(&ws);
+  
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "ESP32 SCPI WebSocket Server");
+  });
+
+  server.begin();
+}
+
+void loop() {
+  ws.cleanupClients();
+}
