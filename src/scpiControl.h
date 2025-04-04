@@ -1,8 +1,6 @@
 //! scpiControl.h
 //! 2025-04-03 revised message parsing for SCPI commands
-
-// Use '~' as a delimiter for web socket commands
-// to avoid conflict with SCPI commands using ':' and ';' as delimiters
+//! 2025-04-04 revised SCPI command structure, remove stream class
 
 /*
   SCPI Commands:
@@ -33,7 +31,7 @@
 
   SYStem:Press <value>
     Sets the motor jog time in milliseconds
- 
+
   SYStem:Repeat <value> ! NOT IN USE !
     Sets the jog button long press repeat interval in milliseconds
 
@@ -42,21 +40,20 @@
 #ifndef SCPICONTROL_H
 #define SCPICONTROL_H
 
-#include <Arduino.h>             // Required for platformio
+#include <Arduino.h>             // Required for platformIO
+#include "credentials.h"         // for SCPI identification
 #include "debug.h"               // DEBUG_PRINT, DEBUG_PRINTLN
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
-#include "h_bridge.h"            // Motor control
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
-#include "webSocket.h"
-
-SCPI_Parser scpi;                // instantiate the parser
-Preferences preferences;         // instantiate the Preferences storage
-;                                // Declare global variables for preferences:
-int speedHigh;                   // motor high speed % for scan
-int speedLow;                    // motor low speed % for fine tune
-int pressDuration;               // long button press duration ms
-int jogDuration;                 // motor jog duration ms
-int repeatInterval;              // jog repeat interval ms
+;                                // Instantiations
+SCPI_Parser scpi;                //   SCPI parser
+Preferences preferences;         //   Preferences storage
+;                                // Declare global variables for Preferences:
+int speedHigh;                   //   motor high speed % for scan
+int speedLow;                    //   motor low speed % for fine tune
+int pressDuration;               //   long button press duration ms
+int jogDuration;                 //   motor jog duration ms
+int repeatInterval;              //   jog repeat interval ms
 
 void restorePreferences()
 {
@@ -67,84 +64,7 @@ void restorePreferences()
   jogDuration = preferences.getInt("jogDuration", 100);       // jog duration ms
 }
 
-//! Functions to handle SCPI commands for web sockets
-
-/**
- * @class CaptureStream
- * @brief A custom implementation of the Stream class to capture SCPI command responses.
- *
- * This class is used to capture the output of SCPI commands executed by the SCPI parser.
- * Instead of sending the output to a hardware interface, it stores the output in a string
- * for further processing, such as sending it back to a client over a WebSocket.
- */
-class CaptureStream : public Stream
-{
-  // written by Copilot AI
-public:
-  /// Captured output from the SCPI parser.
-  String captured;
-
-  /**
-   * @brief Writes a single byte to the captured string.
-   * @param c The byte to write.
-   * @return Always returns 1 to indicate success.
-   */
-  virtual size_t write(uint8_t c)
-  {
-    captured += (char)c;
-    return 1;
-  }
-
-  /**
-   * @brief Indicates the number of bytes available for reading.
-   * @return Always returns 0 as this stream is write-only.
-   */
-  virtual int available() { return 0; }
-
-  /**
-   * @brief Reads a byte from the stream.
-   * @return Always returns -1 as this stream is write-only.
-   */
-  virtual int read() { return -1; }
-
-  /**
-   * @brief Peeks at the next byte in the stream without removing it.
-   * @return Always returns -1 as this stream is write-only.
-   */
-  virtual int peek() { return -1; }
-};
-
-/**
- * @brief Processes an SCPI command received via WebSocket and sends the response back to the client.
- * 
- * @param client Pointer to the WebSocket client that sent the command.
- * @param command The SCPI command string received from the client.
- * 
- * This function captures the SCPI command response using a custom stream and sends it back to the client
- * if the response is not empty. It also logs the command and response for debugging purposes.
- */
-void processSCPICommand(AsyncWebSocketClient *client, String command)
-{
-  // written by Copilot AI
-  // enables integration of websockets with SCPI parser
-  CaptureStream captureStream;
-
-  char *commandCopy = new char[command.length() + 1];
-  strcpy(commandCopy, command.c_str());
-  DEBUG_PRINTF("%s: %s", "SCPI command", commandCopy);
-  scpi.Execute(commandCopy, captureStream);
-  delete[] commandCopy;
-
-  if (captureStream.captured.length() > 0)
-  {
-    String response = "scp~" + captureStream.captured;
-    DEBUG_PRINTF("%s: %s", "SCPI response", response.c_str());
-    client->text(response);
-  }
-}
-
 //! SCPI Command Functions
-
 void deviceClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // reset to default parameters, processor not restarted
@@ -183,9 +103,9 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print("*RST resets processor, settings unaltered\n");
   interface.print("ENVironment? get enclosure temp & humidity\n");
   interface.print("SYStem:DUMP? get system settings\n");
-  interface.print("SYStem:HIGHspeed <80..100>%\n");
+  interface.print("SYStem:HIGHspeed set scan speed <80..100>%\n");
   interface.print("SYStem:JOGduration <50..200>ms\n");
-  interface.print("SYStem:LOWspeed <50..80>%\n");
+  interface.print("SYStem:LOWspeed set jog speed <50..80>%\n");
   interface.print("SYStem:PRESS <200..500>ms\n");
   interface.print("SYStem:REPeat <100..300>ms\n");
   interface.print("Help? or Help");
@@ -279,30 +199,29 @@ void setSystemRepeatInterval(SCPI_C commands, SCPI_P parameters, Stream &interfa
 
 void scpiBegin()
 {
+  preferences.begin("mag-loop", false); // false = open for read/write
+  restorePreferences();
   //! SCPI Command Registration in setup()
   // define the scpi command structure
   // capitalized letters may be used as abbreviations
   // command case is irrelevant
-
-  preferences.begin("mag-loop", false); // false = open for read/write
-
-  restorePreferences();
-
+  // formal SCPI commands should have a command base and a subcommand
+  // e.g. "SYStem:HIGHspeed" or "SYStem:LOWspeed"
   scpi.RegisterCommand("*CLS", &deviceClearStorage);
   scpi.RegisterCommand("*IDN?", &deviceIdentity);
   scpi.RegisterCommand("*RST", &deviceReset);
+  scpi.RegisterCommand("DUMp", &getSystemDump);
+  scpi.RegisterCommand("DUMp?", &getSystemDump);
+  scpi.RegisterCommand("ENVironment?", &getEnvironment);
   scpi.RegisterCommand("HELP", &getHelp);
   scpi.RegisterCommand("HELP?", &getHelp);
-  scpi.RegisterCommand("ENVironment?", &getEnvironment);
-
-  scpi.SetCommandTreeBase("SYStem");
-  scpi.RegisterCommand(":DUMp", &getSystemDump);
-  scpi.RegisterCommand(":DUMp?", &getSystemDump);
-  scpi.RegisterCommand(":HIGHspeed", &setSystemHighspeed);
-  scpi.RegisterCommand(":JOG", &setSystemJog);
-  scpi.RegisterCommand(":LOWspeed", &setSystemLowspeed);
-  scpi.RegisterCommand(":PREss", &setSystemPressDuration);
-  scpi.RegisterCommand(":REPeat", &setSystemRepeatInterval);
+  scpi.RegisterCommand("HIGHspeed", &setSystemHighspeed);// SCAN speed
+  scpi.RegisterCommand("JOG", &setSystemJog); // DURation of JOG
+  scpi.RegisterCommand("LOWspeed", &setSystemLowspeed); // JOG speed
+  scpi.RegisterCommand("REPeat", &setSystemRepeatInterval); // REPeat interval not implemented
+  scpi.RegisterCommand("PREss", &setSystemPressDuration); // long button press duration not implemented
+  scpi.RegisterCommand("RSSI?", &getEnvironment); // for testing
+  scpi.RegisterCommand("VOLTage?", &getEnvironment); // for testing
 } // scpiBegin()
 
 #endif // SCPI_H
