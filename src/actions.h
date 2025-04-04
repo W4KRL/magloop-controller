@@ -6,6 +6,7 @@
 #define ACTIONS_H
 
 #include "buttonHandler.h"
+#include "h_bridge.h"       // for setMotorSpeedDirect()
 
 //! Global variables
 static bool ledBuiltIn = LOW;               // Built-in LED LOW = OFF, HIGH = ON
