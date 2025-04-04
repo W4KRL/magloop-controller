@@ -1,5 +1,9 @@
 //! webSocket.h
-//! 2025-04-03 revised message parsing for button events
+// 2025-04-03 revised message parsing for button events
+// 2025-04-04 revised SCPI handling
+
+//! Use '~' as a delimiter for web socket commands
+//! to avoid conflict with SCPI commands using ':' and ';' as delimiters
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
@@ -9,11 +13,12 @@
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
 
 // Function prototypes
-void initLedStates();                                                  // ledControl.h
-void initButtonStates();                                               // buttonHandler.h
-void processButtonEvent(String &buttonId, String &action);             // buttonHandler.h
-void processSCPICommand(AsyncWebSocketClient *client, String command); // scpiControl.h
+void initLedStates();                                      // ledControl.h
+void initButtonStates();                                   // buttonHandler.h
+void processButtonEvent(String &buttonId, String &action); // buttonHandler.h
+void notifyClients(const String &message);                 // webSocket.h
 
+//! Instantiate WebSocket server on port 80
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
@@ -38,18 +43,23 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 
     // Extract the part of the message before the "~" character
     // All messages are prefixed with four characters: "btn~" or "scp~"
-    String initStr = message.substring(0, message.indexOf("~"));
-
-    if (initStr == "btn")
+    String initialStr = message.substring(0, message.indexOf("~"));
+    if (initialStr == "btn")
     {
-      String buttonId = message.substring(4, 5); // Extract button ID
+      String buttonId = message.substring(4, 5); // Extract string for numeric ID
       String action = message.substring(6);      // Extract action (pressed/released)
-      processButtonEvent(buttonId, action);
+      processButtonEvent(buttonId, action);      // Pass to button handler
     }
-    else if (initStr == "scp")
+    else if (initialStr == "scp")
     {
-      String scpiCommand = message.substring(4); // Remove "scp~" prefix
-      processSCPICommand(client, scpiCommand);
+      String scpiCommand = message.substring(4);                       // Remove "scp~" prefix
+      char scpiCommandBuf[scpiCommand.length() + 1];                   // Create a buffer for the command
+      scpiCommand.toCharArray(scpiCommandBuf, sizeof(scpiCommandBuf)); // Copy to buffer
+      StreamString(responseStream);                                    // Create a stream to capture the response
+      String scpiResponse;                                             // Initialize response string
+      scpi.Execute(scpiCommandBuf, responseStream);                    // Execute SCPI command
+      scpiResponse = "scp~" + responseStream;                          // format for JavaScript client
+      notifyClients(scpiResponse);                                     // broadcast the response to all clients
     }
     else
     {
@@ -81,7 +91,6 @@ void websocketBegin()
     Serial.println("Error mounting LittleFS");
     return;
   }
-
   // Load the web page from LittleFS Filesystem Image
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/index.html", "text/html"); });
