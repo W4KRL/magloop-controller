@@ -115,15 +115,16 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getSystemDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("System Dump\n");
-  interface.printf("%s:\t%s\n", "Firmware", FW_DATE);
-  interface.printf("%s:\t%s\n", "index.html", HTML_DATE);
-  interface.printf("%s:\t%s\n", "script.js", SCRIPT_DATE);
-  interface.printf("%s:\t%s\n", "styles.css", STYLES_DATE);
-  interface.printf("%s:\t%i%%\n", "High speed", speedHigh);
-  interface.printf("%s:\t%i%%\n", "Low speed", speedLow);
-  interface.printf("%s:\t%i ms\n", "Jog duration", jogDuration);
-  interface.printf("%s:\t%i ms\n", "Press duration", pressDuration);
-  interface.printf("%s:\t%i ms\n", "Repeat intrvl", repeatInterval);
+  char colFormat[20] = "%-15s %s\n";
+  interface.printf(colFormat, "Firmware", FW_DATE);
+  interface.printf(colFormat, "index.html", HTML_DATE);
+  interface.printf(colFormat, "script.js", SCRIPT_DATE);
+  interface.printf(colFormat, "styles.css", STYLES_DATE);
+  interface.printf("%-15s %i%%\n", "High speed", speedHigh);
+  interface.printf("%-15s %i%%\n", "Low speed", speedLow);
+  interface.printf("%-15s %i ms\n", "Jog duration", jogDuration);
+  interface.printf("%-15s %i ms\n", "Press duration", pressDuration);
+  interface.printf("%-15s %i ms\n", "Repeat interval", repeatInterval);
   interface.print("---End Dump---");
 } // SystemDump()
 
