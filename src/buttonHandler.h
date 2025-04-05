@@ -42,8 +42,8 @@ void updateButtonState(int btnIndx)
 {
   String id = buttonStates[btnIndx].id;
   ButtonState &button = buttonStates[btnIndx]; // Reference to the button state
-  String message = "btn" + WS_DELIM + id + WS_DELIM;
-  message += button.depressed ? "true" + WS_DELIM + button.color : "false" + WS_DELIM + String(UNPRESSED);
+  String message = "btn~" + id + "~"; // Prefix with "btn~" for button messages
+  message += button.depressed ? "true~" + button.color : "false~" + String(UNPRESSED);
   notifyClients(message);
 } // updateButtonState()
 

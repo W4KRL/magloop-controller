@@ -29,7 +29,7 @@ LedState ledStates[] = {
 void updateLedState(int ledIndex, const String &color)
 {
   ledStates[ledIndex].color = color; // Update the color in the array
-  notifyClients("led" + WS_DELIM + ledStates[ledIndex].id + WS_DELIM + color);
+  notifyClients("led~" + ledStates[ledIndex].id + "~" + color);
 } // updateLedState()
 
 //! Initialize all LED states for newly connected clients

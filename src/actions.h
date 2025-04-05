@@ -17,12 +17,22 @@ volatile bool isLimitDownTriggered = false; // Flag for limit switch interrupt
 // Triggered when capacitor has hit upper frequency limit
 void IRAM_ATTR handleLimitUpTriggered()
 {
+  static unsigned long lastTriggerTime = 0; // Last trigger time for debounce
+  unsigned long currentTime = millis();     // Current time in milliseconds
+  if (currentTime - lastTriggerTime < 50) // Debounce time of 50ms
+    return;                               // Ignore if within debounce time
+  lastTriggerTime = currentTime;          // Update last trigger time
   isLimitUpTriggered = true;
 }
 
 // Triggered when capacitor has hit lower frequency limit
 void IRAM_ATTR handleLimitDownTriggered()
 {
+  static unsigned long lastTriggerTime = 0; // Last trigger time for debounce
+  unsigned long currentTime = millis();     // Current time in milliseconds   
+  if (currentTime - lastTriggerTime < 50) // Debounce time of 50ms
+    return;                               // Ignore if within debounce time
+  lastTriggerTime = currentTime;          // Update last trigger time 
   isLimitDownTriggered = true;
 }
 
@@ -233,7 +243,7 @@ void processLimitSwitches()
 String processSWR()
 {
   float swrValue = 1 + static_cast<float>(rand()) / static_cast<float>(RAND_MAX / (9.0));
-  String swrValueString = "swr" + WS_DELIM + String(swrValue, 2);
+  String swrValueString = "swr~" + String(swrValue, 2);
   return swrValueString;
 }
 
