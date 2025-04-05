@@ -233,7 +233,7 @@ void processLimitSwitches()
 String processSWR()
 {
   float swrValue = 1 + static_cast<float>(rand()) / static_cast<float>(RAND_MAX / (9.0));
-  String swrValueString = "swr~" + String(swrValue, 2);
+  String swrValueString = "swr" + WS_DELIM + String(swrValue, 2);
   return swrValueString;
 }
 

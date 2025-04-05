@@ -4,14 +4,15 @@
 #ifndef WIFICONNECTION_H
 #define WIFICONNECTION_H
 
-#include <WiFi.h> // for WiFi
-#include <ArduinoOTA.h> // for OTA updates
-// #include "credentials.h" // for SSID, password, static IP
-// #include "actions.h"     // for setLED()
+#include <WiFi.h>        // for WiFi
+#include <ArduinoOTA.h>  // for OTA updates
+#include "credentials.h" // for SSID, password, static IP
+#include "actions.h"     // for setLED()
 
+//! Initialize OTA
+//! This function sets up the OTA (Over-The-Air) update process for the ESP32 device.
 void initOTA()
 {
-    // Initialize OTA
     ArduinoOTA.onStart([]()
                        {
 String type = (ArduinoOTA.getCommand() == U_FLASH) ? "sketch" : "filesystem";

@@ -7,6 +7,7 @@
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
+#define WS_DELIM '~' // Delimiter for WebSocket messages
 
 #include <Arduino.h>           // PlatformIO requires this for ESP32
 #include <LittleFS.h>          // for index.html, styles.css, and script.js
@@ -43,7 +44,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 
     // Extract the part of the message before the "~" character
     // All messages are prefixed with four characters: "btn~" or "scp~"
-    String initialStr = message.substring(0, message.indexOf("~"));
+    String initialStr = message.substring(0, message.indexOf(WS_DELIM));
     if (initialStr == "btn")
     {
       String buttonId = message.substring(4, 5); // Extract string for numeric ID
@@ -58,7 +59,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
       StreamString(responseStream);                                    // Create a stream to capture the response
       String scpiResponse;                                             // Initialize response string
       scpi.Execute(scpiCommandBuf, responseStream);                    // Execute SCPI command
-      scpiResponse = "scp~" + responseStream;                          // format for JavaScript client
+      scpiResponse = "scp" + WS_DELIM + responseStream;                // format for JavaScript client
       notifyClients(scpiResponse);                                     // broadcast the response to all clients
     }
     else
