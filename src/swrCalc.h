@@ -8,13 +8,13 @@
 
 #include <Arduino.h>
 
-// ADC pins
-#define SWR_FWD 34
-#define SWR_REV 35
+//! ADC pins
+// defined in credentials.h
 
 void swrCalcBegin()
 {
   // setup the ADC pins
+  // call in setup()
   pinMode(SWR_FWD, INPUT);
   pinMode(SWR_REV, INPUT);
 } // swrCalcBegin()
