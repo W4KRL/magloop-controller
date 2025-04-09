@@ -52,14 +52,9 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     }
     else if (initialStr == "scp")
     {
-      String scpiCommand = message.substring(4);                       // Remove "scp~" prefix
-      char scpiCommandBuf[scpiCommand.length() + 1];                   // Create a buffer for the command
-      scpiCommand.toCharArray(scpiCommandBuf, sizeof(scpiCommandBuf)); // Copy to buffer
-      StreamString(responseStream);                                    // Create a stream to capture the response
-      String scpiResponse;                                             // Initialize response string
-      scpi.Execute(scpiCommandBuf, responseStream);                    // Execute SCPI command
-      scpiResponse = "scp~" + responseStream;                          // format for JavaScript client
-      notifyClients(scpiResponse);                                     // broadcast the response to all clients
+      String scpiCommand = message.substring(4);             // Remove "scp~" prefix
+      String scpiResponse = processSCPIcommand(scpiCommand); // Process the command and get the response
+      notifyClients(scpiResponse);                           // broadcast the response to all clients
     }
     else
     {
