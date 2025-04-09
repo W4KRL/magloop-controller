@@ -44,6 +44,7 @@
 #include "credentials.h"         // for SCPI identification
 #include "debug.h"               // DEBUG_PRINT, DEBUG_PRINTLN
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
+#include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
 ;                                // Instantiations
 SCPI_Parser scpi;                //   SCPI parser
@@ -54,6 +55,21 @@ int speedLow;                    //   motor low speed % for fine tune
 int pressDuration;               //   long button press duration ms
 int jogDuration;                 //   motor jog duration ms
 int repeatInterval;              //   jog repeat interval ms
+
+String processSCPIcommand(String scpiCommand)
+{
+  // process the incoming SCPI command
+  // scpi.Execute() returns true if a command was executed
+  // interface is the stream to send the response to
+
+  char scpiCommandBuf[scpiCommand.length() + 1];                   // Create a buffer for the command
+  scpiCommand.toCharArray(scpiCommandBuf, sizeof(scpiCommandBuf)); // Copy to buffer
+  StreamString(responseStream);                                    // Create a string to capture the response
+  String scpiResponse;                                             // Initialize response string
+  scpi.Execute(scpiCommandBuf, responseStream);                    // Execute SCPI command
+  scpiResponse = "scp~" + responseStream;                          // format for JavaScript client
+  return scpiResponse; // return the response string
+} // processSCPIcommand()
 
 void restorePreferences()
 {
@@ -86,6 +102,7 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // processor restarted, system parameters retained
   interface.print("Restarting.");
+  delay(1000);
   ESP.restart();
 }
 
@@ -216,13 +233,13 @@ void scpiBegin()
   scpi.RegisterCommand("ENVironment?", &getEnvironment);
   scpi.RegisterCommand("HELP", &getHelp);
   scpi.RegisterCommand("HELP?", &getHelp);
-  scpi.RegisterCommand("HIGHspeed", &setSystemHighspeed);// SCAN speed
-  scpi.RegisterCommand("JOG", &setSystemJog); // DURation of JOG
-  scpi.RegisterCommand("LOWspeed", &setSystemLowspeed); // JOG speed
+  scpi.RegisterCommand("HIGHspeed", &setSystemHighspeed);   // SCAN speed
+  scpi.RegisterCommand("JOG", &setSystemJog);               // DURation of JOG
+  scpi.RegisterCommand("LOWspeed", &setSystemLowspeed);     // JOG speed
   scpi.RegisterCommand("REPeat", &setSystemRepeatInterval); // REPeat interval not implemented
-  scpi.RegisterCommand("PREss", &setSystemPressDuration); // long button press duration not implemented
-  scpi.RegisterCommand("RSSI?", &getEnvironment); // for testing
-  scpi.RegisterCommand("VOLTage?", &getEnvironment); // for testing
+  scpi.RegisterCommand("PREss", &setSystemPressDuration);   // long button press duration not implemented
+  scpi.RegisterCommand("RSSI?", &getEnvironment);           // for testing
+  scpi.RegisterCommand("VOLTage?", &getEnvironment);        // for testing
 } // scpiBegin()
 
 #endif // SCPI_H
