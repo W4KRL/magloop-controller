@@ -44,9 +44,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>        // required by PlatformIO
 #include "scpiControl.h"    // for SCPI commands
 #include "actions.h"        // responses to button commands & sensors
+#include "bounce2.h"       // for button control
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials
-#include <ESPTelnet.h>      // for Telnet client
 #include "debug.h"          // for debug print to Serial Monitor
 #include "h_bridge.h"       // for motor control
 #include "ledControl.h"     // for LED control by web sockets
@@ -54,8 +54,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "webSocket.h"      // set up webSocket
 #include "wifiConnection.h" // local WiFi
 #include <ArduinoOTA.h>     // for OTA updates
-
-ESPTelnet telnet; // Telnet client for serial input/output
 
 //! Additional libraries called in local headers:
 /*
@@ -72,15 +70,6 @@ void setup()
 {
   Serial.begin(115200); // start Serial Monitor
   Serial.println("\nMagLoop Controller v1.1\n");
-
-  if (telnet.begin(23))
-  {
-    Serial.println("Telnet server started on port 23");
-  }
-  else
-  {
-    Serial.println("Failed to start Telnet server");
-  }
 
   actionsBegin();   // initialize sensors, limit switches, and actions
   wifiBegin();      // connect to WiFi
@@ -129,13 +118,5 @@ void loop()
 
   //! Shut down motor if limits of travel are reached
   processLimitSwitches();
-
-  telnet.loop();
-
-  // send serial input to telnet as output
-  if (Serial.available())
-  {
-    telnet.print(Serial.read());
-  }
 
 } // loop()
