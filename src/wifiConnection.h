@@ -1,5 +1,5 @@
 //! wifiConnection.h
-//! 2025-03-15 removed static IP due to router conflicts
+//! 2025-04-11 change name of otaBegin()
 
 #ifndef WIFICONNECTION_H
 #define WIFICONNECTION_H
@@ -11,7 +11,7 @@
 
 //! Initialize OTA
 //! This function sets up the OTA (Over-The-Air) update process for the ESP32 device.
-void initOTA()
+void otaBegin()
 {
     ArduinoOTA.onStart([]()
                        {
