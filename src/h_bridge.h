@@ -7,7 +7,7 @@
 // ESP32 GPIOs DOIT ESP32 DEVKIT V1
 // tested with DRV8871 module
 
-//! test limit switches before call to setMotorSpeed()
+//! Test limit switches before call to setMotorSpeed()
 
 #ifndef H_BRIDGE_H
 #define H_BRIDGE_H
