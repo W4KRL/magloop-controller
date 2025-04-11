@@ -1,6 +1,6 @@
 // main.cpp
 // MagLoop-Controller firmware for ESP32 DevKit board
-//! 2025-04-03
+//! 2025-04-11
 
 // !!!Save this file!!!
 // "C:\Users\KarlB\OneDrive\Documents\PlatformIO\Projects\magloop-controller"
@@ -14,9 +14,10 @@ The device employs Standard Commands for Programmable Instruments
 The delimiter for web socket commands is "~" to avoid conflict
 with SCPI commands using ':' and ';' as delimiters.
 
-Interrupts detect the vacuum motor reaching limits of travel and stop the motor
-if it does. The limit switches are normally closed (NC) reed switches.
-The interrupts are triggered when the limit switch is opened (NO) by the motor.
+The vacuum capacitor motor is stopped if travel reaches upper or lower limits.
+The limit switches are normally closed (NC) reed switches with software
+debouncing and external pullup resistors. The input signal is HIGH when a
+corresponding limit is reached.
 */
 
 /*
@@ -44,7 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>        // required by PlatformIO
 #include "scpiControl.h"    // for SCPI commands
 #include "actions.h"        // responses to button commands & sensors
-#include "bounce2.h"       // for button control
+#include "bounce2.h"        // for button control
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials
 #include "debug.h"          // for debug print to Serial Monitor
@@ -71,25 +72,25 @@ void setup()
   Serial.begin(115200); // start Serial Monitor
   Serial.println("\nMagLoop Controller v1.1\n");
 
-  actionsBegin();   // initialize sensors, limit switches, and actions
-  wifiBegin();      // connect to WiFi
-  initOTA();        // Initialize OTA updates
-  scpiBegin();      // initialize SCPI parser, define commands, load Preferences
-  h_bridgeBegin();  // initialize h-bridge for motor control
-  websocketBegin(); // initialize webSocket for bi-directional communication
+  actionsBegin();   // Initialize sensors, limit switches, and actions
+  wifiBegin();      // Connect to WiFi
+  otaBegin();       // Initialize OTA updates
+  scpiBegin();      // Initialize SCPI parser, define commands, load Preferences
+  h_bridgeBegin();  // Initialize h-bridge for motor control
+  websocketBegin(); // Initialize webSocket for bi-directional communication
 } // setup()
 
 //! **************** Loop function ******************
 void loop()
 {
-
-  ArduinoOTA.handle(); // Check for OTA updates
-
   //! Reconnect to Wi-Fi if disconnected
   if (!WiFi.isConnected())
   {
     wifiBegin();
   }
+
+  //! Check for OTA updates
+  ArduinoOTA.handle();
 
   //! Perform web client cleanup
   /*
@@ -107,6 +108,9 @@ void loop()
     cleanTime = millis() + cleanInterval;
   }
 
+  //! Shut down motor if limits of travel are reached
+  processLimitSwitches();
+
   //! Push random SWR value to all clients every 5 seconds
   unsigned long swrInterval = 5000;
   static unsigned long swrTime = millis() + swrInterval;
@@ -115,8 +119,5 @@ void loop()
     notifyClients(processSWR()); // send to all clients
     swrTime = millis() + swrInterval;
   }
-
-  //! Shut down motor if limits of travel are reached
-  processLimitSwitches();
 
 } // loop()
