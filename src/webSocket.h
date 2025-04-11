@@ -1,6 +1,7 @@
 //! webSocket.h
 // 2025-04-03 revised message parsing for button events
 // 2025-04-04 revised SCPI handling
+// 2025-04-11 added /debug page for debugging
 
 //! Use '~' as a delimiter for web socket commands
 //! to avoid conflict with SCPI commands using ':' and ';' as delimiters
@@ -72,10 +73,6 @@ void notifyClients(const String &message)
     // DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
     ws.textAll(message);
   }
-  // else
-  // {
-  //   DEBUG_PRINTF("%s", "No clients connected to WebSocket");
-  // }
 } // notifyClients()
 
 void websocketBegin()
