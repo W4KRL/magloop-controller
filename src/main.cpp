@@ -53,8 +53,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ledControl.h"     // for LED control by web sockets
 #include "scpiControl.h"    // for SCPI commands
 #include "webSocket.h"      // set up webSocket
-#include "wifiConnection.h" // local WiFi
-#include <ArduinoOTA.h>     // for OTA updates
+#include "wifiConnection.h" // local WiFi#include <ArduinoOTA.h>     // for OTA updates
 
 //! Additional libraries called in local headers:
 /*
@@ -69,15 +68,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 void setup()
 {
-  Serial.begin(115200); // start Serial Monitor
-  Serial.println("\nMagLoop Controller v1.1\n");
-
-  actionsBegin();   // Initialize sensors, limit switches, and actions
-  wifiBegin();      // Connect to WiFi
-  otaBegin();       // Initialize OTA updates
-  scpiBegin();      // Initialize SCPI parser, define commands, load Preferences
-  h_bridgeBegin();  // Initialize h-bridge for motor control
-  websocketBegin(); // Initialize webSocket for bi-directional communication
+  Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
+  actionsBegin();       // Initialize sensors, limit switches, and actions
+  wifiBegin();          // Connect to WiFi
+  otaBegin();           // Initialize OTA updates
+  scpiBegin();          // Initialize SCPI parser, define commands, load Preferences
+  h_bridgeBegin();      // Initialize h-bridge for motor control
+  websocketBegin();     // Initialize webSocket for bi-directional communication
 } // setup()
 
 //! **************** Loop function ******************

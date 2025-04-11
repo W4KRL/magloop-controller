@@ -29,8 +29,8 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   {
   case WS_EVT_CONNECT:
     DEBUG_PRINTF("%s", "WS client connected");
-    DEBUG_PRINTF("Free Heap: %u bytes", ESP.getFreeHeap());
-    DEBUG_PRINTF("WiFi Signal Strength (RSSI): %d dBm", WiFi.RSSI());
+    // DEBUG_PRINTF("Free Heap: %u bytes", ESP.getFreeHeap());
+    // DEBUG_PRINTF("WiFi Signal Strength (RSSI): %d dBm", WiFi.RSSI());
     initLedStates();    // Initialize LEDs
     initButtonStates(); // Initialize button states
     break;
@@ -58,7 +58,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     }
     else
     {
-      DEBUG_PRINTF("Rcvd unknown message type.");
+      DEBUG_PRINTF("%s", "Rcvd unknown message type.");
     }
     break;
   }
@@ -69,13 +69,13 @@ void notifyClients(const String &message)
 {
   if (ws.count() > 0) // Check if there are connected clients
   {
-    DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
+    // DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
     ws.textAll(message);
   }
-  else
-  {
-    DEBUG_PRINTF("%s", "No clients connected to WebSocket");
-  }
+  // else
+  // {
+  //   DEBUG_PRINTF("%s", "No clients connected to WebSocket");
+  // }
 } // notifyClients()
 
 void websocketBegin()
@@ -98,6 +98,9 @@ void websocketBegin()
 
   server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/favicon.ico", "image/x-icon"); });
+
+  server.on("/debug", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/debug.html", "text/html"); });
 
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);

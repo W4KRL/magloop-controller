@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Output</title>
+  <script>
+    let socket = new WebSocket("ws://" + location.hostname + "/ws");
+    socket.onmessage = function(event) {
+      let outputDiv = document.getElementById("output");
+      outputDiv.innerHTML += event.data + "<br>";
+      // Scroll to the bottom of the div
+      outputDiv.scrollTop = outputDiv.scrollHeight;
+    };
+  </script>
+</head>
+<body>
+  <h1>Debug Output</h1>
+  <div id="output" style="border:1px solid black; padding:10px; width:500px; height:600px; overflow-y:auto;"></div>
+</body>
+</html>
