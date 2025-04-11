@@ -1,56 +1,52 @@
 //! actions.h
 // 2025-03-23 restored updateButtonState(), improved limit clear detection
 // 2025-03-28 changed to notifyClients() if no change
+// 2025-04-11 changed to debounced limit switches
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include "buttonHandler.h"
-#include "h_bridge.h"       // for setMotorSpeedDirect()
+#include <Arduino.h>       // Required for basic Arduino functions like pinMode, digitalWrite, millis, etc., used throughout this file.
+#include <Bounce2.h>       // for debouncing limit switches
+#include "buttonHandler.h" // for webSocket buttonStates[] and updateButtonState()
+#include "h_bridge.h"      // for setMotorSpeed()
+
+//! Instantiate Bounce objects for limit switches
+Bounce limitSwitchUp = Bounce();   // Create a Bounce object for the UP limit switch
+Bounce limitSwitchDown = Bounce(); // Create a Bounce object for the DOWN limit switch
+#define DEBOUNCE_TIME 50           // Debounce time in milliseconds
 
 //! Global variables
-static bool ledBuiltIn = LOW;               // Built-in LED LOW = OFF, HIGH = ON
-volatile bool isLimitUpTriggered = false;   // Flag for limit switch interrupt
-volatile bool isLimitDownTriggered = false; // Flag for limit switch interrupt
-
-//! Interrupt Service Routines (ISRs)
-// Triggered when capacitor has hit upper frequency limit
-void IRAM_ATTR handleLimitUpTriggered()
-{
-  static unsigned long lastTriggerTime = 0; // Last trigger time for debounce
-  unsigned long currentTime = millis();     // Current time in milliseconds
-  if (currentTime - lastTriggerTime < 50) // Debounce time of 50ms
-    return;                               // Ignore if within debounce time
-  lastTriggerTime = currentTime;          // Update last trigger time
-  isLimitUpTriggered = true;
-}
-
-// Triggered when capacitor has hit lower frequency limit
-void IRAM_ATTR handleLimitDownTriggered()
-{
-  static unsigned long lastTriggerTime = 0; // Last trigger time for debounce
-  unsigned long currentTime = millis();     // Current time in milliseconds   
-  if (currentTime - lastTriggerTime < 50) // Debounce time of 50ms
-    return;                               // Ignore if within debounce time
-  lastTriggerTime = currentTime;          // Update last trigger time 
-  isLimitDownTriggered = true;
-}
+static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
 
 //! Call in setup() to initialize the actions
+/**
+ * @brief Initializes the actions module by configuring the onboard LED and
+ *        setting up the limit switches with debouncing.
+ *
+ * This function performs the following tasks:
+ * - Configures the onboard LED pin (LED_BUILTIN) as an output and sets it to LOW (off).
+ * - Configures the limit switch pins (LIMIT_UP and LIMIT_DOWN) as inputs with external pullups.
+ * - Attaches the limit switches to debouncers and sets the debounce interval.
+ *
+ * Dependencies:
+ * - The LED_BUILTIN macro must be defined for the onboard LED pin.
+ * - The LIMIT_UP and LIMIT_DOWN macros must be defined for the limit switch pins.
+ * - The DEBOUNCE_TIME macro must be defined for the debounce interval.
+ */
 void actionsBegin()
 {
-  // Configure LED pin
-  pinMode(LED_BUILTIN, OUTPUT);   // Set LED_BUILTIN as output
-  digitalWrite(LED_BUILTIN, LOW); // Start with LED off
-
-  // Configure limit switch pins
-  pinMode(LIMIT_UP, INPUT_PULLUP);   // Use INPUT_PULLUP for stable signals
-  pinMode(LIMIT_DOWN, INPUT_PULLUP); // Use INPUT_PULLUP for stable signals
-
-  // Attach interrupt handlers for limit switches
-  // Limit switches are normally closed, triggering interrupts when opened (RISING)
-  attachInterrupt(digitalPinToInterrupt(LIMIT_UP), handleLimitUpTriggered, RISING);
-  attachInterrupt(digitalPinToInterrupt(LIMIT_DOWN), handleLimitDownTriggered, RISING);
+  // Configure onboard LED pin
+  pinMode(LED_BUILTIN, OUTPUT);            // Set LED_BUILTIN as output
+  digitalWrite(LED_BUILTIN, LOW);          // Start with LED off
+  ;                                        // Assign limit switch up pin, attach debouncing
+  pinMode(LIMIT_UP, INPUT);                // Use INPUT with external pullups
+  limitSwitchUp.attach(LIMIT_UP);          // Attach limit switch to debouncer
+  limitSwitchUp.interval(DEBOUNCE_TIME);   // Set debounce time
+  ;                                        // Assign limit switch down pin, attach debouncing
+  pinMode(LIMIT_DOWN, INPUT);              // Use INPUT with external pullups
+  limitSwitchDown.attach(LIMIT_DOWN);      // Attach limit switch to debouncer
+  limitSwitchDown.interval(DEBOUNCE_TIME); // Set debounce time
 } // actionsBegin()
 
 /**
@@ -105,38 +101,38 @@ void toggleLED_BUILTIN()
 
 void actionScanUp()
 {
-  if (buttonStates[BTN1].depressed) // toggle off
+  if (buttonStates[BTN1].depressed) // scan up button was pressed while depressed
   {
-    setMotorSpeedDirect(0, IDLE);
-    buttonStates[BTN1].depressed = false;
-    updateButtonState(BTN1);
+    setMotorSpeed(0, IDLE);               // stop motor
+    buttonStates[BTN1].depressed = false; // toggle to undepressed state
+    updateButtonState(BTN1);              // send websocket message
   }
-  else
+  else // scan up button was pressed while undepressed
   {
-    if (!digitalRead(LIMIT_UP))
+    if (limitSwitchUp.read() == LOW) //  scan up if not at upper limit
     {
-      setMotorSpeedDirect(speedHigh, MOVE_UP);
-      buttonStates[BTN1].depressed = true; // toggle on
-      updateButtonState(BTN1);
+      setMotorSpeed(speedHigh, MOVE_UP);   // scan up at high speed
+      buttonStates[BTN1].depressed = true; // toggle to depressed state
+      updateButtonState(BTN1);             // send websocket message
     }
   }
 }
 
 void actionScanDown()
 {
-  if (buttonStates[BTN2].depressed)
+  if (buttonStates[BTN2].depressed) // scan down button was pressed while depressed
   {
-    setMotorSpeedDirect(0, IDLE);
-    buttonStates[BTN2].depressed = false;
-    updateButtonState(BTN2);
+    setMotorSpeed(0, IDLE);               // stop motor
+    buttonStates[BTN2].depressed = false; // toggle to undepressed state
+    updateButtonState(BTN2);              // send websocket message
   }
-  else
+  else // scan down button was pressed while undepressed
   {
-    if (!digitalRead(LIMIT_DOWN))
+    if (limitSwitchDown.read() == LOW) // scan down if not at lower limit
     {
-      setMotorSpeedDirect(speedHigh, MOVE_DOWN);
-      buttonStates[BTN2].depressed = true;
-      updateButtonState(BTN2);
+      setMotorSpeed(speedHigh, MOVE_DOWN); // scan down at high speed
+      buttonStates[BTN2].depressed = true; // toggle to depressed state
+      updateButtonState(BTN2);             // send websocket message
     }
   }
 }
@@ -145,9 +141,9 @@ void actionJogUp(String &action)
 {
   if (action == "pressed")
   {
-    if (!digitalRead(LIMIT_UP))
+    if (limitSwitchUp.read() == LOW)
     {
-      setMotorSpeedDirect(speedLow, MOVE_UP);
+      setMotorSpeed(speedLow, MOVE_UP);
       buttonStates[BTN3].depressed = true;
       updateButtonState(BTN3);
       const long endTime = millis() + jogDuration;
@@ -155,12 +151,12 @@ void actionJogUp(String &action)
       {
         // wait for jogDuration to jog motor
       }
-      setMotorSpeedDirect(0, IDLE);
+      setMotorSpeed(0, IDLE);
     }
   }
   else
   {
-    setMotorSpeedDirect(0, IDLE);
+    setMotorSpeed(0, IDLE);
     buttonStates[BTN3].depressed = false;
     updateButtonState(BTN3);
   }
@@ -170,9 +166,9 @@ void actionJogDown(String &action)
 {
   if (action == "pressed")
   {
-    if (!digitalRead(LIMIT_DOWN))
+    if (limitSwitchDown.read() == LOW)
     {
-      setMotorSpeedDirect(speedLow, MOVE_DOWN);
+      setMotorSpeed(speedLow, MOVE_DOWN);
       buttonStates[BTN4].depressed = true;
       updateButtonState(BTN4);
       const long endTime = millis() + jogDuration;
@@ -180,12 +176,12 @@ void actionJogDown(String &action)
       {
         // wait for jogDuration to jog motor
       }
-      setMotorSpeedDirect(0, IDLE);
+      setMotorSpeed(0, IDLE);
     }
   }
   else
   {
-    setMotorSpeedDirect(0, IDLE);
+    setMotorSpeed(0, IDLE);
     buttonStates[BTN4].depressed = false;
     updateButtonState(BTN4);
   }
@@ -206,36 +202,38 @@ void actionJogDown(String &action)
 
 void processLimitSwitches()
 {
-  if (isLimitUpTriggered)
-  {
-    setMotorSpeedDirect(0, IDLE);      // Stop the motor
-    buttonStates[BTN1].depressed = false; // Reset the Scan Up button state
-    updateButtonState(BTN1);         // Send websocket message
-    updateLedState(LED_UP, LED_RED);   // Set to red
-    isLimitUpTriggered = false;        // Reset flag to prevent repeated action
-  } // if (isLimitUpTriggered)
+  // Update the state of the limit switches
+  limitSwitchUp.update();   // Update the state of the UP limit switch
+  limitSwitchDown.update(); // Update the state of the DOWN limit switch
 
-  if (isLimitDownTriggered)
+  // Check if the limit switches are triggered
+  if (limitSwitchUp.rose()) // Limit switch UP triggered
   {
-    setMotorSpeedDirect(0, IDLE); // Stop the motor
-    buttonStates[BTN2].depressed = false;
-    updateButtonState(BTN2);
-    updateLedState(LED_DOWN, LED_RED); // Set to red
-    isLimitDownTriggered = false;    // Reset flag
-  } // if (isLimitDownTriggered)
+    setMotorSpeed(0, IDLE);               // Stop the motor
+    buttonStates[BTN1].depressed = false; // Set Scan Up button to undepressed
+    updateButtonState(BTN1);              // Send websocket message
+    updateLedState(LED_UP, LED_RED);      // Set up limit LED to red
+  } // if (limitSwitchUp.rose())
 
-  // test if limit switches are restored
-  if (!digitalRead(LIMIT_UP) && ledStates[LED_UP].color == LED_RED)
+  if (limitSwitchDown.rose()) // Limit switch DOWN triggered
   {
-    Serial.println("Limit switch UP cleared");
-    updateLedState(LED_UP, LED_GREEN); // Set to green
-  }
+    setMotorSpeed(0, IDLE);               // Stop the motor
+    buttonStates[BTN2].depressed = false; // Set Scan Down button to undepressed
+    updateButtonState(BTN2);              // Send websocket message
+    updateLedState(LED_DOWN, LED_RED);    // Set down limit LED to red
+  } // if (limitSwitchDown.rose())
 
-  if (!digitalRead(LIMIT_DOWN) && ledStates[LED_DOWN].color == LED_RED)
+  // Check if limit switches are cleared
+  if (limitSwitchUp.fell()) // limit switch up cleared
   {
-    Serial.println("Limit switch DOWN cleared");
-    updateLedState(LED_DOWN, LED_GREEN); // Set to green
-  }
+    updateLedState(LED_UP, LED_GREEN); // Set limit up LED to green
+  } // if (limitSwitchUp.fell())
+
+  if (limitSwitchDown.fell()) // limit switch down cleared
+  {
+    updateLedState(LED_DOWN, LED_GREEN); // Set limit down LED to green
+  } // if (limitSwitchDown.fell())
+
 } // processLimitSwitches()
 
 //! create a random SWR value to demonstrate the gauge web socket
