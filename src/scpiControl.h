@@ -1,6 +1,7 @@
 //! scpiControl.h
 //! 2025-04-03 revised message parsing for SCPI commands
 //! 2025-04-04 revised SCPI command structure, remove stream class
+//! 2025-04-11 removed SYStem tree
 
 /*
   SCPI Commands:
@@ -20,19 +21,19 @@
   ENVironment?
     Get the enclosure temperature and humidity
 
-  SYStem:Dump?
+  Dump?
     Gets the system state
 
-  SYStem:Highspeed <value>
+  Highspeed <value>
     Sets the motor high speed scan speed in percentage
 
-  SYStem:Lowspeed <value>
+  Lowspeed <value>
     Sets the motor slow speed jog in percentage
 
-  SYStem:Press <value>
+  Press <value>
     Sets the motor jog time in milliseconds
 
-  SYStem:Repeat <value> ! NOT IN USE !
+  Repeat <value> ! NOT IN USE !
     Sets the jog button long press repeat interval in milliseconds
 
 */
@@ -61,6 +62,7 @@ String processSCPIcommand(String scpiCommand)
   // process the incoming SCPI command
   // scpi.Execute() returns true if a command was executed
   // interface is the stream to send the response to
+  // StreamString inherits from ESPAsyncWebServer::Stream
 
   char scpiCommandBuf[scpiCommand.length() + 1];                   // Create a buffer for the command
   scpiCommand.toCharArray(scpiCommandBuf, sizeof(scpiCommandBuf)); // Copy to buffer
@@ -78,7 +80,7 @@ void restorePreferences()
   pressDuration = preferences.getInt("pressDuration", 300);   // long press duration ms
   repeatInterval = preferences.getInt("repeatInterval", 200); // repeat interval ms
   jogDuration = preferences.getInt("jogDuration", 100);       // jog duration ms
-}
+} // restorePreferences()
 
 //! SCPI Command Functions
 void deviceClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -87,7 +89,7 @@ void deviceClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
   preferences.clear();
   restorePreferences();
   interface.print("Parameters reset");
-}
+} // deviceClearStorage()
 
 void deviceIdentity(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
@@ -96,7 +98,7 @@ void deviceIdentity(SCPI_C commands, SCPI_P parameters, Stream &interface)
   char buffer[bufferLength];
   snprintf(buffer, bufferLength, "%s, %s, %s, %s", MAKER, MODEL, SERIAL_NUMBER, VERSION);
   interface.print(buffer);
-} // Identify()
+} // deviceIdentity()
 
 void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
@@ -104,7 +106,7 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print("Restarting.");
   delay(1000);
   ESP.restart();
-}
+} // deviceReset()
 
 void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
@@ -117,19 +119,20 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("*IDN? device identity\n");
   interface.print("*CLS clears settings\n");
-  interface.print("*RST resets processor, settings unaltered\n");
-  interface.print("ENVironment? get enclosure temp & humidity\n");
-  interface.print("SYStem:DUMP? get system settings\n");
-  interface.print("SYStem:HIGHspeed set scan speed <80..100>%\n");
-  interface.print("SYStem:JOGduration <50..200>ms\n");
-  interface.print("SYStem:LOWspeed set jog speed <50..80>%\n");
-  interface.print("SYStem:PRESS <200..500>ms\n");
-  interface.print("SYStem:REPeat <100..300>ms\n");
-  interface.print("Help? or Help");
+  interface.print("*RST reset MUC, settings unaltered\n");
+  interface.print("ENVironment? get encl. temp & humidity\n");
+  interface.print("DUMp? or DUMp get settings\n");
+  interface.print("HIGHspeed set scan speed <80..100>%\n");
+  interface.print("JOGduration <50..200>ms\n");
+  interface.print("LOWspeed set jog speed <50..80>%\n");
+  interface.print("PRESS button long press <200..500>ms\n");
+  interface.print("REPeat button <100..300>ms\n");
+  interface.print("Help? or Help get this help\n");
+  interface.print("---End Help---");
 } // getHelp()
 
 // system commands
-void getSystemDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void getDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("System Dump\n");
   char colFormat[20] = "%-15s %s\n";
@@ -143,9 +146,9 @@ void getSystemDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.printf("%-15s %i ms\n", "Press duration", pressDuration);
   interface.printf("%-15s %i ms\n", "Repeat interval", repeatInterval);
   interface.print("---End Dump---");
-} // SystemDump()
+} // getDump()
 
-void setSystemHighspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setHighspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -157,9 +160,9 @@ void setSystemHighspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
   {
     interface.print("High speed missing");
   }
-} // setSystemHighspeed()
+} // setHighspeed()
 
-void setSystemJog(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setJog(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -171,9 +174,9 @@ void setSystemJog(SCPI_C commands, SCPI_P parameters, Stream &interface)
   {
     interface.print("Jog duration missing");
   }
-} // setSystemHighspeed()
+} // setJog()
 
-void setSystemLowspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setLowspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -185,9 +188,9 @@ void setSystemLowspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
   {
     interface.print("Low speed missing");
   }
-} // setSystemLowspeed()
+} // setLowspeed()
 
-void setSystemPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -199,9 +202,9 @@ void setSystemPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interfac
   {
     interface.print("Press duration missing");
   }
-} // setButtonLongpress()
+} // setPressDuration()
 
-void setSystemRepeatInterval(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setRepeatInterval(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -213,7 +216,7 @@ void setSystemRepeatInterval(SCPI_C commands, SCPI_P parameters, Stream &interfa
   {
     interface.print("Repeat interval missing");
   }
-} // setButtonRepeat()
+} // seSystemRepeatInterval()
 
 void scpiBegin()
 {
@@ -224,20 +227,20 @@ void scpiBegin()
   // capitalized letters may be used as abbreviations
   // command case is irrelevant
   // formal SCPI commands should have a command base and a subcommand
-  // e.g. "SYStem:HIGHspeed" or "SYStem:LOWspeed"
+  // e.g. "HIGHspeed" or "LOWspeed"
   scpi.RegisterCommand("*CLS", &deviceClearStorage);
   scpi.RegisterCommand("*IDN?", &deviceIdentity);
   scpi.RegisterCommand("*RST", &deviceReset);
-  scpi.RegisterCommand("DUMp", &getSystemDump);
-  scpi.RegisterCommand("DUMp?", &getSystemDump);
+  scpi.RegisterCommand("DUMp", &getDump);
+  scpi.RegisterCommand("DUMp?", &getDump);
   scpi.RegisterCommand("ENVironment?", &getEnvironment);
-  scpi.RegisterCommand("HELP", &getHelp);
-  scpi.RegisterCommand("HELP?", &getHelp);
-  scpi.RegisterCommand("HIGHspeed", &setSystemHighspeed);   // SCAN speed
-  scpi.RegisterCommand("JOG", &setSystemJog);               // DURation of JOG
-  scpi.RegisterCommand("LOWspeed", &setSystemLowspeed);     // JOG speed
-  scpi.RegisterCommand("REPeat", &setSystemRepeatInterval); // REPeat interval not implemented
-  scpi.RegisterCommand("PREss", &setSystemPressDuration);   // long button press duration not implemented
+  scpi.RegisterCommand("Help", &getHelp);
+  scpi.RegisterCommand("Help?", &getHelp);
+  scpi.RegisterCommand("HIGHspeed", &setHighspeed);   // SCAN speed
+  scpi.RegisterCommand("JOG", &setJog);               // DURation of JOG
+  scpi.RegisterCommand("LOWspeed", &setLowspeed);     // JOG speed
+  scpi.RegisterCommand("REPeat", &setRepeatInterval); // REPeat interval not implemented
+  scpi.RegisterCommand("PREss", &setPressDuration);   // long button press duration not implemented
   scpi.RegisterCommand("RSSI?", &getEnvironment);           // for testing
   scpi.RegisterCommand("VOLTage?", &getEnvironment);        // for testing
 } // scpiBegin()
