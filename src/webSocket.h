@@ -30,8 +30,8 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   {
   case WS_EVT_CONNECT:
     DEBUG_PRINTF("%s", "WS client connected");
-    // DEBUG_PRINTF("Free Heap: %u bytes", ESP.getFreeHeap());
-    // DEBUG_PRINTF("WiFi Signal Strength (RSSI): %d dBm", WiFi.RSSI());
+    DEBUG_PRINTF("%s: %u", "Free Heap", ESP.getFreeHeap());
+    DEBUG_PRINTF("%s %d %s", "RSSI", WiFi.RSSI(), "dBm");
     initLedStates();    // Initialize LEDs
     initButtonStates(); // Initialize button states
     break;

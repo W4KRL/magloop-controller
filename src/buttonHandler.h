@@ -31,7 +31,7 @@ ButtonState buttonStates[] = {
     {"3", false, JOG_UP},    // jog up
     {"4", false, JOG_DOWN}}; // jog down
 
-// ! Button state constants    
+// ! Button state constants
 #define BTN1 0
 #define BTN2 1
 #define BTN3 2
@@ -42,7 +42,7 @@ void updateButtonState(int btnIndx)
 {
   String id = buttonStates[btnIndx].id;
   ButtonState &button = buttonStates[btnIndx]; // Reference to the button state
-  String message = "btn~" + id + "~"; // Prefix with "btn~" for button messages
+  String message = "btn~" + id + "~";          // Prefix with "btn~" for button messages
   message += button.depressed ? "true~" + button.color : "false~" + String(UNPRESSED);
   notifyClients(message);
 } // updateButtonState()
@@ -65,42 +65,83 @@ bool isJogActionAllowed()
 //! Call the action responses for all buttons
 void processButtonEvent(String &buttonId, String &action)
 {
+  char buttonChar = buttonId.charAt(0); // Extract the first character as a char
+  switch (buttonChar)
+  {
+  case '1':
+    if (!buttonStates[BTN2].depressed)
+    {
+      actionScanUp();
+    }
+    break;
+  case '2':
+    if (!buttonStates[BTN1].depressed)
+    {
+      actionScanDown();
+    }
+    break;
+  case '3':
+    if (action == "pressed" && isJogActionAllowed())
+    {
+      actionJogUp(action);
+    }
+    else if (action == "released")
+    {
+      buttonStates[BTN3].depressed = false;
+      updateButtonState(BTN3);
+    }
+    break;
+  case '4':
+    if (action == "pressed" && isJogActionAllowed())
+    {
+      actionJogDown(action);
+    }
+    else if (action == "released")
+    {
+      buttonStates[BTN4].depressed = false;
+      updateButtonState(BTN4);
+    }
+    break;
+  default:
+    return; // Invalid button ID, exit the function
+  }
+
   // interlocking for latching buttons
-  if ((buttonId == "1" && !buttonStates[BTN2].depressed))
-  {
-    actionScanUp();
-  }
-  else if ((buttonId == "2" && !buttonStates[BTN1].depressed))
-  {
-    actionScanDown();
-  }
-  // momentary buttons
-  else if (buttonId == "3" && action == "pressed" && isJogActionAllowed())
-  {
-    actionJogUp(action);
-  }
-  else if (buttonId == "3" && action == "released")
-  {
-    buttonStates[BTN3].depressed = false;
-    updateButtonState(BTN3);
-  }
-  else if (buttonId == "4" && action == "pressed" && isJogActionAllowed())
-  {
-    actionJogDown(action);
-  }
-  else if (buttonId == "4" && action == "released")
-  {
-    buttonStates[BTN4].depressed = false;
-    updateButtonState(BTN4);
-  }
-  else if (buttonId == "3" && isJogActionAllowed())
-  {
-    actionJogUp(action);
-  }
-  else if (buttonId == "4" && isJogActionAllowed())
-  {
-    actionJogDown(action);
-  }
+  // if ((buttonId == "1" && !buttonStates[BTN2].depressed))
+  // {
+  //   actionScanUp();
+  // }
+  // else if ((buttonId == "2" && !buttonStates[BTN1].depressed))
+  // {
+  //   actionScanDown();
+  // }
+  // // momentary buttons
+  // else if (buttonId == "3" && action == "pressed" && isJogActionAllowed())
+  // {
+  //   actionJogUp(action);
+  // }
+  // else if (buttonId == "3" && action == "released")
+  // {
+  //   buttonStates[BTN3].depressed = false;
+  //   updateButtonState(BTN3);
+  // }
+  // else if (buttonId == "4" && action == "pressed" && isJogActionAllowed())
+  // {
+  //   actionJogDown(action);
+  // }
+  // else if (buttonId == "4" && action == "released")
+  // {
+  //   buttonStates[BTN4].depressed = false;
+  //   updateButtonState(BTN4);
+  // }
+  // else if (buttonId == "3" && isJogActionAllowed())
+  // {
+  //   actionJogUp(action);
+  // }
+  // else if (buttonId == "4" && isJogActionAllowed())
+  // {
+  //   actionJogDown(action);
+  // }
 } // buttonHandler()
 
 #endif
