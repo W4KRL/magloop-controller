@@ -1,9 +1,10 @@
 <!-- debug.html -->
-<!-- 2025-04-12 -->
+<!-- 2025-04-13 -->
 
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
     <title>Debug Output</title>
     <script>
       let socket = new WebSocket("ws://" + location.hostname + "/ws");
@@ -15,6 +16,24 @@
         // Scroll to the bottom of the div
         outputDiv.scrollTop = outputDiv.scrollHeight;
       };
+
+      // Scroll to the top of the output area
+      function scrollToTop() {
+        let outputDiv = document.getElementById("output");
+        outputDiv.scrollTop = 0;
+      }
+
+      // Scroll to the bottom of the output area
+      function scrollToBottom() {
+        let outputDiv = document.getElementById("output");
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+      }
+
+      // Clear the output area
+      function clearOutput() {
+        let outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = "";
+      }
     </script>
     <style>
       body {
@@ -44,11 +63,29 @@
         line-height: 50px;
         background-color: #f1f1f1;
         border-bottom: 1px solid black;
+        display: flex; /* Use flexbox for layout */
+        align-items: center; /* Center content vertically */
+      }
+      .button-container {
+        margin-left: auto; /* Push buttons to the right */
+      }
+      button {
+        margin-left: 10px;
+        padding: 5px 10px;
+        font-size: 14px;
       }
     </style>
   </head>
   <body>
-    <h2>Debug Output</h2>
+    <h2>
+      Debug Output
+      <div class="button-container">
+        <button onclick="scrollToTop()">↑</button>
+        <button onclick="scrollToBottom()">↓</button>
+        <button onclick="clearOutput()">Clear</button>
+      </div>
+    </h2>
     <div id="output"></div>
   </body>
 </html>
+<!-- End of debug.html -->
