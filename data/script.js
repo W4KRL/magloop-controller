@@ -14,7 +14,7 @@ function initWebSocket() {
   }
   socket = new WebSocket("ws://" + window.location.hostname + "/ws");
 
-  socket.onopen = function (event) {};
+  socket.onopen = function (event) { };
 
   socket.onmessage = function (event) {
     console.log("Message received:", event.data);
@@ -179,7 +179,11 @@ function updateSWRgauge(swrValue) {
 
     const valueboxSWR = document.getElementById("valueboxSWR");
     if (valueboxSWR) {
-      valueboxSWR.value = swrValue.toFixed(2) + ":1";
+      if (swrValue < 3) {
+        valueboxSWR.value = swrValue.toFixed(2) + ":1";
+      } else {
+        valueboxSWR.value = swrValue.toFixed(1) + ":1";
+      }
     }
   }
 }
