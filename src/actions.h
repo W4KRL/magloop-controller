@@ -122,28 +122,19 @@ void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
  * for a predefined duration (`jogDuration`) and then stops. If the button action
  * is not "pressed", the motor is stopped, and the button state is updated.
  */
-void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch, String &action)
+void actionJog(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
 {
-  if (action == "pressed")
+  if (limitSwitch.read() == LOW)
   {
-    if (limitSwitch.read() == LOW)
+    setMotorSpeed(speed, moveDirection);
+    buttonStates[btnIndx].depressed = true;
+    updateButtonState(btnIndx);
+    const long endTime = millis() + jogDuration;
+    while (millis() < endTime)
     {
-      setMotorSpeed(speed, moveDirection);
-      buttonStates[btnIdx].depressed = true;
-      updateButtonState(btnIdx);
-      const long endTime = millis() + jogDuration;
-      while (millis() < endTime)
-      {
-        // wait for jogDuration to jog motor
-      }
-      setMotorSpeed(NO_MOTION, IDLE);
+      // wait for jogDuration to jog motor
     }
-  }
-  else
-  {
     setMotorSpeed(NO_MOTION, IDLE);
-    buttonStates[btnIdx].depressed = false;
-    updateButtonState(btnIdx);
   }
 }
 
@@ -176,18 +167,26 @@ void processLimitSwitches()
   // Check if the limit switches are triggered
   if (limitSwitchUp.rose()) // Limit switch UP triggered
   {
-    setMotorSpeed(NO_MOTION, IDLE);              // Stop the motor
-    buttonStates[BTN_SCAN_UP].depressed = false; // Set Scan Up button to undepressed
-    updateButtonState(BTN_SCAN_UP);              // Send websocket message
-    updateLedState(LED_UP, LED_COLOR_RED);       // Set up limit LED to red
+    setMotorSpeed(NO_MOTION, IDLE);                       // Stop the motor
+    buttonStates[BTN_SCAN_UP].depressed = false;          // Set Scan Up button to undepressed
+    buttonStates[BTN_SCAN_UP].color = BTN_DISABLED_COLOR; // Set Scan button to disabled color
+    updateButtonState(BTN_SCAN_UP);                       // Send websocket message
+    buttonStates[BTN_JOG_UP].depressed = false;           // Set Jog Up button to undepressed
+    buttonStates[BTN_JOG_UP].color = BTN_DISABLED_COLOR;  // Set Jog button to disabled color
+    updateButtonState(BTN_JOG_UP);                        // Send websocket message
+    updateLedState(LED_UP, LED_COLOR_RED);                // Set up limit LED to red
   } // if (limitSwitchUp.rose())
 
   if (limitSwitchDown.rose()) // Limit switch DOWN triggered
   {
-    setMotorSpeed(NO_MOTION, IDLE);                // Stop the motor
-    buttonStates[BTN_SCAN_DOWN].depressed = false; // Set Scan Down button to undepressed
-    updateButtonState(BTN_SCAN_DOWN);              // Send websocket message
-    updateLedState(LED_DOWN, LED_COLOR_RED);       // Set down limit LED to red
+    setMotorSpeed(NO_MOTION, IDLE);                         // Stop the motor
+    buttonStates[BTN_SCAN_DOWN].depressed = false;          // Set Scan Down button to undepressed
+    buttonStates[BTN_SCAN_DOWN].color = BTN_DISABLED_COLOR; // Set Scan button to disabled color
+    updateButtonState(BTN_SCAN_DOWN);                       // Send websocket message
+    buttonStates[BTN_JOG_DOWN].depressed = false;           // Set Jog Down button to undepressed
+    buttonStates[BTN_JOG_DOWN].color = BTN_DISABLED_COLOR;  // Set Jog button to disabled color
+    updateButtonState(BTN_JOG_DOWN);                        // Send websocket message
+    updateLedState(LED_DOWN, LED_COLOR_RED);                // Set down limit LED to red
   } // if (limitSwitchDown.rose())
 
   // Check if limit switches are cleared

@@ -15,7 +15,7 @@ extern Bounce limitSwitchDown;
 
 // function prototypes from actions.h
 void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch);
-void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch, String &action);
+void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch);
 
 //! Structure to hold button state information
 struct ButtonState
@@ -87,7 +87,7 @@ void processButtonEvent(String &buttonId, String &action)
   case '3':
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJog(BTN_JOG_UP, MOVE_UP, speedLow, limitSwitchUp, action);
+      actionJog(BTN_JOG_UP, MOVE_UP, speedLow, limitSwitchUp);
     }
     else if (action == "released")
     {
@@ -98,7 +98,7 @@ void processButtonEvent(String &buttonId, String &action)
   case '4':
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedLow, limitSwitchDown, action);
+      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedLow, limitSwitchDown);
     }
     else if (action == "released")
     {
