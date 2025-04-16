@@ -1,5 +1,5 @@
 //! buttonHandler.h
-//! 2025-04-03 revised message parsing for button events
+//! 2025-04-16 combined up/down functions
 
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
@@ -30,10 +30,10 @@ struct ButtonState
 // button 1 and 2 are latching buttons
 // button 3 and 4 are momentary buttons
 ButtonState buttonStates[] = {
-    {"1", false, SCAN_UP},   // scan up
-    {"2", false, SCAN_DOWN}, // scan down
-    {"3", false, JOG_UP},    // jog up
-    {"4", false, JOG_DOWN}}; // jog down
+    {"1", false, BTN_SCAN_UP_COLOR},   // scan up
+    {"2", false, BTN_SCAN_DOWN_COLOR}, // scan down
+    {"3", false, BTN_JOG_UP_COLOR},    // jog up
+    {"4", false, BTN_JOG_DOWN_COLOR}}; // jog down
 
 // ! Button state constants
 #define BTN_SCAN_UP 0
@@ -47,7 +47,7 @@ void updateButtonState(int btnIndx)
   String id = buttonStates[btnIndx].id;
   ButtonState &button = buttonStates[btnIndx]; // Reference to the button state
   String message = "btn~" + id + "~";          // Prefix with "btn~" for button messages
-  message += button.depressed ? "true~" + button.color : "false~" + String(UNPRESSED);
+  message += button.depressed ? "true~" + button.color : "false~" + String(BTN_UNPRESSED_COLOR);
   notifyClients(message);
 } // updateButtonState()
 
@@ -63,7 +63,7 @@ void initButtonStates()
 //! Helper function to check if jog actions are allowed
 bool isJogActionAllowed()
 {
-  return !buttonStates[BTN_SCAN_UP].depressed && !buttonStates[1].depressed;
+  return !buttonStates[BTN_SCAN_UP].depressed && !buttonStates[BTN_SCAN_DOWN].depressed;
 }
 
 //! Call the action responses for all buttons

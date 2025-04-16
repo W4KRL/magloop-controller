@@ -1,6 +1,6 @@
 //! ledControl.h
 //! LED control functions
-//! 2025-04-02 improved/simplified ledStates
+//! 2025-04-16 revised LED colors and names
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
@@ -22,8 +22,8 @@ struct LedState
 
 //! Array to store the id and initial state of each LED
 LedState ledStates[] = {
-    {"1", LED_GREEN},  // LED_UP = 'led~1
-    {"2", LED_GREEN}}; // LED_DOWN = 'led~2'
+    {"1", LED_COLOR_GREEN},  // LED_UP = 'led~1
+    {"2", LED_COLOR_GREEN}}; // LED_DOWN = 'led~2'
 
 //! Update LED state on all connected clients
 void updateLedState(int ledIndex, const String &color)
