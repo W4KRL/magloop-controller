@@ -1,5 +1,7 @@
 //! credentials.h
-//! 2025-04-16 revised button and led colors and names
+//! 2025-02-18
+//! 2025-03-24 added static IP address
+//! 2025-04-11 corrected limit switch GPIOs
 
 #ifndef CREDENTIALS_H
 #define CREDENTIALS_H
@@ -37,15 +39,14 @@ IPAddress subnet(255, 255, 255, 0);
 
 //! Web Button and LED colors
 // used in ledControl.h & actions.h
-#define LED_COLOR_GREEN "LimeGreen"
-#define LED_COLOR_RED "Red"
+#define LED_GREEN "LimeGreen"
+#define LED_RED "Red"
 // used in buttonControl.h
-#define BTN_SCAN_UP_COLOR "RoyalBlue"
-#define BTN_SCAN_DOWN_COLOR "LimeGreen"
-#define BTN_JOG_UP_COLOR "DodgerBlue"
-#define BTN_JOG_DOWN_COLOR "Lime"
-#define BTN_UNPRESSED_COLOR "DimGray"
-#define BTN_DISABLED_COLOR "Cloud"
+#define SCAN_UP "RoyalBlue"
+#define SCAN_DOWN "LimeGreen"
+#define JOG_UP "DodgerBlue"
+#define JOG_DOWN "Lime"
+#define UNPRESSED "DimGray"
 
 #endif
 
