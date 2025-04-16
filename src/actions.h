@@ -10,12 +10,7 @@
 #include <Bounce2.h>       // for debouncing limit switches
 #include "buttonHandler.h" // for webSocket buttonStates[] and updateButtonState()
 #include "h_bridge.h"      // for setMotorSpeed()
-
-//! LED color constants
-#define LED_COLOR_GREEN LED_GREEN
-
-//! LED color definitions
-#define LED_COLOR_GREEN LED_GREEN
+#include "credentials.h"    // for LED colors
 
 //! Instantiate Bounce objects for limit switches
 Bounce limitSwitchUp = Bounce();   // Create a Bounce object for the UP limit switch
@@ -85,44 +80,36 @@ void toggleLED_BUILTIN()
 }
 
 /**
- * @brief Handles motor control actions in response to button presses.
- *
- * The following functions manage motor movement and button states for specific actions:
- *
- * - `actionScanUp`: Toggles the motor to move upward at high speed when the UP button is pressed,
- *   and stops the motor when the button is toggled off or the UP limit switch is triggered.
- *
- * - `actionScanDown`: Toggles the motor to move downward at high speed when the DOWN button is pressed,
- *   and stops the motor when the button is toggled off or the DOWN limit switch is triggered.
- *
- * - `actionJogUp`: Moves the motor upward at low speed for a short duration when the UP jog button is pressed,
- *   and stops the motor when the button is released or the UP limit switch is triggered.
- *
- * - `actionJogDown`: Moves the motor downward at low speed for a short duration when the DOWN jog button is pressed,
- *   and stops the motor when the button is released or the DOWN limit switch is triggered.
- *
- * These functions ensure safe motor operation by checking limit switches and updating button states
- * and LED indicators accordingly.
+ * @brief Handles the scanning action for a motor based on button state and limit switch input.
+ * 
+ * This function manages the motor's movement by checking the state of a button and a limit switch.
+ * If the button is pressed and the limit switch is triggered, the motor is activated in the specified
+ * direction and speed. If the button is released, the motor is stopped.
+ * 
+ * @param btnIndx Index of the button being checked.
+ * @param moveDirection Direction of motor movement (e.g., forward or reverse).
+ * @param speed Speed at which the motor should move.
+ * @param limitSwitch Reference to a Bounce object representing the limit switch state.
  */
 
-void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
-{
-  if (buttonStates[btnIndx].depressed)
-  {
-    setMotorSpeed(NO_MOTION, IDLE);
-    buttonStates[btnIndx].depressed = false;
-    updateButtonState(btnIndx);
-  }
-  else
-  {
-    if (limitSwitch.read() == LOW)
-    {
-      setMotorSpeed(speed, moveDirection);
-      buttonStates[btnIndx].depressed = true;
-      updateButtonState(btnIndx);
-    }
-  }
-}
+ void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
+ {
+   if (buttonStates[btnIndx].depressed)
+   {
+     setMotorSpeed(NO_MOTION, IDLE);
+     buttonStates[btnIndx].depressed = false;
+     updateButtonState(btnIndx);
+   }
+   else
+   {
+     if (limitSwitch.read() == LOW)
+     {
+       setMotorSpeed(speed, moveDirection);
+       buttonStates[btnIndx].depressed = true;
+       updateButtonState(btnIndx);
+     }
+   }
+ }
 
 void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch, String &action)
 {
@@ -150,23 +137,30 @@ void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch, St
 }
 
 /**
- * @brief Monitors the state of the limit switches and updates motor behavior and button states accordingly.
+ * @brief Processes the state of the limit switches and updates the system accordingly.
  *
- * This function should be called in the main loop. It checks the state of the UP and DOWN limit switches
- * to determine if the motor needs to stop or if the system state needs to be updated. When a limit switch
- * is triggered, the motor is stopped, the corresponding button state is reset, and the LED state is updated.
+ * This function checks the state of the UP and DOWN limit switches, determines if they
+ * have been triggered or cleared, and performs the necessary actions such as stopping
+ * the motor, updating button states, sending websocket messages, and changing LED states.
  *
- * Expected Behavior:
- * - If the UP limit switch is triggered, the motor stops moving forward, and the corresponding button and LED states are updated.
- * - If the DOWN limit switch is triggered, the motor stops moving in reverse, and the corresponding button and LED states are updated.
- * - If a limit switch is cleared, the corresponding LED state is updated to indicate the change.
+ * Actions performed:
+ * - If a limit switch is triggered:
+ *   - Stops the motor.
+ *   - Sets the corresponding Scan button to undepressed.
+ *   - Sends a websocket message to update the button state.
+ *   - Sets the corresponding limit LED to red.
+ * - If a limit switch is cleared:
+ *   - Sets the corresponding limit LED to green.
+ *
+ * This function ensures that the system responds appropriately to changes in the state
+ * of the limit switches, providing visual feedback through LEDs and maintaining proper
+ * motor and button states.
  */
-
 void processLimitSwitches()
 {
   // Update the state of the limit switches
-  limitSwitchUp.update();   // Update the state of the UP limit switch
-  limitSwitchDown.update(); // Update the state of the DOWN limit switch
+  limitSwitchUp.update();
+  limitSwitchDown.update();
 
   // Check if the limit switches are triggered
   if (limitSwitchUp.rose()) // Limit switch UP triggered
@@ -174,7 +168,7 @@ void processLimitSwitches()
     setMotorSpeed(NO_MOTION, IDLE);              // Stop the motor
     buttonStates[BTN_SCAN_UP].depressed = false; // Set Scan Up button to undepressed
     updateButtonState(BTN_SCAN_UP);              // Send websocket message
-    updateLedState(LED_UP, LED_RED);             // Set up limit LED to red
+    updateLedState(LED_UP, LED_COLOR_RED);             // Set up limit LED to red
   } // if (limitSwitchUp.rose())
 
   if (limitSwitchDown.rose()) // Limit switch DOWN triggered
@@ -182,7 +176,7 @@ void processLimitSwitches()
     setMotorSpeed(NO_MOTION, IDLE);                // Stop the motor
     buttonStates[BTN_SCAN_DOWN].depressed = false; // Set Scan Down button to undepressed
     updateButtonState(BTN_SCAN_DOWN);              // Send websocket message
-    updateLedState(LED_DOWN, LED_RED);             // Set down limit LED to red
+    updateLedState(LED_DOWN, LED_COLOR_RED);             // Set down limit LED to red
   } // if (limitSwitchDown.rose())
 
   // Check if limit switches are cleared
