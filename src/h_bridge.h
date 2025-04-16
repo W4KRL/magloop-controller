@@ -20,6 +20,7 @@
 #define IDLE 0            // IDLE state
 #define MOVE_UP 1         // forward motion
 #define MOVE_DOWN 2       // reverse motion
+#define NO_MOTION 0       // no motion
 
 void h_bridgeBegin()
 {
