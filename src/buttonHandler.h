@@ -5,13 +5,17 @@
 #define BUTTONHANDLER_H
 
 #include <Arduino.h>
+#include "actions.h"
 #include "ledControl.h"
+#include "h_bridge.h" // for setMotorSpeed()
+
+// Declare limitSwitches as extern variables to be used in actions.h
+extern Bounce limitSwitchUp;
+extern Bounce limitSwitchDown;
 
 // function prototypes from actions.h
-void actionScanUp();                // latching button, pressed toggles .depressed
-void actionScanDown();              // latching button
-void actionJogUp(String &action);   // momentary button, action is "pressed" or "released"
-void actionJogDown(String &action); // momentary button
+void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch);
+void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch, String &action);
 
 //! Structure to hold button state information
 struct ButtonState
@@ -32,10 +36,10 @@ ButtonState buttonStates[] = {
     {"4", false, JOG_DOWN}}; // jog down
 
 // ! Button state constants
-#define BTN1 0
-#define BTN2 1
-#define BTN3 2
-#define BTN4 3
+#define BTN_SCAN_UP 0
+#define BTN_SCAN_DOWN 1
+#define BTN_JOG_UP 2
+#define BTN_JOG_DOWN 3
 
 //! Send a button state update to all connected clients
 void updateButtonState(int btnIndx)
@@ -59,7 +63,7 @@ void initButtonStates()
 //! Helper function to check if jog actions are allowed
 bool isJogActionAllowed()
 {
-  return !buttonStates[BTN1].depressed && !buttonStates[1].depressed;
+  return !buttonStates[BTN_SCAN_UP].depressed && !buttonStates[1].depressed;
 }
 
 //! Call the action responses for all buttons
@@ -69,79 +73,42 @@ void processButtonEvent(String &buttonId, String &action)
   switch (buttonChar)
   {
   case '1':
-    if (!buttonStates[BTN2].depressed)
+    if (!buttonStates[BTN_SCAN_DOWN].depressed)
     {
-      actionScanUp();
+      actionScan(BTN_SCAN_UP, MOVE_UP, speedHigh, limitSwitchUp);
     }
     break;
   case '2':
-    if (!buttonStates[BTN1].depressed)
+    if (!buttonStates[BTN_SCAN_UP].depressed)
     {
-      actionScanDown();
+      actionScan(BTN_SCAN_DOWN, MOVE_DOWN, speedHigh, limitSwitchDown);
     }
     break;
   case '3':
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJogUp(action);
+      actionJog(BTN_JOG_UP, MOVE_UP, speedLow, limitSwitchUp, action);
     }
     else if (action == "released")
     {
-      buttonStates[BTN3].depressed = false;
-      updateButtonState(BTN3);
+      buttonStates[BTN_JOG_UP].depressed = false;
+      updateButtonState(BTN_JOG_UP);
     }
     break;
   case '4':
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJogDown(action);
+      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedLow, limitSwitchDown, action);
     }
     else if (action == "released")
     {
-      buttonStates[BTN4].depressed = false;
-      updateButtonState(BTN4);
+      buttonStates[BTN_JOG_DOWN].depressed = false;
+      updateButtonState(BTN_JOG_DOWN);
     }
     break;
   default:
     return; // Invalid button ID, exit the function
   }
-
-  // interlocking for latching buttons
-  // if ((buttonId == "1" && !buttonStates[BTN2].depressed))
-  // {
-  //   actionScanUp();
-  // }
-  // else if ((buttonId == "2" && !buttonStates[BTN1].depressed))
-  // {
-  //   actionScanDown();
-  // }
-  // // momentary buttons
-  // else if (buttonId == "3" && action == "pressed" && isJogActionAllowed())
-  // {
-  //   actionJogUp(action);
-  // }
-  // else if (buttonId == "3" && action == "released")
-  // {
-  //   buttonStates[BTN3].depressed = false;
-  //   updateButtonState(BTN3);
-  // }
-  // else if (buttonId == "4" && action == "pressed" && isJogActionAllowed())
-  // {
-  //   actionJogDown(action);
-  // }
-  // else if (buttonId == "4" && action == "released")
-  // {
-  //   buttonStates[BTN4].depressed = false;
-  //   updateButtonState(BTN4);
-  // }
-  // else if (buttonId == "3" && isJogActionAllowed())
-  // {
-  //   actionJogUp(action);
-  // }
-  // else if (buttonId == "4" && isJogActionAllowed())
-  // {
-  //   actionJogDown(action);
-  // }
-} // buttonHandler()
+} // processButtonEvent()
 
 #endif
