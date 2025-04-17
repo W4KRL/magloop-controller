@@ -1,7 +1,5 @@
-// 2025-03-23 refactor initWebsocket() and processWebSocketMessage() functions
-// 2025-03-25 moved to chart.js
-// 2025-04-02 improved led parsing
-// 2025-04-03 fixed beep() to close AudioContext only if it's not closed already
+//! \file script.js
+//! 2025-04-17 zero-based indexing for button and LEDs
 
 // Global variables
 let socket;
@@ -106,23 +104,22 @@ function updateButtonState(buttonId, depressed, color) {
 
       // Trigger beep for ON state only
       switch (id) {
-        case "btn1":
-        case "btn3":
-          beep(880, 100); // Frequency for btn1/btn3 ON
+        case "btn0": // scan up
+        case "btn2": // jog up
+          beep(880, 100); // ON beep for btn0/btn2
           break;
-        case "btn2":
-        case "btn4":
-          beep(440, 100); // Frequency for btn2/btn4 ON
+        case "btn1": // scan down
+        case "btn3": // jog down
+          beep(440, 100); // ON beep for btn1/btn3
           break;
       }
     } else {
       button.classList.remove("depressed");
-
       // Explicitly prevent beeps for OFF state for momentary btn3 and btn4
-      if (id === "btn1") {
-        beep(784, 100); // Frequency for btn1 OFF
-      } else if (id === "btn2") {
-        beep(392, 100); // Frequency for btn2 OFF
+      if (id === "btn0") {
+        beep(784, 100); // OFF beep for btn0
+      } else if (id === "btn1") {
+        beep(392, 100); // OFF beep for btn1
       }
     }
   }
@@ -276,11 +273,11 @@ document.addEventListener("DOMContentLoaded", function () {
       sendButtonPress(buttonId); // Call sendButtonPress() for all buttons
     });
 
-    // Add mouseup listeners for btn3 and btn4 only
-    if (button.id === "btn3" || button.id === "btn4") {
+    // Add mouseup listeners for btn2 and btn3 only
+    if (button.id === "btn2" || button.id === "btn3") {
       button.addEventListener("mouseup", function () {
         const buttonId = button.id; // Get the ID of the button
-        releaseButton(buttonId); // Call releaseButton() for btn3 and btn4 only
+        releaseButton(buttonId); // Call releaseButton() for btn2 and btn3 only
       });
     }
   });
