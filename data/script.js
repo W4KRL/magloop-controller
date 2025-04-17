@@ -146,9 +146,6 @@ function updateLedState(id, color) {
   const led = document.getElementById(ledId);
   if (led) {
     led.style.backgroundColor = color;
-    if (color === "red") {
-      beep(180, 100);
-    }
   }
 }
 
