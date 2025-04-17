@@ -4,36 +4,33 @@
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
 
-#include <Arduino.h>
-#include "actions.h"
-#include "ledControl.h"
-#include "h_bridge.h" // for setMotorSpeed()
+#include <Arduino.h>    // for Arduino functions
+#include "actions.h"    // for actionScan(), actionJog()
+#include "ledControl.h" // for LED colors
+#include "h_bridge.h"   // for setMotorSpeed()
 
-// Declare limitSwitches as extern variables to be used in actions.h
+// Declare extern variables and function prototypes for actions.h
 extern Bounce limitSwitchUp;
 extern Bounce limitSwitchDown;
-
-// function prototypes from actions.h
 void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch);
-void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch, String &action);
+void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch);
 
 //! Structure to hold button state information
 struct ButtonState
 {
-  String id;
   bool depressed;
   String color;
 };
 
 //! Array to store the initial state of each button
 //! Each entry includes: buttonId, initial state (depressed or not), and depressedColor (ON)
-// button 1 and 2 are latching buttons
-// button 3 and 4 are momentary buttons
+// button 0 and 1 are latching buttons
+// button 2 and 3 are momentary buttons
 ButtonState buttonStates[] = {
-    {"1", false, BTN_SCAN_UP_COLOR},   // scan up
-    {"2", false, BTN_SCAN_DOWN_COLOR}, // scan down
-    {"3", false, BTN_JOG_UP_COLOR},    // jog up
-    {"4", false, BTN_JOG_DOWN_COLOR}}; // jog down
+    {false, BTN_SCAN_UP_COLOR},   // btn0 scan up
+    {false, BTN_SCAN_DOWN_COLOR}, // btn1 scan down
+    {false, BTN_JOG_UP_COLOR},    // btn2 jog up
+    {false, BTN_JOG_DOWN_COLOR}}; // btn3 jog down
 
 // ! Button state constants
 #define BTN_SCAN_UP 0
@@ -44,9 +41,9 @@ ButtonState buttonStates[] = {
 //! Send a button state update to all connected clients
 void updateButtonState(int btnIndx)
 {
-  String id = buttonStates[btnIndx].id;
-  ButtonState &button = buttonStates[btnIndx]; // Reference to the button state
-  String message = "btn~" + id + "~";          // Prefix with "btn~" for button messages
+  // String id = buttonStates[btnIndx].id;
+  ButtonState &button = buttonStates[btnIndx];     // Reference to the button state
+  String message = "btn~" + String(btnIndx) + "~"; // Prefix with "btn~" for button messages
   message += button.depressed ? "true~" + button.color : "false~" + String(BTN_UNPRESSED_COLOR);
   notifyClients(message);
 } // updateButtonState()
@@ -70,24 +67,26 @@ bool isJogActionAllowed()
 void processButtonEvent(String &buttonId, String &action)
 {
   char buttonChar = buttonId.charAt(0); // Extract the first character as a char
-  switch (buttonChar)
+  int buttonIndex = buttonChar - '0';   // Convert char to index (0-3)
+
+  switch (buttonIndex)
   {
-  case '1':
+  case BTN_SCAN_UP:
     if (!buttonStates[BTN_SCAN_DOWN].depressed)
     {
       actionScan(BTN_SCAN_UP, MOVE_UP, speedHigh, limitSwitchUp);
     }
     break;
-  case '2':
+  case BTN_SCAN_DOWN:
     if (!buttonStates[BTN_SCAN_UP].depressed)
     {
       actionScan(BTN_SCAN_DOWN, MOVE_DOWN, speedHigh, limitSwitchDown);
     }
     break;
-  case '3':
+  case BTN_JOG_UP:
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJog(BTN_JOG_UP, MOVE_UP, speedLow, limitSwitchUp, action);
+      actionJog(BTN_JOG_UP, MOVE_UP, speedLow, limitSwitchUp);
     }
     else if (action == "released")
     {
@@ -95,10 +94,10 @@ void processButtonEvent(String &buttonId, String &action)
       updateButtonState(BTN_JOG_UP);
     }
     break;
-  case '4':
+  case BTN_JOG_DOWN:
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedLow, limitSwitchDown, action);
+      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedLow, limitSwitchDown);
     }
     else if (action == "released")
     {

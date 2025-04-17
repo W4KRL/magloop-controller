@@ -7,37 +7,30 @@
 
 #include <Arduino.h>
 #include "credentials.h" // for LED colors
-#include "webSocket.h" // for notifyClients()
+#include "webSocket.h"   // for notifyClients()
 
 //! LED indices
 #define LED_UP 0
 #define LED_DOWN 1
 
-//! Structure to store an LED id and color
-struct LedState
-{
-  String id;
-  String color;
-};
-
-//! Array to store the id and initial state of each LED
-LedState ledStates[] = {
-    {"1", LED_COLOR_GREEN},  // LED_UP = 'led~1
-    {"2", LED_COLOR_GREEN}}; // LED_DOWN = 'led~2'
+//! Array to store the initial state of each LED
+String ledColor[2] = {
+    {LED_COLOR_GREEN},  // LED_UP = 'led~0
+    {LED_COLOR_GREEN}}; // LED_DOWN = 'led~1'
 
 //! Update LED state on all connected clients
 void updateLedState(int ledIndex, const String &color)
 {
-  ledStates[ledIndex].color = color; // Update the color in the array
-  notifyClients("led~" + ledStates[ledIndex].id + "~" + color);
+  ledColor[ledIndex] = color; // Update the color in the array
+  notifyClients("led~" + String(ledIndex) + "~" + String(color)); // Prefix with "led~" for LED messages
 } // updateLedState()
 
 //! Initialize all LED states for newly connected clients
 void initLedStates()
 {
-  for (int i = 0; i < sizeof(ledStates) / sizeof(ledStates[0]); i++)
+  for (int i = 0; i < sizeof(ledColor) / sizeof(ledColor[0]); i++)
   {
-    updateLedState(i, ledStates[i].color);
+    updateLedState(i, ledColor[i]);
   }
 } // initLedStates()
 
