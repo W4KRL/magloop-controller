@@ -3,7 +3,7 @@
 //! 2025-04-11
 
 // !!!Save this file!!!
-// "C:\Users\KarlB\OneDrive\Documents\PlatformIO\Projects\magloop-controller"
+// C:\Users\KarlB\OneDrive\Documents\PlatformIO\Projects\magloop-controller
 
 /*
 This code is for the ESP32 DevKit board, in PlatformIO with Arduino framework 3.x.
@@ -62,6 +62,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Preferences.h {scpiControl.h} builtin to Arduino compiler
     littleFS.h {webSocket.h} builtin to Arduino compiler
     wifi.h {wifiConnection.h} builtin to Arduino compiler
+    Wire.h {actions.h} builtin to Arduino compiler 
+    SHT2x.h {actions.h} HTU21 temperature and humidity sensor library
 */
 
 //! *************** Setup function ******************

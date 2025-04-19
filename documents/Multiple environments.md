@@ -104,3 +104,164 @@ Citations:
 
 ---
 Answer from Perplexity: pplx.ai/share
+
+*************************************
+To combine the `platformio.ini` file for both environments and assign different GPIO pins, you'll need to define each environment separately and specify the configurations unique to each board. Here's the combined `platformio.ini` file:
+
+```ini
+[env:esp32doit-devkit-v1]
+platform = espressif32@^6.7.0
+platform_packages = 
+    framework-arduinoespressif32 @ https://github.com/espressif/arduino-esp32.git#3.0.1
+    framework-arduinoespressif32-libs @ https://github.com/espressif/arduino-esp32/releases/download/3.0.1/esp32-arduino-libs-3.0.1.zip
+board = esp32doit-devkit-v1
+framework = arduino
+monitor_speed = 115200
+monitor_filters = send_on_enter
+monitor_echo = yes
+monitor_eol = LF
+upload_speed = 921600
+upload_port = 192.168.0.234
+upload_protocol = espota
+board_build.filesystem = littlefs
+build_flags = 
+    -D CONFIG_ASYNC_TCP_RUNNING_CORE=1
+    -D CONFIG_ASYNC_TCP_STACK_SIZE=4096
+    -D GPIO_PIN_MODE_ESP32DOIT=17  ; Example GPIO pin assignment
+lib_deps = 
+    ESP32Async/AsyncTCP
+    ESP32Async/ESPAsyncWebServer
+    vrekrer/Vrekrer SCPI parser@^0.5.0
+    thomasfredericks/Bounce2@^2.72
+
+[env:esp32-c3-devkitm-1]
+platform = espressif32
+board = esp32-c3-devkitm-1
+framework = arduino
+monitor_speed = 115200
+upload_speed = 921600
+build_flags = 
+    -D ARDUINO_USB_MODE=1
+    -D ARDUINO_USB_CDC_ON_BOOT=1
+    -D GPIO_PIN_MODE_ESP32C3=9    ; Example GPIO pin assignment
+```
+
+### How to select the environment
+To choose the environment when building, uploading, or monitoring, you can use the `--environment` flag in the PlatformIO CLI. For example:
+
+- To build for `esp32doit-devkit-v1`:
+  ```
+  pio run --environment esp32doit-devkit-v1
+  ```
+
+- To upload to `esp32-c3-devkitm-1`:
+  ```
+  pio run --target upload --environment esp32-c3-devkitm-1
+  ```
+
+When working in an IDE like Visual Studio Code, you can select the environment from the dropdown in the PlatformIO toolbar.
+
+Feel free to let me know if you'd like further assistance customizing your GPIO pins or other configurations!
+
+********************
+; Common settings for all environments
+[platformio]
+default_envs = esp32doit-devkit-v1
+
+[common]
+lib_deps = 
+    ESP32Async/AsyncTCP
+    ESP32Async/ESPAsyncWebServer
+    vrekrer/Vrekrer SCPI parser@^0.5.0
+    thomasfredericks/Bounce2@^2.72
+
+[env:esp32doit-devkit-v1]
+platform = espressif32@^6.7.0
+platform_packages = 
+    framework-arduinoespressif32 @ https://github.com/espressif/arduino-esp32.git#3.0.1
+    framework-arduinoespressif32-libs @ https://github.com/espressif/arduino-esp32/releases/download/3.0.1/esp32-arduino-libs-3.0.1.zip
+board = esp32doit-devkit-v1
+framework = arduino
+monitor_speed = 115200
+monitor_filters = send_on_enter
+monitor_echo = yes
+monitor_eol = LF
+upload_speed = 921600
+upload_port = 192.168.0.234
+upload_protocol = espota
+board_build.filesystem = littlefs
+build_flags = 
+    -D CONFIG_ASYNC_TCP_RUNNING_CORE=1
+    -D CONFIG_ASYNC_TCP_STACK_SIZE=4096
+    -D GPIO_PIN_MODE_ESP32DOIT=17
+lib_deps = ${common.lib_deps}  ; Reference common lib_deps
+
+[env:esp32-c3-devkitm-1]
+platform = espressif32
+board = esp32-c3-devkitm-1
+framework = arduino
+monitor_speed = 115200
+upload_speed = 921600
+build_flags = 
+    -D ARDUINO_USB_MODE=1
+    -D ARDUINO_USB_CDC_ON_BOOT=1
+    -D GPIO_PIN_MODE_ESP32C3=9
+lib_deps = ${common.lib_deps}  ; Reference common lib_deps
+
+**********************************
+GPIO (General Purpose Input/Output) assignment depends on the specific needs of your project, as well as the hardware features and pin mappings of each processor. Since you have 8 different GPIO pins for each processor, you can assign them in your code using conditional compilation based on the environment.
+
+### Defining GPIO Pins for Each Environment
+You can use preprocessor macros (`#define`) in your code and rely on the `build_flags` in your `platformio.ini` file to differentiate the assignments for each processor. Here's an example:
+
+```cpp
+#if defined(ESP32DOIT_DEVKIT_V1)
+// GPIO assignments for esp32doit-devkit-v1
+#define GPIO_PIN_1 17
+#define GPIO_PIN_2 18
+#define GPIO_PIN_3 19
+#define GPIO_PIN_4 21
+#define GPIO_PIN_5 22
+#define GPIO_PIN_6 23
+#define GPIO_PIN_7 25
+#define GPIO_PIN_8 26
+#elif defined(ESP32_C3_DEVKITM_1)
+// GPIO assignments for esp32-c3-devkitm-1
+#define GPIO_PIN_1 2
+#define GPIO_PIN_2 3
+#define GPIO_PIN_3 4
+#define GPIO_PIN_4 5
+#define GPIO_PIN_5 6
+#define GPIO_PIN_6 7
+#define GPIO_PIN_7 8
+#define GPIO_PIN_8 9
+#else
+#error "No environment defined for GPIO assignment!"
+#endif
+```
+
+### Linking GPIO Assignments to PlatformIO
+You need to ensure that the `build_flags` in your `platformio.ini` file define unique macros for each environment. For example:
+
+```ini
+[env:esp32doit-devkit-v1]
+platform = espressif32
+board = esp32doit-devkit-v1
+framework = arduino
+build_flags = 
+    -D ESP32DOIT_DEVKIT_V1
+
+[env:esp32-c3-devkitm-1]
+platform = espressif32
+board = esp32-c3-devkitm-1
+framework = arduino
+build_flags = 
+    -D ESP32_C3_DEVKITM_1
+```
+
+### How It Works
+1. **Environment Selection**: When you select an environment in PlatformIO (either `esp32doit-devkit-v1` or `esp32-c3-devkitm-1`), the corresponding `build_flags` define macros (`ESP32DOIT_DEVKIT_V1` or `ESP32_C3_DEVKITM_1`).
+2. **Conditional Compilation**: The code uses these macros to determine which set of GPIO assignments to include during compilation.
+3. **GPIO Usage**: You can use the defined GPIO pins in your code without worrying about mismatched pin mappings between the processors.
+
+Let me know if you'd like further clarification or additional assistance!

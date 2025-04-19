@@ -34,6 +34,8 @@ IPAddress subnet(255, 255, 255, 0);
 #define SWR_RFL 35	  // SWR reflected ADC input
 #define SWR_FWD 34	  // SWR forward ADC input
 #define VM 32		  // VM voltage monitor ADC input
+#define SDA 2		  // I2C SDA pin
+#define SCL 15		  // I2C SCL pin
 
 //! Web Button and LED colors
 // used in ledControl.h & actions.h

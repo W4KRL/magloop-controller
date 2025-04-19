@@ -4,7 +4,8 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include <Arduino.h>       // Required for basic Arduino functions like pinMode, digitalWrite, millis, etc., used throughout this file.
+#include <Arduino.h>       // Required for basic Arduino functions
+
 #include <Bounce2.h>       // for debouncing limit switches
 #include "buttonHandler.h" // for webSocket buttonStates[] and updateButtonState()
 #include "h_bridge.h"      // for setMotorSpeed()
