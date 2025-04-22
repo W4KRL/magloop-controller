@@ -43,7 +43,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define DEBUG_MAGLOOP //! uncomment for debug output to Serial Monitor
 
 #include <Arduino.h>        // required by PlatformIO
-#include "scpiControl.h"    // for SCPI commands
 #include "actions.h"        // responses to button commands & sensors
 #include "bounce2.h"        // for button control
 #include "buttonHandler.h"  // for button control from web sockets
@@ -85,7 +84,7 @@ void loop()
   //! Reconnect to Wi-Fi if disconnected
   if (!WiFi.isConnected())
   {
-    wifiBegin();
+    wifiConnect();
   }
 
   //! Check for OTA updates
