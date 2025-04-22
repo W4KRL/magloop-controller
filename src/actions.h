@@ -36,9 +36,6 @@ static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
  */
 void actionsBegin()
 {
-  // Configure onboard LED pin
-  pinMode(LED_BUILTIN, OUTPUT);            // Set LED_BUILTIN as output
-  digitalWrite(LED_BUILTIN, LOW);          // Start with LED off
   ;                                        // Assign limit switch up pin, attach debouncing
   pinMode(LIMIT_UP, INPUT);                // Use INPUT with external pullups
   limitSwitchUp.attach(LIMIT_UP);          // Attach limit switch to debouncer
@@ -48,35 +45,6 @@ void actionsBegin()
   limitSwitchDown.attach(LIMIT_DOWN);      // Attach limit switch to debouncer
   limitSwitchDown.interval(DEBOUNCE_TIME); // Set debounce time
 } // actionsBegin()
-
-/**
- * @brief Sets the state of the built-in LED.
- *
- * This function updates the state of the built-in LED to the specified value.
- * It also updates the internal `ledBuiltIn` variable to reflect the current state.
- *
- * @param state A boolean value indicating the desired LED state:
- *              - `true` to turn the LED ON.
- *              - `false` to turn the LED OFF.
- */
-void setLED_BUILTIN(bool state)
-{
-  ledBuiltIn = state;
-  digitalWrite(LED_BUILTIN, ledBuiltIn);
-}
-
-/**
- * @brief Toggles the state of the built-in LED.
- *
- * This function inverts the current state of the built-in LED. If the LED is ON,
- * it will be turned OFF, and vice versa. The internal `ledState` variable is
- * updated to reflect the new state.
- */
-void toggleLED_BUILTIN()
-{
-  ledBuiltIn = !ledBuiltIn;              // Invert the current state
-  digitalWrite(LED_BUILTIN, ledBuiltIn); // Apply the new state
-}
 
 /**
  * @brief Handles the scanning action for a motor based on button state and limit switch input.
