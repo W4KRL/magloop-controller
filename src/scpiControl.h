@@ -47,6 +47,8 @@
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
+#include <Wire.h>                // for I2C communication
+#include <SHT2x.h>               // for SHT2x temperature and humidity sensor
 ;                                // Instantiations
 SCPI_Parser scpi;                //   SCPI parser
 Preferences preferences;         //   Preferences storage
@@ -56,6 +58,11 @@ int speedLow;                    //   motor low speed % for fine tune
 int pressDuration;               //   long button press duration ms
 int jogDuration;                 //   motor jog duration ms
 int repeatInterval;              //   jog repeat interval ms
+extern Bounce limitSwitchUp;
+extern Bounce limitSwitchDown;
+
+//! Instantiate temperature and humidity sensor object
+SHT2x envSensor; // Create an SHT2x object with I2C communication
 
 String processSCPIcommand(String scpiCommand)
 {
@@ -70,7 +77,7 @@ String processSCPIcommand(String scpiCommand)
   String scpiResponse;                                             // Initialize response string
   scpi.Execute(scpiCommandBuf, responseStream);                    // Execute SCPI command
   scpiResponse = "scp~" + responseStream;                          // format for JavaScript client
-  return scpiResponse; // return the response string
+  return scpiResponse;                                             // return the response string
 } // processSCPIcommand()
 
 void restorePreferences()
@@ -111,8 +118,8 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // get the temperature and humidity
-  interface.printf("Temperature: %i C\n", 25);
-  interface.printf("Humidity: %i%%\n", 50);
+  interface.printf("Temperature: %i C\n", envSensor.getTemperature());
+  interface.printf("Humidity: %i%%\n", envSensor.getHumidity());
 } // getEnvironment()
 
 void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -222,6 +229,11 @@ void scpiBegin()
 {
   preferences.begin("mag-loop", false); // false = open for read/write
   restorePreferences();
+  // Configure I2C pins
+  pinMode(SDA, INPUT); // Set SDA pin to input with pull-up resistor
+  pinMode(SCL, INPUT); // Set SCL pin to input with pull-up resistor
+  Wire.begin(SDA, SCL); // Initialize I2C with specified SDA and SCL pins
+  envSensor.begin();    // Initialize the SHT2x sensor
   //! SCPI Command Registration in setup()
   // define the scpi command structure
   // capitalized letters may be used as abbreviations
@@ -241,8 +253,8 @@ void scpiBegin()
   scpi.RegisterCommand("LOWspeed", &setLowspeed);     // JOG speed
   scpi.RegisterCommand("REPeat", &setRepeatInterval); // REPeat interval not implemented
   scpi.RegisterCommand("PREss", &setPressDuration);   // long button press duration not implemented
-  scpi.RegisterCommand("RSSI?", &getEnvironment);           // for testing
-  scpi.RegisterCommand("VOLTage?", &getEnvironment);        // for testing
+  scpi.RegisterCommand("RSSI?", &getEnvironment);     // for testing
+  scpi.RegisterCommand("VOLTage?", &getEnvironment);  // for testing
 } // scpiBegin()
 
 #endif // SCPI_H
