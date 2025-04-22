@@ -15,8 +15,8 @@ void otaBegin()
 {
     ArduinoOTA.onStart([]()
                        {
-String type = (ArduinoOTA.getCommand() == U_FLASH) ? "sketch" : "filesystem";
-Serial.println("Start updating " + type); });
+    String type = (ArduinoOTA.getCommand() == U_FLASH) ? "sketch" : "filesystem";
+    Serial.println("Start updating " + type); });
     ArduinoOTA.onEnd([]()
                      { Serial.println("\nUpdate Complete"); });
     ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
@@ -33,21 +33,37 @@ else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
     Serial.println("OTA Ready");
 }
 
-//! Connect to WiFi
-void wifiBegin()
+/**
+ * @brief Sets the state of the built-in LED.
+ *
+ * This function updates the state of the built-in LED to the specified value.
+ * It also updates the internal `ledBuiltIn` variable to reflect the current state.
+ *
+ * @param state A boolean value indicating the desired LED state:
+ *              - `true` to turn the LED ON.
+ *              - `false` to turn the LED OFF.
+ */
+void setLED_BUILTIN(bool state)
 {
-    WiFi.mode(WIFI_STA);
-    WiFi.persistent(false);
-    WiFi.setAutoReconnect(true);
-    WiFi.setSleep(false);
+    ledBuiltIn = state;
+    digitalWrite(LED_BUILTIN, ledBuiltIn);
+}
 
-    Serial.printf("\n%s %s\n", "Connecting to", WIFI_SSID);
-    // Set static IP configuration
-    if (!WiFi.config(localIP, gateway, subnet))
-    {
-        Serial.println("Static IP Configuration Failed!");
-        return;
-    }
+/**
+ * @brief Toggles the state of the built-in LED.
+ *
+ * This function inverts the current state of the built-in LED. If the LED is ON,
+ * it will be turned OFF, and vice versa. The internal `ledState` variable is
+ * updated to reflect the new state.
+ */
+void toggleLED_BUILTIN()
+{
+    ledBuiltIn = !ledBuiltIn;              // Invert the current state
+    digitalWrite(LED_BUILTIN, ledBuiltIn); // Apply the new state
+}
+
+void wifiConnect()
+{
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -57,7 +73,33 @@ void wifiBegin()
     }
     setLED_BUILTIN(HIGH); // Turn on the LED when connected
     Serial.printf("\n%s: %s\n", "Connected to IP Address", WiFi.localIP().toString());
+} // wifiConnect()
 
+//! Connect to WiFi
+void wifiBegin()
+{
+    // Configure onboard LED pin
+    pinMode(LED_BUILTIN, OUTPUT);   // Set LED_BUILTIN as output
+    digitalWrite(LED_BUILTIN, LOW); // Start with LED off
+
+    WiFi.mode(WIFI_STA);
+    WiFi.persistent(false);
+    WiFi.setAutoReconnect(true);
+    WiFi.setSleep(false);
+    Serial.printf("\n%s %s\n", "Connecting to", WIFI_SSID);
+    // Set static IP configuration
+    if (!WiFi.config(localIP, gateway, subnet))
+    {
+        Serial.println("Static IP Configuration Failed!");
+        return;
+    }
+    wifiConnect(); // Connect to WiFi
+    // Serial.println("WiFi connected");
+    // Serial.print("IP address: ");
+    // Serial.println(WiFi.localIP());
+    // Serial.print("Signal strength (dBm): ");
+    // Serial.println(WiFi.RSSI());
+    // Serial.println("WiFi connection established.");
 } // wifiBegin()
 
 #endif
