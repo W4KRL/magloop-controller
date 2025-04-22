@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include "credentials.h" // for LED colors
 #include "webSocket.h"   // for notifyClients()
+#include "actions.h"     // for limitSwitchUp, limitSwitchDown
 
 //! LED indices
 #define LED_UP 0
@@ -28,6 +29,22 @@ void updateLedState(int ledIndex, const String &color)
 //! Initialize all LED states for newly connected clients
 void initLedStates()
 {
+if (limitSwitchUp.read()) // Limit switch up triggered
+  {
+    ledColor[LED_UP] = LED_COLOR_RED; // Set up limit LED to red
+  }
+  else
+  {
+    ledColor[LED_UP] = LED_COLOR_GREEN; // Set up limit LED to green
+  }
+  if (limitSwitchDown.read()) // Limit switch down triggered
+  {
+    ledColor[LED_DOWN] = LED_COLOR_RED; // Set down limit LED to red
+  }
+  else
+  {
+    ledColor[LED_DOWN] = LED_COLOR_GREEN; // Set down limit LED to green
+  }
   for (int i = 0; i < sizeof(ledColor) / sizeof(ledColor[0]); i++)
   {
     updateLedState(i, ledColor[i]);
