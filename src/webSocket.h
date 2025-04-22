@@ -72,6 +72,7 @@ void notifyClients(const String &message)
 {
   if (ws.count() > 0) // Check if there are connected clients
   {
+    // debug here kills the message
     // DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
     ws.textAll(message);
   }
