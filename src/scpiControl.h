@@ -43,12 +43,12 @@
 
 #include <Arduino.h>             // Required for platformIO
 #include "credentials.h"         // for SCPI identification
-#include "debug.h"               // DEBUG_PRINT, DEBUG_PRINTLN
+#include "debug.h"               // DEBUG_PRINTF()
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
 #include <Wire.h>                // for I2C communication
-#include <SHT2x.h>               // for SHT2x temperature and humidity sensor
+#include "Adafruit_HTU21DF.h"    // for HTU21D temperature and humidity sensor
 ;                                // Instantiations
 SCPI_Parser scpi;                //   SCPI parser
 Preferences preferences;         //   Preferences storage
@@ -61,8 +61,10 @@ int repeatInterval;              //   jog repeat interval ms
 extern Bounce limitSwitchUp;
 extern Bounce limitSwitchDown;
 
+void notifyClients(const String &message); // webSocket.h prototype
+
 //! Instantiate temperature and humidity sensor object
-SHT2x envSensor; // Create an SHT2x object with I2C communication
+Adafruit_HTU21DF envSensor = Adafruit_HTU21DF();
 
 String processSCPIcommand(String scpiCommand)
 {
@@ -118,8 +120,11 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // get the temperature and humidity
-  interface.printf("Temperature: %i C\n", envSensor.getTemperature());
-  interface.printf("Humidity: %i%%\n", envSensor.getHumidity());
+  float tempC = envSensor.readTemperature();
+  float tempF = 1.8 * tempC + 32;
+  float humidity = envSensor.readHumidity();
+  interface.printf("Temperature: %.1f °C (%.1f °F)\n", tempC, tempF);
+  interface.printf("Humidity: %.1f%%\n", humidity);
 } // getEnvironment()
 
 void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -229,11 +234,13 @@ void scpiBegin()
 {
   preferences.begin("mag-loop", false); // false = open for read/write
   restorePreferences();
+  
   // Configure I2C pins
-  pinMode(SDA, INPUT); // Set SDA pin to input with pull-up resistor
-  pinMode(SCL, INPUT); // Set SCL pin to input with pull-up resistor
+  pinMode(SDA, INPUT);  // Set SDA pin to input with module pull-up resistor
+  pinMode(SCL, INPUT);  // Set SCL pin to input with module pull-up resistor
   Wire.begin(SDA, SCL); // Initialize I2C with specified SDA and SCL pins
-  envSensor.begin();    // Initialize the SHT2x sensor
+  envSensor.begin();    // Initialize the HTU21D sensor
+
   //! SCPI Command Registration in setup()
   // define the scpi command structure
   // capitalized letters may be used as abbreviations
