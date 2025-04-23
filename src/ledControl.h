@@ -1,6 +1,6 @@
 //! ledControl.h
-//! LED control functions
-//! 2025-04-16 revised LED colors and names
+//! LED control functions for webSocket clients
+//! 2025-04-23 revised initializeStates() to read limit switches
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
@@ -22,14 +22,30 @@ String ledColor[2] = {
 //! Update LED state on all connected clients
 void updateLedState(int ledIndex, const String &color)
 {
-  ledColor[ledIndex] = color; // Update the color in the array
+  ledColor[ledIndex] = color;                                     // Update the color in the array
   notifyClients("led~" + String(ledIndex) + "~" + String(color)); // Prefix with "led~" for LED messages
 } // updateLedState()
 
 //! Initialize all LED states for newly connected clients
+/**
+ * @brief Initializes the LED states based on the status of the limit switches.
+ *
+ * This function checks the state of `limitSwitchUp` and `limitSwitchDown`
+ * to determine the appropriate color for the corresponding LEDs. If a limit
+ * switch is triggered, the associated LED is set to red; otherwise, it is set
+ * to green. After determining the colors, the function updates the state of
+ * all LEDs accordingly.
+ *
+ * LED States:
+ * - LED_UP: Red if `limitSwitchUp` is triggered, Green otherwise.
+ * - LED_DOWN: Red if `limitSwitchDown` is triggered, Green otherwise.
+ *
+ * The function iterates through all LEDs in the `ledColor` array and updates
+ * their states using the `updateLedState` function.
+ */
 void initLedStates()
 {
-if (limitSwitchUp.read()) // Limit switch up triggered
+  if (limitSwitchUp.read()) // Limit switch up triggered
   {
     ledColor[LED_UP] = LED_COLOR_RED; // Set up limit LED to red
   }
