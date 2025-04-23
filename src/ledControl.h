@@ -22,8 +22,10 @@ String ledColor[2] = {
 //! Update LED state on all connected clients
 void updateLedState(int ledIndex, const String &color)
 {
-  ledColor[ledIndex] = color;                                     // Update the color in the array
-  notifyClients("led~" + String(ledIndex) + "~" + String(color)); // Prefix with "led~" for LED messages
+  ledColor[ledIndex] = color;                                       // Update the color in the array
+  String message = "led~" + String(ledIndex) + "~" + String(color); // Create the message
+  DEBUG_PRINTF("%s", message.c_str());                                    // Debug print
+  notifyClients(message);
 } // updateLedState()
 
 //! Initialize all LED states for newly connected clients

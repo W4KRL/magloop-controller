@@ -45,6 +45,7 @@ void updateButtonState(int btnIndx)
   ButtonState &button = buttonStates[btnIndx];     // Reference to the button state
   String message = "btn~" + String(btnIndx) + "~"; // Prefix with "btn~" for button messages
   message += button.depressed ? "true~" + button.color : "false~" + String(BTN_UNPRESSED_COLOR);
+  DEBUG_PRINTF("%s", message.c_str()); 
   notifyClients(message);
 } // updateButtonState()
 
