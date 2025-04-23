@@ -62,6 +62,20 @@ void toggleLED_BUILTIN()
     digitalWrite(LED_BUILTIN, ledBuiltIn); // Apply the new state
 }
 
+/**
+ * @brief Connects to a Wi-Fi network using predefined SSID and password.
+ *
+ * This function attempts to establish a connection to a Wi-Fi network
+ * using the credentials defined by WIFI_SSID and WIFI_PASSWORD. While
+ * the connection is being established, the built-in LED toggles every
+ * 250 milliseconds, and a dot ('.') is printed to the Serial monitor
+ * to indicate progress. Once connected, the built-in LED is turned on,
+ * and the assigned IP address is printed to the Serial monitor.
+ *
+ * @note Ensure that WIFI_SSID and WIFI_PASSWORD are defined before
+ *       calling this function. The Serial monitor should also be
+ *       initialized using Serial.begin() for output to be visible.
+ */
 void wifiConnect()
 {
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -76,6 +90,25 @@ void wifiConnect()
 } // wifiConnect()
 
 //! Connect to WiFi
+/**
+ * @brief Initializes the WiFi connection and configures the onboard LED.
+ *
+ * This function sets up the WiFi in station mode, disables persistent storage,
+ * enables auto-reconnection, and disables WiFi sleep mode. It also configures
+ * a static IP address and attempts to connect to the WiFi network using the
+ * provided SSID and password. Additionally, it configures the onboard LED pin
+ * and ensures it starts in the off state.
+ *
+ * @note Ensure that the following variables are defined and initialized before
+ *       calling this function:
+ *       - `WIFI_SSID`: The SSID of the WiFi network to connect to.
+ *       - `localIP`: The static IP address to assign to the device.
+ *       - `gateway`: The gateway address for the network.
+ *       - `subnet`: The subnet mask for the network.
+ *
+ * @warning If the static IP configuration fails, the function will terminate
+ *          without attempting to connect to the WiFi network.
+ */
 void wifiBegin()
 {
     // Configure onboard LED pin
@@ -94,12 +127,6 @@ void wifiBegin()
         return;
     }
     wifiConnect(); // Connect to WiFi
-    // Serial.println("WiFi connected");
-    // Serial.print("IP address: ");
-    // Serial.println(WiFi.localIP());
-    // Serial.print("Signal strength (dBm): ");
-    // Serial.println(WiFi.RSSI());
-    // Serial.println("WiFi connection established.");
 } // wifiBegin()
 
 #endif
