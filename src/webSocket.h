@@ -12,8 +12,8 @@
 #include <Arduino.h>           // PlatformIO requires this for ESP32
 #include <LittleFS.h>          // for index.html, styles.css, and script.js
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
-#include "debug.h"           // for DEBUG_PRINT, DEBUG_PRINTLN
-#include "scpiControl.h"      // for processSCPIcommand()
+#include "debug_magloop.h"     // for DEBUG_PRINT, DEBUG_PRINTLN
+#include "scpiControl.h"       // for processSCPIcommand()
 
 // Function prototypes
 void initLedStates();                                      // ledControl.h
@@ -72,8 +72,6 @@ void notifyClients(const String &message)
 {
   if (ws.count() > 0) // Check if there are connected clients
   {
-    // debug here kills the message
-    // DEBUG_PRINTF("%s: %s", "WS msg sent", message.c_str());
     ws.textAll(message);
   }
 } // notifyClients()
