@@ -45,10 +45,11 @@
 #include "credentials.h"         // for SCPI identification
 #include "debug.h"               // DEBUG_PRINTF()
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
+#include <StreamString.h>        // for StreamString class in processSCPIcommand()
 #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
 #include <Wire.h>                // for I2C communication
-#include "Adafruit_HTU21DF.h"    // for HTU21D temperature and humidity sensor
+#include <SHT2x.h>               // for HTU21D temperature and humidity sensor
 ;                                // Instantiations
 SCPI_Parser scpi;                //   SCPI parser
 Preferences preferences;         //   Preferences storage
@@ -64,7 +65,7 @@ extern Bounce limitSwitchDown;
 void notifyClients(const String &message); // webSocket.h prototype
 
 //! Instantiate temperature and humidity sensor object
-Adafruit_HTU21DF envSensor = Adafruit_HTU21DF();
+SHT2x envSensor; // HTU21D temperature and humidity sensor
 
 String processSCPIcommand(String scpiCommand)
 {
@@ -75,7 +76,7 @@ String processSCPIcommand(String scpiCommand)
 
   char scpiCommandBuf[scpiCommand.length() + 1];                   // Create a buffer for the command
   scpiCommand.toCharArray(scpiCommandBuf, sizeof(scpiCommandBuf)); // Copy to buffer
-  StreamString(responseStream);                                    // Create a string to capture the response
+  StreamString responseStream;                                     // Create a string to capture the response
   String scpiResponse;                                             // Initialize response string
   scpi.Execute(scpiCommandBuf, responseStream);                    // Execute SCPI command
   scpiResponse = "scp~" + responseStream;                          // format for JavaScript client
@@ -119,10 +120,11 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 
 void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
-  // get the temperature and humidity
-  float tempC = envSensor.readTemperature();
+  // get the temperature and humidity from the HTU21D sensor
+  envSensor.read(); // read the sensor data
+  float tempC = envSensor.getTemperature(); // HTU21D temperature
   float tempF = 1.8 * tempC + 32;
-  float humidity = envSensor.readHumidity();
+  float humidity = envSensor.getHumidity(); // HTU21D humidity
   interface.printf("Temperature: %.1f °C (%.1f °F)\n", tempC, tempF);
   interface.printf("Humidity: %.1f%%\n", humidity);
 } // getEnvironment()
@@ -234,7 +236,7 @@ void scpiBegin()
 {
   preferences.begin("mag-loop", false); // false = open for read/write
   restorePreferences();
-  
+
   // Configure I2C pins
   pinMode(SDA, INPUT);  // Set SDA pin to input with module pull-up resistor
   pinMode(SCL, INPUT);  // Set SCL pin to input with module pull-up resistor
