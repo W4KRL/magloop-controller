@@ -47,7 +47,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bounce2.h"        // for button control
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials
-#include "debug.h"          // for debug print to Serial Monitor
+#include "debug_magloop.h"  // for debug print to Serial Monitor
 #include "h_bridge.h"       // for motor control
 #include "ledControl.h"     // for LED control by web sockets
 #include "scpiControl.h"    // for SCPI commands
@@ -61,7 +61,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     Preferences.h {scpiControl.h} builtin to Arduino compiler
     littleFS.h {webSocket.h} builtin to Arduino compiler
     wifi.h {wifiConnection.h} builtin to Arduino compiler
-    Wire.h {actions.h} builtin to Arduino compiler 
+    Wire.h {actions.h} builtin to Arduino compiler
     SHT2x.h {actions.h} HTU21 temperature and humidity sensor library
 */
 

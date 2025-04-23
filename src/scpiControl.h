@@ -43,7 +43,7 @@
 
 #include <Arduino.h>             // Required for platformIO
 #include "credentials.h"         // for SCPI identification
-#include "debug.h"               // DEBUG_PRINTF()
+#include "debug_magloop.h"       // DEBUG_PRINTF()
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include <StreamString.h>        // for StreamString class in processSCPIcommand()
 #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
@@ -121,7 +121,7 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // get the temperature and humidity from the HTU21D sensor
-  envSensor.read(); // read the sensor data
+  envSensor.read();                         // read the sensor data
   float tempC = envSensor.getTemperature(); // HTU21D temperature
   float tempF = 1.8 * tempC + 32;
   float humidity = envSensor.getHumidity(); // HTU21D humidity
