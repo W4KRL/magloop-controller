@@ -1,5 +1,5 @@
 //! debug_magloop.h
-// 2024-04-23 renamed from debug.h
+// 2024-04-23 renamed from debug.h, added webSocket message for notifyClients()
 
 //! !!!!! DO NOT AUTOFORMAT !!!!!
 /* 
@@ -13,15 +13,15 @@
 #define DEBUG_MAGLOOP_H
 
 #ifdef DEBUG_MAGLOOP
-  #define DEBUG_PRINTF(fmt, ...) do { \
+#define DEBUG_PRINTF(fmt, ...) do { \
     char buffer[128]; /* Adjust buffer size as needed */ \
     snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); /* Format the message */ \
-    String message = String("-> ") + String(buffer); \
-    Serial.printf("%s\n", message.c_str()); /* Output to Serial Monitor */ \
+    String message = String("dbg~") + String(buffer); /* Prefix with 'dbg~' */ \
+    Serial.println(message); /* Output to Serial Monitor */ \
     notifyClients(message); /* Send to WebSocket clients */ \
-  } while (0)
+} while (0)
 #else
-  #define DEBUG_PRINTF(...) /* No-op: Debugging disabled */
+#define DEBUG_PRINTF(...) /* No-op: Debugging disabled */
 #endif // DEBUG_MAGLOOP
 
 //! Legacy Serial Monitor debug macro
