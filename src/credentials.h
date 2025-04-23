@@ -18,15 +18,15 @@ IPAddress subnet(255, 255, 255, 0);
 #define MAKER "W4KRL"
 #define MODEL "Mag Loop Controller"
 #define SERIAL_NUMBER "S/N: 001"
-#define VERSION "DevKit 2025-04-11"
+#define VERSION "DevKit 2025-04-23"
 
 //! Web Server File Dates
-#define FW_DATE "2025-04-11"
+#define FW_DATE "2025-04-23"
 #define HTML_DATE "2025-04-03"
 #define SCRIPT_DATE "2025-04-03"
 #define STYLES_DATE "2025-03-25"
 
-//! GPIO Pin definitions
+//! GPIO Pin definitions for ESP32 DOIT DevKit V1
 #define HB_IN1 23	  // PWM IN1 logic
 #define HB_IN2 22	  // PWM IN2 logic
 #define LIMIT_UP 18	  // upper limit switch interrupt
@@ -34,8 +34,8 @@ IPAddress subnet(255, 255, 255, 0);
 #define SWR_RFL 35	  // SWR reflected ADC input
 #define SWR_FWD 34	  // SWR forward ADC input
 #define VM 32		  // VM voltage monitor ADC input
-#define SDA 21		  // I2C SDA pin - use 21
-#define SCL 4		  // I2C SCL pin - use 4
+#define SDA 21		  // I2C SDA pin
+#define SCL 4		  // I2C SCL pin
 
 //! Web Button and LED colors
 // used in ledControl.h & actions.h
