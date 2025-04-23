@@ -19,20 +19,23 @@ Bounce limitSwitchDown = Bounce(); // Create a Bounce object for the DOWN limit 
 //! Global variables
 static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
 
-//! Call in setup() to initialize the actions
+//! Call in setup()
 /**
- * @brief Initializes the actions module by configuring the onboard LED and
- *        setting up the limit switches with debouncing.
- *
- * This function performs the following tasks:
- * - Configures the onboard LED pin (LED_BUILTIN) as an output and sets it to LOW (off).
- * - Configures the limit switch pins (LIMIT_UP and LIMIT_DOWN) as inputs with external pullups.
- * - Attaches the limit switches to debouncers and sets the debounce interval.
- *
+ * @brief Initializes the limit switch pins and sets up debouncing.
+ * 
+ * This function configures the pins for the limit switches as inputs with 
+ * external pull-ups. It also attaches the limit switches to debouncers and 
+ * sets the debounce interval to the specified DEBOUNCE_TIME.
+ * 
+ * Pins used:
+ * - LIMIT_UP: Pin for the upper limit switch.
+ * - LIMIT_DOWN: Pin for the lower limit switch.
+ * 
  * Dependencies:
- * - The LED_BUILTIN macro must be defined for the onboard LED pin.
- * - The LIMIT_UP and LIMIT_DOWN macros must be defined for the limit switch pins.
- * - The DEBOUNCE_TIME macro must be defined for the debounce interval.
+ * - The `limitSwitchUp` and `limitSwitchDown` objects must support the 
+ *   `attach()` and `interval()` methods for debouncing.
+ * - The constants `LIMIT_UP`, `LIMIT_DOWN`, and `DEBOUNCE_TIME` must be 
+ *   defined prior to calling this function.
  */
 void actionsBegin()
 {
@@ -46,17 +49,21 @@ void actionsBegin()
   limitSwitchDown.interval(DEBOUNCE_TIME); // Set debounce time
 } // actionsBegin()
 
+
 /**
  * @brief Handles the scanning action for a motor based on button state and limit switch input.
  *
- * This function manages the motor's movement by checking the state of a button and a limit switch.
- * If the button is pressed and the limit switch is triggered, the motor is activated in the specified
- * direction and speed. If the button is released, the motor is stopped.
+ * This function manages the motor's movement in a specified direction and speed
+ * when a button is pressed, and stops the motor when the button is released.
+ * It also ensures that the motor does not move if the limit switch is triggered.
  *
- * @param btnIndx Index of the button being checked.
- * @param moveDirection Direction of motor movement (e.g., forward or reverse).
- * @param speed Speed at which the motor should move.
- * @param limitSwitch Reference to a Bounce object representing the limit switch state.
+ * @param btnIndx The index of the button being monitored.
+ * @param moveDirection The direction in which the motor should move.
+ *                       Use predefined constants for direction (e.g., FORWARD, REVERSE).
+ * @param speed The speed at which the motor should move.
+ *              Use predefined constants or values for speed.
+ * @param limitSwitch A reference to a Bounce object representing the limit switch.
+ *                    The limit switch prevents motor movement when triggered.
  */
 void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
 {
