@@ -1,5 +1,5 @@
 <!-- debug.html -->
-<!-- 2025-04-13 -->
+<!-- 2025-04-23 -->
 
 <!DOCTYPE html>
 <html>
@@ -9,29 +9,46 @@
     <script>
       let socket = new WebSocket("ws://" + location.hostname + "/ws");
       socket.onmessage = function (event) {
-        let outputDiv = document.getElementById("output");
-        // Replace newline characters with <br> for proper formatting in the div
-        let formattedMessage = event.data.replace(/\n/g, "<br>");
-        outputDiv.innerHTML += formattedMessage + "<br>";
-        // Scroll to the bottom of the div
-        outputDiv.scrollTop = outputDiv.scrollHeight;
+        const message = event.data;
+
+        // Check if the message is a debug message
+        if (message.startsWith("dbg~")) {
+          // Process only debug messages
+          const debugMessage = message.substring(4); // Remove "dbg~" prefix
+          let debugMessagesArea = document.getElementById("debugMessages");
+
+          if (debugMessagesArea) {
+            // Append the debug message to the debugMessages area
+            const messageElement = document.createElement("div");
+            messageElement.textContent = debugMessage;
+            debugMessagesArea.appendChild(messageElement);
+
+            // Scroll to the bottom of the debugMessages area
+            debugMessagesArea.scrollTop = debugMessagesArea.scrollHeight;
+          } else {
+            console.warn("Debug message area not found in this page!");
+          }
+        } else {
+          // Ignore non-debug messages in debug.html
+          console.log("Non-debug message ignored:", message);
+        }
       };
 
       // Scroll to the top of the output area
       function scrollToTop() {
-        let outputDiv = document.getElementById("output");
+        let outputDiv = document.getElementById("debugMessages");
         outputDiv.scrollTop = 0;
       }
 
       // Scroll to the bottom of the output area
       function scrollToBottom() {
-        let outputDiv = document.getElementById("output");
+        let outputDiv = document.getElementById("debugMessages");
         outputDiv.scrollTop = outputDiv.scrollHeight;
       }
 
       // Clear the output area
       function clearOutput() {
-        let outputDiv = document.getElementById("output");
+        let outputDiv = document.getElementById("debugMessages");
         outputDiv.innerHTML = "";
       }
     </script>
@@ -43,7 +60,7 @@
         flex-direction: column;
         height: 100vh;
       }
-      #output {
+      #debugMessages {
         border: 1px solid black;
         padding: 10px;
         width: 100%; /* Full width of the screen */
@@ -85,7 +102,7 @@
         <button onclick="clearOutput()">Clear</button>
       </div>
     </h2>
-    <div id="output"></div>
+    <div id="debugMessages"></div>
   </body>
 </html>
 <!-- End of debug.html -->

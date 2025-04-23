@@ -43,6 +43,9 @@ function processWebSocketMessage(message) {
       case "btn":
         updateButtonState(parts[1], parts[2] === "true", parts[3]); // id, depressed, color
         break;
+      case "dbg": // Handle debug messages
+        forwardDebugMessage(parts[1]); // Send to debug.html or a debug-specific area
+        break;
       case "led":
         updateLedState(parts[1], parts[2]); // id, color
         break;
@@ -137,6 +140,20 @@ function releaseButton(buttonId) {
   const newID = buttonId.replace("btn", "btn~");
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(newID + "~released");
+  }
+}
+
+function forwardDebugMessage(debugMessage) {
+  // Locate the debug message area in the HTML
+  const debugMessagesArea = document.getElementById("debugMessages");
+
+  if (debugMessagesArea) {
+    // Append the debug message to the area
+    const messageElement = document.createElement("div");
+    messageElement.textContent = debugMessage;
+    debugMessagesArea.appendChild(messageElement);
+  } else {
+    console.warn("Debug message area not found in this page!");
   }
 }
 
