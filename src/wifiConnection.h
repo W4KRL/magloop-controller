@@ -33,6 +33,10 @@ else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
     Serial.println("OTA Ready");
 }
 
+
+//! Global variables
+static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
+
 /**
  * @brief Sets the state of the built-in LED.
  *

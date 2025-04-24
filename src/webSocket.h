@@ -57,6 +57,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     {
       String scpiCommand = message.substring(4);             // Remove "scp~" prefix
       String scpiResponse = processSCPIcommand(scpiCommand); // Process the command and get the response
+      DEBUG_PRINTF("%s", scpiResponse.c_str());              // Print the response to Serial Monitor
       notifyClients(scpiResponse);                           // broadcast the response to all clients
     }
     else

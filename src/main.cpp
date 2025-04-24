@@ -56,13 +56,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 //! Additional libraries called in local headers:
 /*
-    ESPAsyncWebServer.h {webSocket.h} https://github.com/ESP32Async/AsyncTCP
+    ArduinoOTA.h {wifiConnection.h}       builtin to Arduino compiler
+    ESPAsyncWebServer.h {webSocket.h}     https://github.com/ESP32Async/AsyncTCP
+    littleFS.h {webSocket.h}              builtin to Arduino compiler
+    Preferences.h {scpiControl.h}         builtin to Arduino compiler
+    SHT2x.h {scpiControl.h}               https://github.com/RobTillaart/SHT2x
     Vrekrer_scpi_parser.h {scpiControl.h} https://github.com/Vrekrer/Vrekrer_scpi_parser
-    Preferences.h {scpiControl.h} builtin to Arduino compiler
-    littleFS.h {webSocket.h} builtin to Arduino compiler
-    wifi.h {wifiConnection.h} builtin to Arduino compiler
-    Wire.h {actions.h} builtin to Arduino compiler
-    SHT2x.h {actions.h} HTU21 temperature and humidity sensor library
+    wifi.h {wifiConnection.h}             builtin to Arduino compiler
+    Wire.h {actions.h}                    builtin to Arduino compiler
 */
 
 //! *************** Setup function ******************

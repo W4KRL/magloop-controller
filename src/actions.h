@@ -16,9 +16,6 @@ Bounce limitSwitchUp = Bounce();   // Create a Bounce object for the UP limit sw
 Bounce limitSwitchDown = Bounce(); // Create a Bounce object for the DOWN limit switch
 #define DEBOUNCE_TIME 50           // Debounce time in milliseconds
 
-//! Global variables
-static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
-
 //! Call in setup()
 /**
  * @brief Initializes the limit switch pins and sets up debouncing.
@@ -39,11 +36,11 @@ static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
  */
 void actionsBegin()
 {
-  ;                                        // Assign limit switch up pin, attach debouncing
+  // Assign limit switch up pin, attach debouncing
   pinMode(LIMIT_UP, INPUT);                // Use INPUT with external pullups
   limitSwitchUp.attach(LIMIT_UP);          // Attach limit switch to debouncer
   limitSwitchUp.interval(DEBOUNCE_TIME);   // Set debounce time
-  ;                                        // Assign limit switch down pin, attach debouncing
+  // Assign limit switch down pin, attach debouncing
   pinMode(LIMIT_DOWN, INPUT);              // Use INPUT with external pullups
   limitSwitchDown.attach(LIMIT_DOWN);      // Attach limit switch to debouncer
   limitSwitchDown.interval(DEBOUNCE_TIME); // Set debounce time
@@ -59,7 +56,8 @@ void actionsBegin()
  *
  * @param btnIndx The index of the button being monitored.
  * @param moveDirection The direction in which the motor should move.
- *                       Use predefined constants for direction (e.g., FORWARD, REVERSE).
+ *                       Use predefined constants for direction (e.g., MOVE_UP,
+ *                       MOVE_DOWN, NO_MOTION).
  * @param speed The speed at which the motor should move.
  *              Use predefined constants or values for speed.
  * @param limitSwitch A reference to a Bounce object representing the limit switch.
@@ -79,6 +77,11 @@ void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
     {
       setMotorSpeed(speed, moveDirection);
       buttonStates[btnIndx].depressed = true;
+      updateButtonState(btnIndx);
+    }
+    else
+    {
+      buttonStates[btnIndx].color = BTN_DISABLED_COLOR;
       updateButtonState(btnIndx);
     }
   }

@@ -1,5 +1,5 @@
 //! credentials.h
-//! 2025-04-16 revised button and led colors and names
+//! 2025-04-24 LED_BUILTIN
 
 #ifndef CREDENTIALS_H
 #define CREDENTIALS_H
@@ -36,6 +36,9 @@ IPAddress subnet(255, 255, 255, 0);
 #define VM 32		  // VM voltage monitor ADC input
 #define SDA 21		  // I2C SDA pin
 #define SCL 4		  // I2C SCL pin
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 2 // Built-in LED pin
+#endif
 
 //! Web Button and LED colors
 // used in ledControl.h & actions.h
