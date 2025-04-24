@@ -1,5 +1,5 @@
 //! wifiConnection.h
-//! 2025-04-11 change name of otaBegin()
+//! 2025-04-23 add comments
 
 #ifndef WIFICONNECTION_H
 #define WIFICONNECTION_H
