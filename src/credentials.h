@@ -46,8 +46,8 @@ IPAddress subnet(255, 255, 255, 0);
 #define LED_COLOR_RED "Red"
 // used in buttonControl.h
 #define BTN_SCAN_UP_COLOR "RoyalBlue"
-#define BTN_SCAN_DOWN_COLOR "LimeGreen"
-#define BTN_JOG_UP_COLOR "DodgerBlue"
+#define BTN_SCAN_DOWN_COLOR "Lime"
+#define BTN_JOG_UP_COLOR "RoyalBlue"
 #define BTN_JOG_DOWN_COLOR "Lime"
 #define BTN_UNPRESSED_COLOR "DimGray"
 #define BTN_DISABLED_COLOR "Cloud"
