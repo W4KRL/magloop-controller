@@ -6,36 +6,48 @@
 /*
   SCPI Commands:
   *CLS
-    Clears the preference settings
+    Clears the user preference settings
 
   *IDN?
-    Gets the instrument identification
+    Returns the instrument identification
 
   *RST
-    Restarts processor, settings unaltered
+    Resets the instrument to default state, retaining user settings.
 
   Help
   Help?
-    Get the SCPI command list
+    Returns the list of available SCPI commands.
 
-  ENVironment?
-    Get the enclosure temperature and humidity
+  CONtrol:All?
+    Returns all motor control mode settings.
 
-  Dump?
-    Gets the system state
+  CONtrol:Duration <value>
+    Sets the jog mode duration in milliseconds.
 
-  Highspeed <value>
-    Sets the motor high speed scan speed in percentage
+  CONtrol:Jogspeed <value>
+    Sets jog speed (low range) as a percentage (0–100).
 
-  Lowspeed <value>
-    Sets the motor slow speed jog in percentage
+  CONtrol:Pressduration <value>
+    Sets th jog mode button long press duration in milliseconds.
 
-  Press <value>
-    Sets the motor jog time in milliseconds
+  CONtrol:Repeatinterval <value>
+    Sets the jog mode button repeat interval in milliseconds.
 
-  Repeat <value> ! NOT IN USE !
-    Sets the jog button long press repeat interval in milliseconds
+  CONtrol:Scanspeed <value>
+    Sets scan speed (high range) as a percentage (0–100).
 
+  SYStem:Dump?
+    Returns the system state.
+
+  SYStem:Environment?
+    Returns the enclosure temperature and humidity.
+
+  SYStem:Voltage?
+    Returns the system supply voltage.
+
+  SYStem:Webserver?
+    Returns web server state:
+    [IP address, port number, signal strength (RSSI), connected clients]
 */
 
 #ifndef SCPICONTROL_H
@@ -50,12 +62,16 @@
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
 #include <Wire.h>                // for I2C communication
 #include <SHT2x.h>               // for HTU21D temperature and humidity sensor
+#include <WiFi.h>                // for WiFi functions like localIP() and RSSI()
+#include "webSocket.h"
+
+extern AsyncWebSocket ws;
 ;                                // Instantiations
 SCPI_Parser scpi;                //   SCPI parser
 Preferences preferences;         //   Preferences storage
 ;                                // Declare global variables for Preferences:
-int speedHigh;                   //   motor high speed % for scan
-int speedLow;                    //   motor low speed % for fine tune
+int speedScan;                   //   motor high speed % for scan
+int speedJog;                    //   motor low speed % for fine tune
 int pressDuration;               //   long button press duration ms
 int jogDuration;                 //   motor jog duration ms
 int repeatInterval;              //   jog repeat interval ms
@@ -85,15 +101,15 @@ String processSCPIcommand(String scpiCommand)
 
 void restorePreferences()
 {
-  speedHigh = preferences.getInt("speedHigh", 100);           // motor high speed % for scan
-  speedLow = preferences.getInt("speedLow", 50);              // motor low speed % for fine tune
+  speedScan = preferences.getInt("speedHigh", 100);           // motor high speed % for scan
+  speedJog = preferences.getInt("speedLow", 50);              // motor low speed % for fine tune
   pressDuration = preferences.getInt("pressDuration", 300);   // long press duration ms
   repeatInterval = preferences.getInt("repeatInterval", 200); // repeat interval ms
   jogDuration = preferences.getInt("jogDuration", 100);       // jog duration ms
 } // restorePreferences()
 
 //! SCPI Command Functions
-void deviceClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void instrumentClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // reset to default parameters, processor not restarted
   preferences.clear();
@@ -101,7 +117,7 @@ void deviceClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print("Parameters reset");
 } // deviceClearStorage()
 
-void deviceIdentity(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void instrumentIdentify(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // required by SCPI spec for device identification
   int bufferLength = 100;
@@ -110,7 +126,7 @@ void deviceIdentity(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print(buffer);
 } // deviceIdentity()
 
-void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void instrumentReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // processor restarted, system parameters retained
   interface.print("Restarting.");
@@ -118,15 +134,15 @@ void deviceReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
   ESP.restart();
 } // deviceReset()
 
-void getEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void getSystemEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // get the temperature and humidity from the HTU21D sensor
   envSensor.read();                         // read the sensor data
   float tempC = envSensor.getTemperature(); // HTU21D temperature
   float tempF = 1.8 * tempC + 32;
   float humidity = envSensor.getHumidity(); // HTU21D humidity
-  interface.printf("Temperature: %.1f °C (%.1f °F)\n", tempC, tempF);
-  interface.printf("Humidity: %.1f%%\n", humidity);
+  interface.printf("Temperature: %.1f°C (%d°F)\n", tempC, (int)round(tempF));
+  interface.printf("Humidity: %d%%\n", (int)round(humidity));
 } // getEnvironment()
 
 void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -134,11 +150,11 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print("*IDN? device identity\n");
   interface.print("*CLS clears settings\n");
   interface.print("*RST reset MUC, settings unaltered\n");
-  interface.print("ENVironment? get encl. temp & humidity\n");
-  interface.print("DUMp? or DUMp get settings\n");
-  interface.print("HIGHspeed set scan speed <80..100>%\n");
-  interface.print("JOGduration <50..200>ms\n");
-  interface.print("LOWspeed set jog speed <50..80>%\n");
+  interface.print("SYS:Environment? get encl. temp & humidity\n");
+  interface.print("SYS:Dump? get settings\n");
+  interface.print("SYS:Scan <80..100> set scan speed in %\n");
+  interface.print("SYS:Duration <50..200> oj duration in ms\n");
+  interface.print("SYS:Jogspeed <50..80> set jog speed in %\n");
   interface.print("PRESS button long press <200..500>ms\n");
   interface.print("REPeat button <100..300>ms\n");
   interface.print("Help? or Help get this help\n");
@@ -146,7 +162,7 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
 } // getHelp()
 
 // system commands
-void getDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void getSystemDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("System Dump\n");
   char colFormat[20] = "%-15s %s\n";
@@ -154,21 +170,34 @@ void getDump(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.printf(colFormat, "index.html", HTML_DATE);
   interface.printf(colFormat, "script.js", SCRIPT_DATE);
   interface.printf(colFormat, "styles.css", STYLES_DATE);
-  interface.printf("%-15s %i%%\n", "High speed", speedHigh);
-  interface.printf("%-15s %i%%\n", "Low speed", speedLow);
+  interface.printf("%-15s %i%%\n", "Scan speed", speedScan);
+  interface.printf("%-15s %i%%\n", "Jog speed", speedJog);
   interface.printf("%-15s %i ms\n", "Jog duration", jogDuration);
   interface.printf("%-15s %i ms\n", "Press duration", pressDuration);
   interface.printf("%-15s %i ms\n", "Repeat interval", repeatInterval);
   interface.print("---End Dump---");
 } // getDump()
 
-void setHighspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void getSystemVoltage(SCPI_C commands, SCPI_P parameters, Stream &interface)
+{
+  // get the supply voltage and RSSI
+  interface.print("Supply voltage: ");
+  // interface.printf("%i mV\n", ESP.getVcc());
+} // getMeasure()
+
+void getSystemWebserver(SCPI_C commands, SCPI_P parameters, Stream &interface)
+{
+  // get the web server state
+  interface.printf("IP:%s, %i dBm, %i client\n", WiFi.localIP().toString().c_str(), WiFi.RSSI(), ws.count());
+} // getWebserver()
+
+void setControlScanSpeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
-    speedHigh = String(parameters[0]).toInt();
-    interface.printf("%s: %i%%", "High speed", speedHigh);
-    preferences.putInt("speedHigh", speedHigh);
+    speedScan = String(parameters[0]).toInt();
+    interface.printf("%s: %i%%", "High speed", speedScan);
+    preferences.putInt("speedHigh", speedScan);
   }
   else
   {
@@ -176,7 +205,7 @@ void setHighspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
   }
 } // setHighspeed()
 
-void setJog(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setControlDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -190,13 +219,13 @@ void setJog(SCPI_C commands, SCPI_P parameters, Stream &interface)
   }
 } // setJog()
 
-void setLowspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setControlJogSpeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
-    speedLow = String(parameters[0]).toInt();
-    preferences.putInt("speedLow", speedLow);
-    interface.printf("%s: %i%%", "Low speed", speedLow);
+    speedJog = String(parameters[0]).toInt();
+    preferences.putInt("speedLow", speedJog);
+    interface.printf("%s: %i%%", "Low speed", speedJog);
   }
   else
   {
@@ -204,7 +233,7 @@ void setLowspeed(SCPI_C commands, SCPI_P parameters, Stream &interface)
   }
 } // setLowspeed()
 
-void setPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setControlPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -218,7 +247,7 @@ void setPressDuration(SCPI_C commands, SCPI_P parameters, Stream &interface)
   }
 } // setPressDuration()
 
-void setRepeatInterval(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void setControlRepeatInterval(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
@@ -249,21 +278,23 @@ void scpiBegin()
   // command case is irrelevant
   // formal SCPI commands should have a command base and a subcommand
   // e.g. "HIGHspeed" or "LOWspeed"
-  scpi.RegisterCommand("*CLS", &deviceClearStorage);
-  scpi.RegisterCommand("*IDN?", &deviceIdentity);
-  scpi.RegisterCommand("*RST", &deviceReset);
-  scpi.RegisterCommand("DUMp", &getDump);
-  scpi.RegisterCommand("DUMp?", &getDump);
-  scpi.RegisterCommand("ENVironment?", &getEnvironment);
+  scpi.RegisterCommand("*CLS", &instrumentClearStorage);
+  scpi.RegisterCommand("*IDN?", &instrumentIdentify);
+  scpi.RegisterCommand("*RST", &instrumentReset);
+  scpi.RegisterCommand("DUMp", &getSystemDump);
+  scpi.RegisterCommand("DUMp?", &getSystemDump);
   scpi.RegisterCommand("Help", &getHelp);
   scpi.RegisterCommand("Help?", &getHelp);
-  scpi.RegisterCommand("HIGHspeed", &setHighspeed);   // SCAN speed
-  scpi.RegisterCommand("JOG", &setJog);               // DURation of JOG
-  scpi.RegisterCommand("LOWspeed", &setLowspeed);     // JOG speed
-  scpi.RegisterCommand("REPeat", &setRepeatInterval); // REPeat interval not implemented
-  scpi.RegisterCommand("PREss", &setPressDuration);   // long button press duration not implemented
-  scpi.RegisterCommand("RSSI?", &getEnvironment);     // for testing
-  scpi.RegisterCommand("VOLTage?", &getEnvironment);  // for testing
+  scpi.SetCommandTreeBase("CONtrol");                           // set the command tree base to CONtrol
+  scpi.RegisterCommand(":Scanspeed", &setControlScanSpeed);     // SCAN speed
+  scpi.RegisterCommand(":Duration", &setControlDuration);       // DURation of JOG
+  scpi.RegisterCommand(":Jogspeed", &setControlJogSpeed);       // JOG speed
+  scpi.RegisterCommand(":Repeat", &setControlRepeatInterval);   // REPeat interval not implemented
+  scpi.RegisterCommand(":Press", &setControlPressDuration);     // long button press duration not implemented
+  scpi.SetCommandTreeBase("SYStem");                            // set the command tree base to SYStem
+  scpi.RegisterCommand(":Environment?", &getSystemEnvironment); // set the command tree base to SYStem
+  scpi.RegisterCommand(":Voltage?", &getSystemEnvironment);     // for testing
+  scpi.RegisterCommand(":Webserver?", &getSystemWebserver);     // for testing
 } // scpiBegin()
 
 #endif // SCPI_H

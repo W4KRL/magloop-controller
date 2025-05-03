@@ -75,19 +75,19 @@ void processButtonEvent(String &buttonId, String &action)
   case BTN_SCAN_UP:
     if (!buttonStates[BTN_SCAN_DOWN].depressed)
     {
-      actionScan(BTN_SCAN_UP, MOVE_UP, speedHigh, limitSwitchUp);
+      actionScan(BTN_SCAN_UP, MOVE_UP, speedScan, limitSwitchUp);
     }
     break;
   case BTN_SCAN_DOWN:
     if (!buttonStates[BTN_SCAN_UP].depressed)
     {
-      actionScan(BTN_SCAN_DOWN, MOVE_DOWN, speedHigh, limitSwitchDown);
+      actionScan(BTN_SCAN_DOWN, MOVE_DOWN, speedScan, limitSwitchDown);
     }
     break;
   case BTN_JOG_UP:
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJog(BTN_JOG_UP, MOVE_UP, speedLow, limitSwitchUp);
+      actionJog(BTN_JOG_UP, MOVE_UP, speedJog, limitSwitchUp);
     }
     else if (action == "released")
     {
@@ -98,7 +98,7 @@ void processButtonEvent(String &buttonId, String &action)
   case BTN_JOG_DOWN:
     if (action == "pressed" && isJogActionAllowed())
     {
-      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedLow, limitSwitchDown);
+      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedJog, limitSwitchDown);
     }
     else if (action == "released")
     {
