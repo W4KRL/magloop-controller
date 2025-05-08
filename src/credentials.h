@@ -1,6 +1,5 @@
 //! credentials.h
-//! 2025-04-24 LED_BUILTIN
-
+//! 2025-05-08 update firmware version and dates, added voltage divider values
 #ifndef CREDENTIALS_H
 #define CREDENTIALS_H
 
@@ -18,12 +17,12 @@ IPAddress subnet(255, 255, 255, 0);
 #define MAKER "W4KRL"
 #define MODEL "Mag Loop Controller"
 #define SERIAL_NUMBER "S/N: 001"
-#define VERSION "DevKit 2025-04-23"
+#define VERSION "DevKit 2025-05-08"
 
 //! Web Server File Dates
-#define FW_DATE "2025-04-23"
-#define HTML_DATE "2025-04-03"
-#define SCRIPT_DATE "2025-04-03"
+#define FW_DATE "2025-05-08"
+#define HTML_DATE "2025-04-17"
+#define SCRIPT_DATE "2025-04-17"
 #define STYLES_DATE "2025-03-25"
 
 //! GPIO Pin definitions for ESP32 DOIT DevKit V1
@@ -39,6 +38,10 @@ IPAddress subnet(255, 255, 255, 0);
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Built-in LED pin
 #endif
+#define R2 47000.0   // VM voltage divider upper resistor
+#define R1 6800.0	   // VM voltage divider lower resistor
+#define VM_VOLTAGE 3.3 // VM voltage divider reference voltage
+#define ADC_MAX 4095.0 // ADC max value for 12-bit ADC
 
 //! Web Button and LED colors
 // used in ledControl.h & actions.h

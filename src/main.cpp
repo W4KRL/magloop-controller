@@ -71,12 +71,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 void setup()
 {
   Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
-  actionsBegin();       // Initialize sensors, limit switches, and actions
   wifiBegin();          // Connect to WiFi
   otaBegin();           // Initialize OTA updates
-  scpiBegin();          // Initialize SCPI parser, define commands, load Preferences
-  h_bridgeBegin();      // Initialize h-bridge for motor control
   websocketBegin();     // Initialize webSocket for bi-directional communication
+  actionsBegin();       // Initialize sensors, limit switches, and actions
+  scpiBegin();          // Initialize SCPI parser, define commands, load user Preferences
+  h_bridgeBegin();      // Initialize h-bridge for motor control
 } // setup()
 
 //! **************** Loop function ******************
