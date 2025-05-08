@@ -1,5 +1,5 @@
 //! scpiControl.h
-//! 2025-05-08 revised SCPI control functions, added error handling
+//! 2025-05-08 revised SCPI control functions, added error handling, add VM voltage divider
 
 /**
  * @file scpiControl.h
@@ -76,15 +76,15 @@
 
 #include <Arduino.h>             // Required for platformIO
 #include "credentials.h"         // for SCPI identification
-#include "debug_magloop.h"       // DEBUG_PRINTF()
+// #include "debug_magloop.h"       // DEBUG_PRINTF()
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include <StreamString.h>        // for StreamString class in processSCPIcommand()
-#include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
+// #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
 #include <Preferences.h>         // Store controller settings in flash with LittleFS
 #include <Wire.h>                // for I2C communication
 #include <SHT2x.h>               // for HTU21D temperature and humidity sensor
-#include <WiFi.h>                // for WiFi functions like localIP() and RSSI()
-#include "webSocket.h"           // for SYStem:WEBserver? command, to get web server state
+// #include <WiFi.h>                // for WiFi functions like localIP() and RSSI()
+// #include "webSocket.h"           // for SYStem:WEBserver? command, to get web server state
 
 extern AsyncWebSocket ws;                  // for debug statements
 void notifyClients(const String &message); // for debug statements
@@ -342,6 +342,11 @@ void getSystemFirmware(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getSystemTemperature(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   // get the temperature and humidity from the HTU21D sensor
+  // if (!envSensor.begin()) // Initialize the HTU21D sensor
+  // {
+  //   notifyClients("scp~Error: HTU21D sensor.");
+  //   return; // Exit if sensor initialization fails
+  // }
   envSensor.read();                         // read the sensor data
   float tempC = envSensor.getTemperature(); // HTU21D temperature
   float tempF = 1.8 * tempC + 32;
@@ -352,11 +357,22 @@ void getSystemTemperature(SCPI_C commands, SCPI_P parameters, Stream &interface)
 
 void getSystemVoltage(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
-  // get the supply voltage and RSSI
-  DEBUG_PRINTF("%s %s %s", "getSystemVoltage():", commands[0], commands[1]);
-  int val = analogRead(VM);
-  interface.printf("%-15s %i V\n", "Voltage:", val);
-  interface.flush(); // flush the output buffer
+  // Get the supply voltage from the VM pin
+  // Supply voltage is connected to resistor R2
+  // The VM pin is connected to the voltage divider with R1 to ground
+  // Compensate for non-linear ADC response
+  int adc = analogRead(VM); // read the ADC value from the VM pin
+  float voltage = 0;        // convert to voltage
+  if (adc > 3000)
+  {
+    voltage = 0.0005 * adc + 1.0874;
+  }
+  else
+  {
+    voltage = 0.0008 * adc + 0.1372;
+  }
+  voltage = voltage * (R1 + R2) / R1; // convert to supply voltage
+  interface.printf("%-15s %.1f V\n", "Voltage:", voltage);
 } // getSystemVoltage()
 
 void getSystemWebserver(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -365,7 +381,6 @@ void getSystemWebserver(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.printf("%-15s %s\n", "IP:", WiFi.localIP().toString().c_str());
   interface.printf("%-15s %i dBm\n", "RSSI:", WiFi.RSSI());
   interface.printf("%-15s %i\n", "Clients:", ws.count());
-  interface.flush(); // flush the output buffer
 } // getSystemWebserver()
 
 void getSystemList(SCPI_C commands, SCPI_P parameters, Stream &interface)
@@ -386,12 +401,13 @@ void scpiBegin()
   pinMode(SDA, INPUT);    // Set SDA pin to input with module pull-up resistor
   pinMode(SCL, INPUT);    // Set SCL pin to input with module pull-up resistor
   Wire.begin(SDA, SCL);   // Initialize I2C with specified SDA and SCL pins
+
   if (!envSensor.begin()) // Initialize the HTU21D sensor
   {
-    DEBUG_PRINTF("Error: Failed to initialize HTU21D sensor.\n");
+    notifyClients("scp~Error: HTU21D sensor.");
   }
 
-  //! SCPI Command Registration in setup()
+  //! SCPI Command Registration called in setup()
   scpi.hash_magic_number = 257; // set the hash magic number
   scpi.hash_magic_offset = 11;  // set the hash magic offset
 
@@ -419,7 +435,7 @@ void scpiBegin()
   scpi.RegisterCommand(":VOLTage?", &getSystemVoltage);         // get the system Voltage
   scpi.RegisterCommand(":WEBserver?", &getSystemWebserver);     // get the web server status
 
-  scpi.PrintDebugInfo(Serial); // print the debug info to the serial monitor
+  // scpi.PrintDebugInfo(Serial); // print the debug info to the serial monitor
 } // scpiBegin()
 
 #endif // SCPI_H
