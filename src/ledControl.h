@@ -1,6 +1,6 @@
 //! ledControl.h
 //! LED control functions for webSocket clients
-//! 2025-04-23 revised initializeStates() to read limit switches
+//! 2025-05-08 moved external functions to ledControl.h
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
@@ -9,6 +9,9 @@
 #include "credentials.h" // for LED colors
 #include "webSocket.h"   // for notifyClients()
 #include "actions.h"     // for limitSwitchUp, limitSwitchDown
+
+extern Bounce limitSwitchUp;
+extern Bounce limitSwitchDown;
 
 //! LED indices
 #define LED_UP 0
