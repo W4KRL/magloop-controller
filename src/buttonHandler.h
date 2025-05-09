@@ -1,19 +1,19 @@
 //! buttonHandler.h
-//! 2025-04-16 combined up/down functions
+//! 2025-05-09 change to DigitalSignalDetector.h from Bounce2.h
 
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
 
-#include <Arduino.h>    // for Arduino functions
-#include "actions.h"    // for actionScan(), actionJog()
-#include "ledControl.h" // for LED colors
-#include "h_bridge.h"   // for setMotorSpeed()
+#include <Arduino.h>               // for Arduino functions
+#include "actions.h"               // for actionScan(), actionJog()
+#include "ledControl.h"            // for LED colors
+#include "h_bridge.h"              // for setMotorSpeed()
+#include "DigitalSignalDetector.h" // for limit switch detection
 
-// Declare extern variables and function prototypes for actions.h
-extern Bounce limitSwitchUp;
-extern Bounce limitSwitchDown;
-void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch);
-void actionJog(int btnIdx, int moveDirection, int speed, Bounce &limitSwitch);
+extern DigitalSignalDetector limitSwitchUp;   // Reference the UP limit switch
+extern DigitalSignalDetector limitSwitchDown; // Reference the DOWN limit switch
+void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch);
+void actionJog(int btnIdx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch);
 
 //! Structure to hold button state information
 struct ButtonState
@@ -45,7 +45,7 @@ void updateButtonState(int btnIndx)
   ButtonState &button = buttonStates[btnIndx];     // Reference to the button state
   String message = "btn~" + String(btnIndx) + "~"; // Prefix with "btn~" for button messages
   message += button.depressed ? "true~" + button.color : "false~" + String(BTN_UNPRESSED_COLOR);
-  DEBUG_PRINTF("%s", message.c_str()); 
+  DEBUG_PRINTF("%s", message.c_str());
   notifyClients(message);
 } // updateButtonState()
 

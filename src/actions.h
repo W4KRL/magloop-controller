@@ -1,51 +1,18 @@
 //! actions.h
-//! 2024-04-16 combined up/down functions
+//! 2024-05-09 change to DigitalSignalDetector.h from Bounce2.h
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include <Arduino.h>       // Required for basic Arduino functions
+#include <Arduino.h>               // Required for basic Arduino functions
+#include "buttonHandler.h"         // for webSocket buttonStates[] and updateButtonState()
+#include "h_bridge.h"              // for setMotorSpeed()
+#include "credentials.h"           // for LED colors
+#include "DigitalSignalDetector.h" // for limit switch detection
 
-#include <Bounce2.h>       // for debouncing limit switches
-#include "buttonHandler.h" // for webSocket buttonStates[] and updateButtonState()
-#include "h_bridge.h"      // for setMotorSpeed()
-#include "credentials.h"   // for LED colors
-
-//! Instantiate Bounce objects for limit switches
-Bounce limitSwitchUp = Bounce();   // Create a Bounce object for the UP limit switch
-Bounce limitSwitchDown = Bounce(); // Create a Bounce object for the DOWN limit switch
-#define DEBOUNCE_TIME 50           // Debounce time in milliseconds
-
-//! Call in setup()
-/**
- * @brief Initializes the limit switch pins and sets up debouncing.
- * 
- * This function configures the pins for the limit switches as inputs with 
- * external pull-ups. It also attaches the limit switches to debouncers and 
- * sets the debounce interval to the specified DEBOUNCE_TIME.
- * 
- * Pins used:
- * - LIMIT_UP: Pin for the upper limit switch.
- * - LIMIT_DOWN: Pin for the lower limit switch.
- * 
- * Dependencies:
- * - The `limitSwitchUp` and `limitSwitchDown` objects must support the 
- *   `attach()` and `interval()` methods for debouncing.
- * - The constants `LIMIT_UP`, `LIMIT_DOWN`, and `DEBOUNCE_TIME` must be 
- *   defined prior to calling this function.
- */
-void actionsBegin()
-{
-  // Assign limit switch up pin, attach debouncing
-  pinMode(LIMIT_UP, INPUT);                // Use INPUT with external pullups
-  limitSwitchUp.attach(LIMIT_UP);          // Attach limit switch to debouncer
-  limitSwitchUp.interval(DEBOUNCE_TIME);   // Set debounce time
-  // Assign limit switch down pin, attach debouncing
-  pinMode(LIMIT_DOWN, INPUT);              // Use INPUT with external pullups
-  limitSwitchDown.attach(LIMIT_DOWN);      // Attach limit switch to debouncer
-  limitSwitchDown.interval(DEBOUNCE_TIME); // Set debounce time
-} // actionsBegin()
-
+//! Instantiate DigitalSignalDetector objects for limit switches
+DigitalSignalDetector limitSwitchUp(LIMIT_UP_PIN);
+DigitalSignalDetector limitSwitchDown(LIMIT_DOWN_PIN);
 
 /**
  * @brief Handles the scanning action for a motor based on button state and limit switch input.
@@ -63,7 +30,8 @@ void actionsBegin()
  * @param limitSwitch A reference to a Bounce object representing the limit switch.
  *                    The limit switch prevents motor movement when triggered.
  */
-void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
+// void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
+void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch)
 {
   if (buttonStates[btnIndx].depressed)
   {
@@ -101,7 +69,7 @@ void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
  * for a predefined duration (`jogDuration`) and then stops. If the button action
  * is not "pressed", the motor is stopped, and the button state is updated.
  */
-void actionJog(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
+void actionJog(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch)
 {
   if (limitSwitch.read() == LOW)
   {
@@ -143,8 +111,8 @@ void processLimitSwitches()
   limitSwitchUp.update();
   limitSwitchDown.update();
 
-  // Check if the limit switches are triggered
-  if (limitSwitchUp.rose()) // Limit switch UP triggered
+  // Check if the limit switches were triggered
+  if (limitSwitchUp.rose()) // Limit switch UP was triggered
   {
     setMotorSpeed(NO_MOTION, IDLE);                       // Stop the motor
     buttonStates[BTN_SCAN_UP].depressed = false;          // Set Scan Up button to undepressed
@@ -156,7 +124,7 @@ void processLimitSwitches()
     updateLedState(LED_UP, LED_COLOR_RED);                // Set up limit LED to red
   } // if (limitSwitchUp.rose())
 
-  if (limitSwitchDown.rose()) // Limit switch DOWN triggered
+  if (limitSwitchDown.rose()) // Limit switch DOWN was triggered
   {
     setMotorSpeed(NO_MOTION, IDLE);                         // Stop the motor
     buttonStates[BTN_SCAN_DOWN].depressed = false;          // Set Scan Down button to undepressed
@@ -168,7 +136,7 @@ void processLimitSwitches()
     updateLedState(LED_DOWN, LED_COLOR_RED);                // Set down limit LED to red
   } // if (limitSwitchDown.rose())
 
-  // Check if limit switches are cleared
+  // Check if limit switches were cleared
   if (limitSwitchUp.fell()) // limit switch up cleared
   {
     updateLedState(LED_UP, LED_COLOR_GREEN); // Set limit up LED to green

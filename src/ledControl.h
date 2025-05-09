@@ -9,9 +9,12 @@
 #include "credentials.h" // for LED colors
 #include "webSocket.h"   // for notifyClients()
 #include "actions.h"     // for limitSwitchUp, limitSwitchDown
+#include "DigitalSignalDetector.h" // for limit switch detection
 
-extern Bounce limitSwitchUp;
-extern Bounce limitSwitchDown;
+// extern Bounce limitSwitchUp;
+// extern Bounce limitSwitchDown;
+extern DigitalSignalDetector limitSwitchUp;
+extern DigitalSignalDetector limitSwitchDown;
 
 //! LED indices
 #define LED_UP 0
@@ -49,7 +52,7 @@ void updateLedState(int ledIndex, const String &color)
  * their states using the `updateLedState` function.
  */
 void initLedStates()
-{
+{   
   if (limitSwitchUp.read()) // Limit switch up triggered
   {
     ledColor[LED_UP] = LED_COLOR_RED; // Set up limit LED to red

@@ -1,5 +1,6 @@
 //! credentials.h
 //! 2025-05-08 update firmware version and dates, added voltage divider values
+
 #ifndef CREDENTIALS_H
 #define CREDENTIALS_H
 
@@ -26,19 +27,19 @@ IPAddress subnet(255, 255, 255, 0);
 #define STYLES_DATE "2025-03-25"
 
 //! GPIO Pin definitions for ESP32 DOIT DevKit V1
-#define HB_IN1 23	  // PWM IN1 logic
-#define HB_IN2 22	  // PWM IN2 logic
-#define LIMIT_UP 18	  // upper limit switch interrupt
-#define LIMIT_DOWN 19 // lower limit switch interrupt
-#define SWR_RFL 35	  // SWR reflected ADC input
-#define SWR_FWD 34	  // SWR forward ADC input
-#define VM 32		  // VM voltage monitor ADC input
-#define SDA 21		  // I2C SDA pin
-#define SCL 4		  // I2C SCL pin
+#define HB_IN1_PIN 23	  // PWM IN1 logic
+#define HB_IN2_PIN 22	  // PWM IN2 logic
+#define LIMIT_UP_PIN 18	  // upper limit switch interrupt
+#define LIMIT_DOWN_PIN 19 // lower limit switch interrupt
+#define SWR_RFL_PIN 35	  // SWR reflected ADC input
+#define SWR_FWD_PIN 34	  // SWR forward ADC input
+#define VM_PIN 32		  // VM voltage monitor ADC input
+#define SDA_PIN 21		  // I2C SDA pin
+#define SCL_PIN 4		  // I2C SCL pin
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 // Built-in LED pin
 #endif
-#define R2 47000.0   // VM voltage divider upper resistor
+#define R2 47000.0	   // VM voltage divider upper resistor
 #define R1 6800.0	   // VM voltage divider lower resistor
 #define VM_VOLTAGE 3.3 // VM voltage divider reference voltage
 #define ADC_MAX 4095.0 // ADC max value for 12-bit ADC

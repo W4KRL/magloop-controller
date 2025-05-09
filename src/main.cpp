@@ -44,7 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <Arduino.h>        // required by PlatformIO
 #include "actions.h"        // responses to button commands & sensors
-#include "bounce2.h"        // for button control
+// #include "bounce2.h"        // for button control
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials
 #include "debug_magloop.h"  // for debug print to Serial Monitor
@@ -74,7 +74,6 @@ void setup()
   wifiBegin();          // Connect to WiFi
   otaBegin();           // Initialize OTA updates
   websocketBegin();     // Initialize webSocket for bi-directional communication
-  actionsBegin();       // Initialize sensors, limit switches, and actions
   scpiBegin();          // Initialize SCPI parser, define commands, load user Preferences
   h_bridgeBegin();      // Initialize h-bridge for motor control
 } // setup()

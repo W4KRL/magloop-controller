@@ -74,15 +74,15 @@
 #define SCPI_ARRAY_SYZE 6       // Maximum number of elements in an array
 #define SCPI_HASH_TYPE uint16_t // Default value = uint8_t
 
-#include <Arduino.h>             // Required for platformIO
-#include "credentials.h"         // for SCPI identification
+#include <Arduino.h>     // Required for platformIO
+#include "credentials.h" // for SCPI identification
 // #include "debug_magloop.h"       // DEBUG_PRINTF()
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include <StreamString.h>        // for StreamString class in processSCPIcommand()
 // #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
-#include <Preferences.h>         // Store controller settings in flash with LittleFS
-#include <Wire.h>                // for I2C communication
-#include <SHT2x.h>               // for HTU21D temperature and humidity sensor
+#include <Preferences.h> // Store controller settings in flash with LittleFS
+#include <Wire.h>        // for I2C communication
+#include <SHT2x.h>       // for HTU21D temperature and humidity sensor
 // #include <WiFi.h>                // for WiFi functions like localIP() and RSSI()
 // #include "webSocket.h"           // for SYStem:WEBserver? command, to get web server state
 
@@ -361,8 +361,8 @@ void getSystemVoltage(SCPI_C commands, SCPI_P parameters, Stream &interface)
   // Supply voltage is connected to resistor R2
   // The VM pin is connected to the voltage divider with R1 to ground
   // Compensate for non-linear ADC response
-  int adc = analogRead(VM); // read the ADC value from the VM pin
-  float voltage = 0;        // convert to voltage
+  int adc = analogRead(VM_PIN); // read the ADC value from the VM pin
+  float voltage = 0;            // convert to voltage
   if (adc > 3000)
   {
     voltage = 0.0005 * adc + 1.0874;
@@ -398,9 +398,9 @@ void scpiBegin()
   restorePreferences();
 
   // Configure I2C pins
-  pinMode(SDA, INPUT);    // Set SDA pin to input with module pull-up resistor
-  pinMode(SCL, INPUT);    // Set SCL pin to input with module pull-up resistor
-  Wire.begin(SDA, SCL);   // Initialize I2C with specified SDA and SCL pins
+  pinMode(SDA_PIN, INPUT);  // Set SDA pin to input with module pull-up resistor
+  pinMode(SCL_PIN, INPUT);  // Set SCL pin to input with module pull-up resistor
+  Wire.begin(SDA_PIN, SCL_PIN); // Initialize I2C with specified SDA and SCL pins
 
   if (!envSensor.begin()) // Initialize the HTU21D sensor
   {

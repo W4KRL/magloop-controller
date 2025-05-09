@@ -15,15 +15,15 @@ void swrCalcBegin()
 {
   // setup the ADC pins
   // call in setup()
-  pinMode(SWR_FWD, INPUT);
-  pinMode(SWR_REV, INPUT);
+  pinMode(SWR_FWD_PIN, INPUT);
+  pinMode(SWR_REV_PIN, INPUT);
 } // swrCalcBegin()
 
 float swrValue()
 {
   // read the forward and reverse power
-  int fwdPower = analogRead(SWR_FWD);
-  int revPower = analogRead(SWR_REV);
+  int fwdPower = analogRead(SWR_FWD_PIN);
+  int revPower = analogRead(SWR_REV_PIN);
 
   // calculate the SWR
   float swr = (fwdPower + revPower) / (fwdPower - revPower);

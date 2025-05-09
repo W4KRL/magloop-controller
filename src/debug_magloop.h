@@ -24,11 +24,4 @@
 #define DEBUG_PRINTF(...) /* No-op: Debugging disabled */
 #endif // DEBUG_MAGLOOP
 
-//! Legacy Serial Monitor debug macro
-// #ifdef DEBUG_MAGLOOP
-//   #define DEBUG_PRINTF(...) Serial.printf("-> " __VA_ARGS__); Serial.print("\r\n")
-// #else
-//   #define DEBUG_PRINTF(...) /* No-op: Debugging disabled */
-// #endif // DEBUG_MAGLOOP_H
-
 #endif
