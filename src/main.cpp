@@ -44,7 +44,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <Arduino.h>        // required by PlatformIO
 #include "actions.h"        // responses to button commands & sensors
-// #include "bounce2.h"        // for button control
 #include "buttonHandler.h"  // for button control from web sockets
 #include "credentials.h"    // for WiFi credentials
 #include "debug_magloop.h"  // for debug print to Serial Monitor

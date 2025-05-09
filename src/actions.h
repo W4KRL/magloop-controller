@@ -27,10 +27,9 @@ DigitalSignalDetector limitSwitchDown(LIMIT_DOWN_PIN);
  *                       MOVE_DOWN, NO_MOTION).
  * @param speed The speed at which the motor should move.
  *              Use predefined constants or values for speed.
- * @param limitSwitch A reference to a Bounce object representing the limit switch.
+ * @param limitSwitch A reference to a DigitalSignalDetector object representing the limit switch.
  *                    The limit switch prevents motor movement when triggered.
  */
-// void actionScan(int btnIndx, int moveDirection, int speed, Bounce &limitSwitch)
 void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch)
 {
   if (buttonStates[btnIndx].depressed)
@@ -61,7 +60,7 @@ void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector
  * @param btnIdx Index of the button triggering the jog action.
  * @param moveDirection Direction of motor movement (e.g., forward or reverse).
  * @param speed Speed at which the motor should jog.
- * @param limitSwitch Reference to a Bounce object representing the limit switch.
+ * @param limitSwitch Reference to a DigitalSignalDetector object representing the limit switch.
  * @param action String indicating the button action ("pressed" or other states).
  *
  * This function checks the state of the limit switch and performs a jog action

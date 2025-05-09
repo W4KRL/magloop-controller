@@ -6,13 +6,11 @@
 #define LED_CONTROL_H
 
 #include <Arduino.h>
-#include "credentials.h" // for LED colors
-#include "webSocket.h"   // for notifyClients()
-#include "actions.h"     // for limitSwitchUp, limitSwitchDown
+#include "credentials.h"           // for LED colors
+#include "webSocket.h"             // for notifyClients()
+#include "actions.h"               // for limitSwitchUp, limitSwitchDown
 #include "DigitalSignalDetector.h" // for limit switch detection
 
-// extern Bounce limitSwitchUp;
-// extern Bounce limitSwitchDown;
 extern DigitalSignalDetector limitSwitchUp;
 extern DigitalSignalDetector limitSwitchDown;
 
@@ -30,7 +28,7 @@ void updateLedState(int ledIndex, const String &color)
 {
   ledColor[ledIndex] = color;                                       // Update the color in the array
   String message = "led~" + String(ledIndex) + "~" + String(color); // Create the message
-  DEBUG_PRINTF("%s", message.c_str());                                    // Debug print
+  DEBUG_PRINTF("%s", message.c_str());                              // Debug print
   notifyClients(message);
 } // updateLedState()
 
@@ -52,7 +50,7 @@ void updateLedState(int ledIndex, const String &color)
  * their states using the `updateLedState` function.
  */
 void initLedStates()
-{   
+{
   if (limitSwitchUp.read()) // Limit switch up triggered
   {
     ledColor[LED_UP] = LED_COLOR_RED; // Set up limit LED to red
