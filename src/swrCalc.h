@@ -7,23 +7,23 @@
 #define SWRCALC_H
 
 #include <Arduino.h>
+#include "credentials.h" // for SWR pin definitions
 
-//! ADC pins
-// defined in credentials.h
+//! ADC pins are defined in credentials.h
 
 void swrCalcBegin()
 {
   // setup the ADC pins
   // call in setup()
   pinMode(SWR_FWD_PIN, INPUT);
-  pinMode(SWR_REV_PIN, INPUT);
+  pinMode(SWR_RFL_PIN, INPUT);
 } // swrCalcBegin()
 
 float swrValue()
 {
   // read the forward and reverse power
   int fwdPower = analogRead(SWR_FWD_PIN);
-  int revPower = analogRead(SWR_REV_PIN);
+  int revPower = analogRead(SWR_RFL_PIN);
 
   // calculate the SWR
   float swr = (fwdPower + revPower) / (fwdPower - revPower);
