@@ -25,16 +25,16 @@
 void h_bridgeBegin()
 {
     // setup ESP32 PWM and connect to H-bridge inputs
-    pinMode(HB_IN1, OUTPUT);
-    pinMode(HB_IN2, OUTPUT);
+    pinMode(HB_IN1_PIN, OUTPUT);
+    pinMode(HB_IN2_PIN, OUTPUT);
 
     // Configure PWM settings for pin HB_IN1
-    ledcAttach(HB_IN1, pwmFrequency, pwmResolution);
-    ledcAttach(HB_IN2, pwmFrequency, pwmResolution);
+    ledcAttach(HB_IN1_PIN, pwmFrequency, pwmResolution);
+    ledcAttach(HB_IN2_PIN, pwmFrequency, pwmResolution);
 
     // Initialize pin states
-    ledcWrite(HB_IN1, 255); // same as logic HIGH
-    ledcWrite(HB_IN2, 255);
+    ledcWrite(HB_IN1_PIN, 255); // same as logic HIGH
+    ledcWrite(HB_IN2_PIN, 255);
 } // h-bridgeBegin()
 
 void setMotorSpeed(int speed, int mode)
@@ -52,21 +52,21 @@ void setMotorSpeed(int speed, int mode)
     switch (mode)
     {
     case MOVE_UP:
-        ledcWrite(HB_IN1, 255);  // logic HIGH
-        ledcWrite(HB_IN2, duty); // inverted PWM
+        ledcWrite(HB_IN1_PIN, 255);  // logic HIGH
+        ledcWrite(HB_IN2_PIN, duty); // inverted PWM
         break;
     case MOVE_DOWN:
-        ledcWrite(HB_IN1, duty); // inverted PWM
-        ledcWrite(HB_IN2, 255);  // logic HIGH
+        ledcWrite(HB_IN1_PIN, duty); // inverted PWM
+        ledcWrite(HB_IN2_PIN, 255);  // logic HIGH
         break;
     case IDLE:
-        ledcWrite(HB_IN1, 255); // logic HIGH
-        ledcWrite(HB_IN2, 255); // logic HIGH
+        ledcWrite(HB_IN1_PIN, 255); // logic HIGH
+        ledcWrite(HB_IN2_PIN, 255); // logic HIGH
         break;
     default:
         // direction is undefined - set to idle
-        ledcWrite(HB_IN1, 255); // logic HIGH
-        ledcWrite(HB_IN2, 255); // logic HIGH
+        ledcWrite(HB_IN1_PIN, 255); // logic HIGH
+        ledcWrite(HB_IN2_PIN, 255); // logic HIGH
     }
 } // setMotorSpeedDirect()
 
