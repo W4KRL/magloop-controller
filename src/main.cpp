@@ -1,4 +1,4 @@
-// main.cpp
+//! @file main.cpp
 // MagLoop-Controller firmware for ESP32 DevKit board
 //! 2025-05-11 conform to extensive updates
 

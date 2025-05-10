@@ -1,4 +1,4 @@
-//! actions.h
+//! @file actions.h
 //! 2024-05-10 change to DigitalSignalDetector.h from Bounce2.h
 
 #ifndef ACTIONS_H

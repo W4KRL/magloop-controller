@@ -1,4 +1,4 @@
-//! ledControl.h
+//! @file ledControl.h
 //! LED control functions for webSocket clients
 //! 2025-05-10 use enum LedIndex for LED indices
 

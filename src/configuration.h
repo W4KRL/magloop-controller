@@ -1,4 +1,4 @@
-//! configuration.h
+//! @file configuration.h
 //! 2025-05-10 update firmware version and dates, added voltage divider values
 
 #ifndef CONFIGURATION_H

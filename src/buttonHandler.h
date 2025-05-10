@@ -1,4 +1,4 @@
-//! buttonHandler.h
+//! @file buttonHandler.h
 //! 2025-05-10 change to DigitalSignalDetector.h from Bounce2.h
 
 #ifndef BUTTONHANDLER_H

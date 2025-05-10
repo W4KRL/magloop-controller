@@ -1,4 +1,4 @@
-//! scpiControl.h
+//! @file scpiControl.h
 //! 2025-05-10 revise SYS:ENV and others
 
 /**

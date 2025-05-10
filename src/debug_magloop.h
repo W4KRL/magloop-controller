@@ -1,4 +1,4 @@
-//! debug_magloop.h
+//! @file debug_magloop.h
 // 2024-04-23 renamed from debug.h, added webSocket message for notifyClients()
 
 //! !!!!! DO NOT AUTOFORMAT !!!!!

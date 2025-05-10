@@ -1,4 +1,4 @@
-//! swrCalc.h
+//! @file swrCalc.h
 // 2025-05-10 revise pin names and comments
 
 //! placeholder for the SWR calculation function

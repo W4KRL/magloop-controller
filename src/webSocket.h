@@ -1,4 +1,4 @@
-//! webSocket.h
+//! @file webSocket.h
 // 2025-04-03 revised message parsing for button events
 // 2025-04-04 revised SCPI handling
 // 2025-04-11 added /debug page for debugging

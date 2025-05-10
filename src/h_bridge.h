@@ -1,4 +1,4 @@
-//! h_bridge.h
+//! @file h_bridge.h
 //! 2025-05-10 use enum Motion for direction, eliminate IDLE
 
 //! uses fast stop inverted logic
