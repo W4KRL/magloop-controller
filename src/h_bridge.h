@@ -1,26 +1,25 @@
 //! h_bridge.h
-//! 2025-04-11
-//! using fast stop inverted logic
+//! 2025-05-10 use enum Motion for direction, eliminate IDLE
+
+//! uses fast stop inverted logic
 // see TI datasheet 7.3.1
-// https://www.ti.com/lit/ds/symlink/l298.pdf
-
-// ESP32 GPIOs DOIT ESP32 DEVKIT V1
-// tested with DRV8871 module
-
-//! Test limit switches before call to setMotorSpeed()
+// https://www.ti.com/lit/ds/symlink/drv8871.pdf
 
 #ifndef H_BRIDGE_H
 #define H_BRIDGE_H
 
-#include <Arduino.h>     // for Arduino functions
-#include "credentials.h" // GPIO definitions
+#include <Arduino.h>       // for Arduino functions
+#include "configuration.h" // GPIO definitions
 
-#define pwmFrequency 1000 // frequency in Hz
-#define pwmResolution 8   // resolution in bits
-#define IDLE 0            // IDLE state
-#define MOVE_UP 1         // forward motion
-#define MOVE_DOWN 2       // reverse motion
-#define NO_MOTION 0       // no motion
+enum Motion
+{
+    NO_MOTION = 0,
+    MOVE_UP = 1,
+    MOVE_DOWN = 2
+};
+
+const int pwmFrequency = 1000; // frequency in Hz
+const int pwmResolution = 8;   // resolution in bits
 
 void h_bridgeBegin()
 {
@@ -59,12 +58,12 @@ void setMotorSpeed(int speed, int mode)
         ledcWrite(HB_IN1_PIN, duty); // inverted PWM
         ledcWrite(HB_IN2_PIN, 255);  // logic HIGH
         break;
-    case IDLE:
+    case NO_MOTION:
         ledcWrite(HB_IN1_PIN, 255); // logic HIGH
         ledcWrite(HB_IN2_PIN, 255); // logic HIGH
         break;
     default:
-        // direction is undefined - set to idle
+        // direction is undefined - set to NO_MOTION
         ledcWrite(HB_IN1_PIN, 255); // logic HIGH
         ledcWrite(HB_IN2_PIN, 255); // logic HIGH
     }

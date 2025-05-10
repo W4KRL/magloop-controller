@@ -1,5 +1,5 @@
 //! actions.h
-//! 2024-05-09 change to DigitalSignalDetector.h from Bounce2.h
+//! 2024-05-10 change to DigitalSignalDetector.h from Bounce2.h
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
@@ -7,7 +7,7 @@
 #include <Arduino.h>               // Required for basic Arduino functions
 #include "buttonHandler.h"         // for webSocket buttonStates[] and updateButtonState()
 #include "h_bridge.h"              // for setMotorSpeed()
-#include "credentials.h"           // for LED colors
+#include "configuration.h"           // for LED colors
 #include "DigitalSignalDetector.h" // for limit switch detection
 
 //! Instantiate DigitalSignalDetector objects for limit switches
@@ -15,26 +15,26 @@ DigitalSignalDetector limitSwitchUp(LIMIT_UP_PIN);
 DigitalSignalDetector limitSwitchDown(LIMIT_DOWN_PIN);
 
 /**
- * @brief Handles the scanning action for a motor based on button state and limit switch input.
+ * @brief Handles the scan action of the motor based on web button state and limit switch input.
  *
  * This function manages the motor's movement in a specified direction and speed
- * when a button is pressed, and stops the motor when the button is released.
- * It also ensures that the motor does not move if the limit switch is triggered.
+ * when a websocket button is toggled ON, and stops the motor when 
+ * the button is toggled OFF or a limit switch is triggered.
+ * It updates the button state and LED color accordingly.
  *
- * @param btnIndx The index of the button being monitored.
- * @param moveDirection The direction in which the motor should move.
- *                       Use predefined constants for direction (e.g., MOVE_UP,
- *                       MOVE_DOWN, NO_MOTION).
- * @param speed The speed at which the motor should move.
- *              Use predefined constants or values for speed.
- * @param limitSwitch A reference to a DigitalSignalDetector object representing the limit switch.
- *                    The limit switch prevents motor movement when triggered.
+ * @param btnIndx       The index of the button being monitored.
+ * @param moveDirection The direction in which the motor should move set by
+ *                      predefined constants for direction (e.g., MOVE_UP,
+ *                      MOVE_DOWN, NO_MOTION).
+ * @param speed         The speed at which the motor should move as a percentage of full speed.
+ * @param limitSwitch   A reference to a DigitalSignalDetector object representing the limit switch.
+ *                      The limit switch prevents motor movement when triggered.
  */
 void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch)
 {
   if (buttonStates[btnIndx].depressed)
   {
-    setMotorSpeed(NO_MOTION, IDLE);
+    setMotorSpeed(NO_MOTION, NO_MOTION);
     buttonStates[btnIndx].depressed = false;
     updateButtonState(btnIndx);
   }
@@ -55,18 +55,21 @@ void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector
 }
 
 /**
- * @brief Handles the jog action for a motor based on button input and limit switch state.
+ * @brief Handles the jog action for a motor based on web button input and limit switch state.
  *
- * @param btnIdx Index of the button triggering the jog action.
- * @param moveDirection Direction of motor movement (e.g., forward or reverse).
- * @param speed Speed at which the motor should jog.
+ * @param btnIdx Index of the websocket button triggering the jog action.
+ * @param moveDirection The direction in which the motor should move set by
+ *                      predefined constants for direction (e.g., MOVE_UP,
+ *                      MOVE_DOWN, NO_MOTION).
+ * @param speed Speed at which the motor should jog as a percentage of full speed.
  * @param limitSwitch Reference to a DigitalSignalDetector object representing the limit switch.
  * @param action String indicating the button action ("pressed" or other states).
+ *                      The limit switch prevents motor movement when triggered.
  *
  * This function checks the state of the limit switch and performs a jog action
  * if the button is pressed and the limit switch allows movement. The motor jogs
- * for a predefined duration (`jogDuration`) and then stops. If the button action
- * is not "pressed", the motor is stopped, and the button state is updated.
+ * for a predefined duration (`jogDuration`) and then stops. If the button is
+ * released, the motor is stopped, and the button state is updated.
  */
 void actionJog(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch)
 {
@@ -78,9 +81,9 @@ void actionJog(int btnIndx, int moveDirection, int speed, DigitalSignalDetector 
     const long endTime = millis() + jogDuration;
     while (millis() < endTime)
     {
-      // wait for jogDuration to jog motor
+      // run the motor for jogDuration
     }
-    setMotorSpeed(NO_MOTION, IDLE);
+    setMotorSpeed(NO_MOTION, NO_MOTION);
   }
 }
 
@@ -90,6 +93,7 @@ void actionJog(int btnIndx, int moveDirection, int speed, DigitalSignalDetector 
  * This function checks the state of the UP and DOWN limit switches, determines if they
  * have been triggered or cleared, and performs the necessary actions such as stopping
  * the motor, updating button states, sending websocket messages, and changing LED states.
+ * @note This function should be called in the main loop to continuously monitor the limit switches.
  *
  * Actions performed:
  * - If a limit switch is triggered:
@@ -113,7 +117,7 @@ void processLimitSwitches()
   // Check if the limit switches were triggered
   if (limitSwitchUp.rose()) // Limit switch UP was triggered
   {
-    setMotorSpeed(NO_MOTION, IDLE);                       // Stop the motor
+    setMotorSpeed(NO_MOTION, NO_MOTION);                       // Stop the motor
     buttonStates[BTN_SCAN_UP].depressed = false;          // Set Scan Up button to undepressed
     buttonStates[BTN_SCAN_UP].color = BTN_DISABLED_COLOR; // Set Scan button to disabled color
     updateButtonState(BTN_SCAN_UP);                       // Send websocket message
@@ -125,7 +129,7 @@ void processLimitSwitches()
 
   if (limitSwitchDown.rose()) // Limit switch DOWN was triggered
   {
-    setMotorSpeed(NO_MOTION, IDLE);                         // Stop the motor
+    setMotorSpeed(NO_MOTION, NO_MOTION);                         // Stop the motor
     buttonStates[BTN_SCAN_DOWN].depressed = false;          // Set Scan Down button to undepressed
     buttonStates[BTN_SCAN_DOWN].color = BTN_DISABLED_COLOR; // Set Scan button to disabled color
     updateButtonState(BTN_SCAN_DOWN);                       // Send websocket message

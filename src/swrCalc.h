@@ -1,5 +1,5 @@
 //! swrCalc.h
-// 02/06/2025   
+// 2025-05-10 revise pin names and comments
 
 //! placeholder for the SWR calculation function
 
@@ -7,9 +7,9 @@
 #define SWRCALC_H
 
 #include <Arduino.h>
-#include "credentials.h" // for SWR pin definitions
+#include "configuration.h" // for SWR pin definitions
 
-//! ADC pins are defined in credentials.h
+//! ADC pins are defined in configuration.h
 
 void swrCalcBegin()
 {

@@ -6,7 +6,7 @@
 
 #include <WiFi.h>        // for WiFi
 #include <ArduinoOTA.h>  // for OTA updates
-#include "credentials.h" // for SSID, password, static IP
+#include "configuration.h" // for SSID, password, static IP
 #include "actions.h"     // for setLED()
 
 //! Initialize OTA

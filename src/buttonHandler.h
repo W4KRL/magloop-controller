@@ -1,5 +1,5 @@
 //! buttonHandler.h
-//! 2025-05-09 change to DigitalSignalDetector.h from Bounce2.h
+//! 2025-05-10 change to DigitalSignalDetector.h from Bounce2.h
 
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
@@ -32,11 +32,14 @@ ButtonState buttonStates[] = {
     {false, BTN_JOG_UP_COLOR},    // btn2 jog up
     {false, BTN_JOG_DOWN_COLOR}}; // btn3 jog down
 
-// ! Button state constants
-#define BTN_SCAN_UP 0
-#define BTN_SCAN_DOWN 1
-#define BTN_JOG_UP 2
-#define BTN_JOG_DOWN 3
+//! Button state constants
+enum ButtonID
+{
+  BTN_SCAN_UP = 0,
+  BTN_SCAN_DOWN = 1,
+  BTN_JOG_UP = 2,
+  BTN_JOG_DOWN = 3
+} ButtonID;
 
 //! Send a button state update to all connected clients
 void updateButtonState(int btnIndx)

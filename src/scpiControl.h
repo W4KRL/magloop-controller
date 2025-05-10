@@ -1,5 +1,5 @@
 //! scpiControl.h
-//! 2025-05-08 revised SCPI control functions, added error handling, add VM voltage divider
+//! 2025-05-10 revise SYS:ENV and others
 
 /**
  * @file scpiControl.h
@@ -32,7 +32,7 @@
  * - CONtrol:SCANspeed?: Returns the scan speed (high range) as a percentage (0–100).
  *
  * System Commands:
- * - SYStem:Environment?: Returns the enclosure temperature and humidity.
+ * - SYStem:ENVironment?: Returns the enclosure temperature and humidity.
  * - SYStem:LISt?: Returns the system state.
  * - SYStem:VOLTage?: Returns the system supply voltage.
  * - SYStem:WEBserver?: Returns web server state.
@@ -41,7 +41,7 @@
  *
  * @dependencies
  * - Arduino.h: Required for PlatformIO.
- * - credentials.h: For SCPI identification.
+ * - configuration.h: For SCPI identification.
  * - debug_magloop.h: For debugging utilities.
  * - Vrekrer_scpi_parser.h: SCPI parser library.
  * - StreamString.h: For handling SCPI command responses.
@@ -74,17 +74,13 @@
 #define SCPI_ARRAY_SYZE 6       // Maximum number of elements in an array
 #define SCPI_HASH_TYPE uint16_t // Default value = uint8_t
 
-#include <Arduino.h>     // Required for platformIO
-#include "credentials.h" // for SCPI identification
-// #include "debug_magloop.h"       // DEBUG_PRINTF()
+#include <Arduino.h>             // Required for platformIO
+#include "configuration.h"       // for SCPI identification
 #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 #include <StreamString.h>        // for StreamString class in processSCPIcommand()
-// #include <ESPAsyncWebServer.h>   // https://github.com/ESP32Async/ESPAsyncWebServer for StreamString class
-#include <Preferences.h> // Store controller settings in flash with LittleFS
-#include <Wire.h>        // for I2C communication
-#include <SHT2x.h>       // for HTU21D temperature and humidity sensor
-// #include <WiFi.h>                // for WiFi functions like localIP() and RSSI()
-// #include "webSocket.h"           // for SYStem:WEBserver? command, to get web server state
+#include <Preferences.h>         // Store controller settings in flash with LittleFS
+#include <Wire.h>                // for I2C communication
+#include <SHT2x.h>               // for HTU21D temperature and humidity sensor
 
 extern AsyncWebSocket ws;                  // for debug statements
 void notifyClients(const String &message); // for debug statements
@@ -210,9 +206,9 @@ void getHelp(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.print("CON:REPeat? get repeat interval in ms\n");
   interface.print("CON:SCAn <80..100> set scan speed in %\n");
   interface.print("CON:SCAn? get scan speed in %\n");
-  interface.print("SYS:ERRor? get last SCPI error\n");
+  interface.print("SYS:ENVironment? get encl. temp & humidity\n");
+  interface.print("SYS:FIRMware? get firmware versions\n");
   interface.print("SYS:LISt? get system state\n");
-  interface.print("SYS:TEMPerature? get encl. temp & humidity\n");
   interface.print("SYS:VOLTage? get supply voltage\n");
   interface.print("SYS:WEBserver? get web server state\n");
   interface.print("---End Help---");
@@ -339,14 +335,8 @@ void getSystemFirmware(SCPI_C commands, SCPI_P parameters, Stream &interface)
   interface.printf(colFormat, "styles.css", STYLES_DATE);
 } // getSystemFirmware()
 
-void getSystemTemperature(SCPI_C commands, SCPI_P parameters, Stream &interface)
+void getSystemEnvironment(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
-  // get the temperature and humidity from the HTU21D sensor
-  // if (!envSensor.begin()) // Initialize the HTU21D sensor
-  // {
-  //   notifyClients("scp~Error: HTU21D sensor.");
-  //   return; // Exit if sensor initialization fails
-  // }
   envSensor.read();                         // read the sensor data
   float tempC = envSensor.getTemperature(); // HTU21D temperature
   float tempF = 1.8 * tempC + 32;
@@ -386,7 +376,7 @@ void getSystemWebserver(SCPI_C commands, SCPI_P parameters, Stream &interface)
 void getSystemList(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   interface.print("---System List\n");
-  getSystemTemperature(commands, parameters, interface); // get the enclosure temperature and humidity
+  getSystemEnvironment(commands, parameters, interface); // get the enclosure temperature and humidity
   getSystemVoltage(commands, parameters, interface);     // get the supply voltage
   getSystemWebserver(commands, parameters, interface);   // get the web server state
   interface.print("---End System List---");
@@ -398,8 +388,8 @@ void scpiBegin()
   restorePreferences();
 
   // Configure I2C pins
-  pinMode(SDA_PIN, INPUT);  // Set SDA pin to input with module pull-up resistor
-  pinMode(SCL_PIN, INPUT);  // Set SCL pin to input with module pull-up resistor
+  pinMode(SDA_PIN, INPUT);      // Set SDA pin to input with module pull-up resistor
+  pinMode(SCL_PIN, INPUT);      // Set SCL pin to input with module pull-up resistor
   Wire.begin(SDA_PIN, SCL_PIN); // Initialize I2C with specified SDA and SCL pins
 
   if (!envSensor.begin()) // Initialize the HTU21D sensor
@@ -429,9 +419,9 @@ void scpiBegin()
   scpi.RegisterCommand(":SCAN", &setControlScan);               // set Scan speed
   scpi.RegisterCommand(":SCAN?", &getControlScan);              // get Scan speed
   scpi.SetCommandTreeBase("SYStem");                            // set the command tree base to SYStem
+  scpi.RegisterCommand(":ENVironment?", &getSystemEnvironment); // get the temp/humid inside enclosure
   scpi.RegisterCommand(":FIRMware?", &getSystemFirmware);       // get the system firmware list
   scpi.RegisterCommand(":LISt?", &getSystemList);               // get the system status list
-  scpi.RegisterCommand(":TEMPerature?", &getSystemTemperature); // get the temp/humid inside enclosure
   scpi.RegisterCommand(":VOLTage?", &getSystemVoltage);         // get the system Voltage
   scpi.RegisterCommand(":WEBserver?", &getSystemWebserver);     // get the web server status
 

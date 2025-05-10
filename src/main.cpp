@@ -1,6 +1,6 @@
 // main.cpp
 // MagLoop-Controller firmware for ESP32 DevKit board
-//! 2025-04-11
+//! 2025-05-11 conform to extensive updates
 
 // !!!Save this file!!!
 // C:\Users\KarlB\OneDrive\Documents\PlatformIO\Projects\magloop-controller
@@ -42,16 +42,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define DEBUG_MAGLOOP //! uncomment for debug output to Serial Monitor
 
-#include <Arduino.h>        // required by PlatformIO
-#include "actions.h"        // responses to button commands & sensors
-#include "buttonHandler.h"  // for button control from web sockets
-#include "credentials.h"    // for WiFi credentials
-#include "debug_magloop.h"  // for debug print to Serial Monitor
-#include "h_bridge.h"       // for motor control
-#include "ledControl.h"     // for LED control by web sockets
-#include "scpiControl.h"    // for SCPI commands
-#include "webSocket.h"      // set up webSocket
-#include "wifiConnection.h" // local WiFi#include <ArduinoOTA.h>     // for OTA updates
+#include <Arduino.h>               // required by PlatformIO
+#include "actions.h"               // responses to button commands & sensors
+#include "buttonHandler.h"         // for button control from web sockets
+#include "configuration.h"         // for WiFi credentials
+#include "debug_magloop.h"         // for debug print to Serial Monitor
+#include "DigitalSignalDetector.h" // for limit switch control
+#include "h_bridge.h"              // for motor control
+#include "ledControl.h"            // for LED control by web sockets
+#include "scpiControl.h"           // for SCPI commands
+#include "webSocket.h"             // set up webSocket
+#include "wifiConnection.h"        // local WiFi#include <ArduinoOTA.h>     // for OTA updates
 
 //! Additional libraries called in local headers:
 /*

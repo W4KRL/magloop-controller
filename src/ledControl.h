@@ -1,12 +1,12 @@
 //! ledControl.h
 //! LED control functions for webSocket clients
-//! 2025-05-08 moved external functions to ledControl.h
+//! 2025-05-10 use enum LedIndex for LED indices
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
 
 #include <Arduino.h>
-#include "credentials.h"           // for LED colors
+#include "configuration.h"           // for LED colors
 #include "webSocket.h"             // for notifyClients()
 #include "actions.h"               // for limitSwitchUp, limitSwitchDown
 #include "DigitalSignalDetector.h" // for limit switch detection
@@ -15,8 +15,11 @@ extern DigitalSignalDetector limitSwitchUp;
 extern DigitalSignalDetector limitSwitchDown;
 
 //! LED indices
-#define LED_UP 0
-#define LED_DOWN 1
+enum LedIndex
+{
+    LED_UP = 0,
+    LED_DOWN = 1
+};
 
 //! Array to store the initial state of each LED
 String ledColor[2] = {
