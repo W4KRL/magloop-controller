@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <Arduino.h>               // required by PlatformIO
 #include "actions.h"               // responses to button commands & sensors
+#include "ArduinoOTA.h"            // for ArduinoOTA.handle() in loop()
 #include "buttonHandler.h"         // for button control from web sockets
 #include "configuration.h"         // for WiFi credentials
 #include "debug_magloop.h"         // for debug print to Serial Monitor
@@ -71,7 +72,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 void setup()
 {
   Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
-  wifiBegin();          // Connect to WiFi
+  wifiBegin();          // setup WiFi
+  wifiConnect();        // Connect to WiFi
   otaBegin();           // Initialize OTA updates
   websocketBegin();     // Initialize webSocket for bi-directional communication
   scpiBegin();          // Initialize SCPI parser, define commands, load user Preferences

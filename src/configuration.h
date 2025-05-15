@@ -19,10 +19,15 @@
  * Example: IPAddress(192, 168, 0, 234) represents the static IP address
  * 192.168.0.234.
  */
-IPAddress localIP(192, 168, 0, 234);
-// Set your Gateway IP address
-IPAddress gateway(192, 168, 0, 1);
-IPAddress subnet(255, 255, 255, 0);
+
+ #define LOCAL_IP 192, 168, 0, 234 // Set your local IP address
+ #define GATEWAY 192, 168, 0, 1   // Set your Gateway IP address
+ #define SUBNET 255, 255, 255, 0  // Set your subnet mask
+ 
+// IPAddress localIP(192, 168, 0, 234);
+// // Set your Gateway IP address
+// IPAddress gateway(192, 168, 0, 1);
+// IPAddress subnet(255, 255, 255, 0);
 
 // SCPI Identification
 //! Do not include "~" in the string. The JavaScript client will parse it as a command.
