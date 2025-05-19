@@ -31,5 +31,6 @@ extern AsyncWebSocket ws;
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 void notifyClients(const String &message);//! Notify all connected clients with a message
 void websocketBegin();
+void websocketCleanup();
 
 #endif

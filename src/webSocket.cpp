@@ -23,7 +23,7 @@
  * - onWsEvent: Handles WebSocket events (connect, disconnect, data).
  * - notifyClients: Sends a message to all connected WebSocket clients.
  * - websocketBegin: Initializes the filesystem, sets up HTTP routes, and starts the server.
- * 
+ *
  * @author Karl Berger
  * @date 2025-05-19
  */
@@ -119,3 +119,21 @@ void websocketBegin()
 	server.addHandler(&ws);
 	server.begin();
 } // websocketBegin()
+
+void websocketCleanup()
+{
+	/*
+  The cleanupClients() function is called periodically to free up
+  resources by removing disconnected or inactive clients from
+  the server's client list. Otherwise, you might encounter
+  issues like resource leaks or memory exhaustion over time,
+  particularly if clients connect and disconnect frequently.
+*/
+	unsigned long cleanInterval = 5000; // 5 seconds
+	static unsigned long cleanTime = millis() + cleanInterval;
+	if (millis() > cleanTime)
+	{
+		ws.cleanupClients();
+		cleanTime = millis() + cleanInterval;
+	}
+}
