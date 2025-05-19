@@ -52,6 +52,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "h_bridge.h"              // for motor control
 #include "ledControl.h"            // for LED control by web sockets
 #include "scpiControl.h"           // for SCPI commands
+#include "swrCalc.h"               // for SWR read and calculate
 #include "webSocket.h"             // set up webSocket
 #include "wifiConnection.h"        // local WiFi#include <ArduinoOTA.h>     // for OTA updates
 
@@ -72,7 +73,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 void setup()
 {
   Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
-  wifiBegin();          // setup WiFi
+  wifiBegin();          // Setup WiFi
   wifiConnect();        // Connect to WiFi
   otaBegin();           // Initialize OTA updates
   websocketBegin();     // Initialize webSocket for bi-directional communication
@@ -83,41 +84,9 @@ void setup()
 //! **************** Loop function ******************
 void loop()
 {
-  //! Reconnect to Wi-Fi if disconnected
-  if (!WiFi.isConnected())
-  {
-    wifiConnect();
-  }
-
-  //! Check for OTA updates
-  ArduinoOTA.handle();
-
-  //! Perform web client cleanup
-  /*
-    The cleanupClients() function is called periodically to free up
-    resources by removing disconnected or inactive clients from
-    the server's client list. Otherwise, you might encounter
-    issues like resource leaks or memory exhaustion over time,
-    particularly if clients connect and disconnect frequently.
-  */
-  unsigned long cleanInterval = 5000; // 5 seconds
-  static unsigned long cleanTime = millis() + cleanInterval;
-  if (millis() > cleanTime)
-  {
-    ws.cleanupClients();
-    cleanTime = millis() + cleanInterval;
-  }
-
-  //! Shut down motor if limits of travel are reached
-  processLimitSwitches();
-
-  //! Push random SWR value to all clients every 5 seconds
-  unsigned long swrInterval = 5000;
-  static unsigned long swrTime = millis() + swrInterval;
-  if (millis() > swrTime)
-  {
-    notifyClients(processSWR()); // send to all clients
-    swrTime = millis() + swrInterval;
-  }
-
+  wifiConnect();          //! Reconnect to Wi-Fi if disconnected
+  ArduinoOTA.handle();    //! Check for OTA updates
+  websocketCleanup();     //! Perform web client cleanup
+  processLimitSwitches(); //! Shut down motor if limits of travel are reached
+  swrUpdate();            //! Push random SWR value to all clients every 5 seconds
 } // loop()
