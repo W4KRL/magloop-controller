@@ -19,7 +19,7 @@
  * - WiFi.h
  * - ArduinoOTA.h
  * - configuration.h
- * 
+ *
  * @author Karl Berger
  * @date 2025-05-19
  */
@@ -87,15 +87,18 @@ void toggleLED_BUILTIN()
 
 void wifiConnect()
 {
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-	while (WiFi.status() != WL_CONNECTED)
+	if (!WiFi.isConnected())
 	{
-		toggleLED_BUILTIN();
-		delay(250);
-		Serial.print(".");
+		WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+		while (WiFi.status() != WL_CONNECTED)
+		{
+			toggleLED_BUILTIN();
+			delay(250);
+			Serial.print(".");
+		}
+		setLED_BUILTIN(HIGH); // Turn on the LED when connected
+		Serial.printf("\n%s: %s\n", "Connected to IP Address", WiFi.localIP().toString());
 	}
-	setLED_BUILTIN(HIGH); // Turn on the LED when connected
-	Serial.printf("\n%s: %s\n", "Connected to IP Address", WiFi.localIP().toString());
 } // wifiConnect()
 
 void wifiBegin()
@@ -115,5 +118,4 @@ void wifiBegin()
 		Serial.println("Static IP Configuration Failed!");
 		return;
 	}
-	wifiConnect(); // Connect to WiFi
 } // wifiBegin()
