@@ -12,12 +12,7 @@
 //! ADC pins are defined in configuration.h
 
 void swrCalcBegin();
-float swrValue();
-
-/*
-update the SWR continuously at 100 ms intervals
-send to the WebSocket only when the value has changed by more than 0.1
-
-*/
+// float swrValue();
+void swrUpdate();
 
 #endif

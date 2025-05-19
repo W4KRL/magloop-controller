@@ -9,7 +9,6 @@
  * - actionScan: Performs a scanning action in a specified direction and speed, monitoring a limit switch.
  * - actionJog: Performs a jogging action in a specified direction and speed, monitoring a limit switch.
  * - processLimitSwitches: Handles the logic for processing the state of limit switches.
- * - processSWR: Processes and returns the Standing Wave Ratio (SWR) as a String.
  *
  * External Variables:
  * - limitSwitchUp: Digital signal detector for the upper limit switch.
@@ -30,6 +29,5 @@ extern DigitalSignalDetector limitSwitchDown;
 void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch);
 void actionJog(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch);
 void processLimitSwitches();
-String processSWR();
 
 #endif

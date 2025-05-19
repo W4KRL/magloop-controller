@@ -9,7 +9,6 @@
  * - actionScan(): Handles scan button actions, manages motor movement and button state based on limit switches.
  * - actionJog(): Handles jog button actions, moves the motor for a fixed duration if the limit switch allows.
  * - processLimitSwitches(): Updates and processes the state of limit switches, updates button and LED states accordingly.
- * - processSWR(): Generates a random SWR value string for demonstration via WebSocket.
  *
  * Dependencies:
  * - Arduino.h: Basic Arduino functions.
@@ -120,11 +119,3 @@ void processLimitSwitches()
 
 } // processLimitSwitches()
 
-//! create a random SWR value to demonstrate the gauge web socket
-//! call this in loop()
-String processSWR()
-{
-  float swrValue = 1 + static_cast<float>(rand()) / static_cast<float>(RAND_MAX / (9.0));
-  String swrValueString = "swr~" + String(swrValue, 2);
-  return swrValueString;
-}
