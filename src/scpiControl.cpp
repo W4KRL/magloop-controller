@@ -33,7 +33,7 @@
  */
 #include "scpiControl.h" // Include the header file for SCPI control functions
 
-
+//! Override SCPI Parser defaults for commands and tokens
 #define SCPI_MAX_COMMANDS 35    // Maximum number of SCPI commands
 #define SCPI_MAX_TOKENS 30      // Maximum number of tokens in a command
 #define SCPI_BUFFER_LENGTH 128  // From 64
@@ -49,11 +49,11 @@
 #include <SHT2x.h>         // for HTU21D temperature and humidity sensor
 #include "webSocket.h"
 
-// Instantiations
+//! Instantiations
 SCPI_Parser scpi;        //   SCPI parser
 Preferences preferences; //   Preferences storage
 
-// Declare global variables for Preferences:
+//! Declare global variables for Preferences:
 int speedScan = 100;      //   motor high speed % for scan
 int speedJog = 70;        //   motor low speed % for fine tune
 int pressDuration = 100;  //   long button press duration ms
@@ -139,7 +139,8 @@ void instrumentIdentify(SCPI_C commands, SCPI_P parameters, Stream &interface)
   // required by SCPI spec for device identification
   int bufferLength = 100;
   char buffer[bufferLength];
-  snprintf(buffer, bufferLength, "%s, %s, %s, %s", MAKER, MODEL, SERIAL_NUMBER, VERSION);
+  snprintf(buffer, bufferLength, "%s, %s, %s, %s",
+           MAKER, MODEL, SERIAL_NUMBER, VERSION);
   interface.print(buffer);
 } // instrumentIdentity()
 
