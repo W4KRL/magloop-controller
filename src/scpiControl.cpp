@@ -1,6 +1,36 @@
-//! @file scpiControl.cpp
-//! 2025-05-10 revise SYS:ENV and others
-
+/**
+ * @file scpiControl.cpp
+ * @brief Implements SCPI (Standard Commands for Programmable Instruments) command parsing and execution
+ *        for the magloop-controller project.
+ *
+ * This file provides the implementation of SCPI command handling, including registration of commands,
+ * processing of incoming SCPI messages, and management of user preferences and system state.
+ * It interfaces with hardware components such as the HTU21D temperature/humidity sensor and manages
+ * persistent storage of user settings using the Preferences library.
+ *
+ * Key Features:
+ * - SCPI command parsing and execution using the Vrekrer SCPI parser.
+ * - Persistent storage and restoration of user-configurable settings (motor speeds, durations, etc.).
+ * - System information retrieval (firmware version, environment, voltage, web server state).
+ * - Integration with web socket for remote command execution and notification.
+ * - Hardware initialization for I2C and sensor components.
+ *
+ * Main Functions:
+ * - processSCPIcommand: Executes a given SCPI command and returns the formatted response.
+ * - restorePreferences: Loads user settings from persistent storage.
+ * - scpiBegin: Initializes SCPI parser, hardware, and registers all supported SCPI commands.
+ * - Various command handler functions for control and system queries/updates.
+ *
+ * Dependencies:
+ * - configuration.h: Project-specific configuration and definitions.
+ * - StreamString.h: For capturing SCPI command responses.
+ * - Preferences.h: For persistent storage of settings.
+ * - Wire.h, SHT2x.h: For I2C communication and sensor access.
+ * - webSocket.h: For web socket integration.
+ *
+ * @author Karl Berger
+ * @date 2024-05-19
+ */
 #include "scpiControl.h" // Include the header file for SCPI control functions
 
 #define SCPI_MAX_COMMANDS 35    // Maximum number of SCPI commands
@@ -9,13 +39,14 @@
 #define SCPI_ARRAY_SYZE 6       // Maximum number of elements in an array
 #define SCPI_HASH_TYPE uint16_t // Default value = uint8_t
 
-#include "configuration.h"       // for SCPI identification
+#include "configuration.h" // for SCPI identification
 // #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
-#include <StreamString.h>        // for StreamString class in processSCPIcommand()
-#include <Preferences.h>         // Store controller settings in flash with LittleFS
-#include <Wire.h>                // for I2C communication
-#include <SHT2x.h>               // for HTU21D temperature and humidity sensor
+#include <StreamString.h> // for StreamString class in processSCPIcommand()
+#include <Preferences.h>  // Store controller settings in flash with LittleFS
+#include <Wire.h>         // for I2C communication
+#include <SHT2x.h>        // for HTU21D temperature and humidity sensor
 #include "webSocket.h"
+#include "configuration.h" // for colors and definitions
 
 // extern AsyncWebSocket ws;                  // for debug statements
 // void notifyClients(const String &message); // for debug statements

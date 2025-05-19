@@ -1,6 +1,3 @@
-//! @file scpiControl.h
-//! 2025-05-10 revise SYS:ENV and others
-
 /**
  * @file scpiControl.h
  * @brief SCPI (Standard Commands for Programmable Instruments) control functions for managing
