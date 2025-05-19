@@ -1,13 +1,31 @@
+/**
+ * @file h_bridge.cpp
+ * @brief Implementation of H-bridge motor control functions for ESP32.
+ *
+ * This file provides functions to initialize and control a DC motor via an H-bridge
+ * using PWM signals on the ESP32 platform. The motor direction and speed are controlled
+ * by setting the appropriate logic levels and PWM duty cycles on the H-bridge input pins.
+ *
+ * Functions:
+ * - h_bridgeBegin(): Initializes the H-bridge control pins and configures PWM settings.
+ * - setMotorSpeed(int speed, int mode): Sets the motor speed and direction based on the specified mode.
+ *
+ * PWM logic:
+ * - Forward: IN1 = HIGH, IN2 = PWM (inverted logic)
+ * - Reverse: IN1 = PWM (inverted logic), IN2 = HIGH
+ * - Idle:    IN1 = HIGH, IN2 = HIGH
+ *
+ * @note The PWM duty cycle is inverted (0 = full output, 255 = off) due to H-bridge logic.
+ * @note Requires GPIO definitions from "configuration.h".
+ */
+
 #include "h_bridge.h"
 
 #include "configuration.h" // GPIO definitions
 
-// enum Motion
-// {
-//     NO_MOTION = 0,
-//     MOVE_UP = 1,
-//     MOVE_DOWN = 2
-// };
+const int NO_MOTION = 0;
+const int MOVE_UP = 1;
+const int MOVE_DOWN = 2;
 
 const int pwmFrequency = 1000; // frequency in Hz
 const int pwmResolution = 8;   // resolution in bits

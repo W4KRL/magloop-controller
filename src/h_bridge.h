@@ -1,21 +1,30 @@
-//! @file h_bridge.h
-//! 2025-05-10 use enum Motion for direction, eliminate IDLE
-
-//! uses fast stop inverted logic
-// see TI datasheet 7.3.1
-// https://www.ti.com/lit/ds/symlink/drv8871.pdf
+/**
+ * @file h_bridge.h
+ * @brief Header file for H-Bridge motor control functions.
+ *
+ * This file provides the interface for controlling a motor using an H-Bridge driver,
+ * specifically referencing the TI DRV8871 datasheet (section 7.3.1).
+ *
+ * - Uses fast stop with inverted logic.
+ * - Defines the Motion enum for specifying motor direction.
+ * - Eliminates the IDLE state in favor of NO_MOTION.
+ *
+ * Functions:
+ *   - h_bridgeBegin(): Initializes the H-Bridge hardware.
+ *   - setMotorSpeed(int speed, int mode): Sets the motor speed and direction.
+ *
+ * @author Karl Berger
+ * @date 2025-05-10
+ */
 
 #ifndef H_BRIDGE_H
 #define H_BRIDGE_H
 
-#include <Arduino.h>       // for Arduino functions
+#include <Arduino.h> // for Arduino functions
 
-enum Motion
-{
-    NO_MOTION = 0,
-    MOVE_UP = 1,
-    MOVE_DOWN = 2
-};
+extern const int NO_MOTION;
+extern const int MOVE_UP;
+extern const int MOVE_DOWN;
 
 void h_bridgeBegin();
 void setMotorSpeed(int speed, int mode);

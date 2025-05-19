@@ -1,6 +1,4 @@
-//! @file DigitalSignalDetector.h
-//! 2025-05-15
-// by Perplexity AI & Karl W. Berger, W4KRL
+
 
 #ifndef DIGITAL_SIGNAL_DETECTOR_H
 #define DIGITAL_SIGNAL_DETECTOR_H
@@ -9,13 +7,21 @@
 
 /**
  * @class DigitalSignalDetector
- * @brief A class to detect digital signal changes (rising and falling edges) on a specified input pin.
+ * @brief Detects rising and falling edges on a digital input pin.
  *
- * This class provides functionality to monitor a digital input pin and detect
- * transitions (rising and falling edges) as well as the current state of the pin.
- * 
- * @note Call the `update()` method in your main loop to refresh the state of the pin.
- *       Call the constructor with the pin number to initialize the pin mode in setup().
+ * The DigitalSignalDetector class monitors a specified digital input pin for state changes.
+ * It detects transitions (rising and falling edges) and provides methods to query the current
+ * state and whether an edge has occurred since the last update.
+ *
+ * Usage:
+ *   - Instantiate with the desired pin number.
+ *   - Call update() in the main loop to refresh the pin state.
+ *   - Use rose(), fell(), and read() to query pin transitions and state.
+ *
+ * @note Call update() frequently (e.g., in the main loop) to ensure accurate edge detection.
+ *
+ * @author Karl Berger
+ * @date 2025-05-19
  */
 class DigitalSignalDetector
 {

@@ -1,6 +1,26 @@
+/**
+ * @file ledControl.cpp
+ * @brief Implements LED control logic for the magloop controller, including state updates and client notifications via web sockets.
+ *
+ * This file provides functions to manage the state and color of two LEDs (UP and DOWN) based on limit switch readings.
+ * It updates all connected clients with the current LED state using web sockets.
+ *
+ * - LED_UP and LED_DOWN represent the indices for the two LEDs.
+ * - ledColor[] stores the current color of each LED.
+ * - updateLedState() updates the color of a specific LED and notifies all clients.
+ * - initLedStates() initializes the LED states based on the limit switch readings and updates all clients.
+ *
+ * Dependencies:
+ * - Arduino.h: Arduino core functions.
+ * - configuration.h: LED color definitions.
+ * - webSocket.h: notifyClients() for client communication.
+ * - actions.h: limitSwitchUp and limitSwitchDown objects.
+ * - debug_magloop.h: Debug print macros.
+ * - DigitalSignalDetector.h: Digital signal detection utilities.
+ */
+
 #include "ledControl.h" // for LED control by web sockets
 
-#include <Arduino.h>
 #include "configuration.h" // for LED colors
 #include "webSocket.h"     // for notifyClients()
 #include "actions.h"       // for limitSwitchUp, limitSwitchDown

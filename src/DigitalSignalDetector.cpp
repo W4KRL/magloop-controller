@@ -1,6 +1,13 @@
-//! @file DigitalSignalDetector.cpp
-//! 2025-05-15
-// by Perplexity AI & Karl W. Berger, W4KRL
+/**
+ * @file DigitalSignalDetector.cpp
+ * @brief Implementation of the DigitalSignalDetector class for detecting digital signal changes on a specified input pin.
+ *
+ * This class provides methods to monitor a digital input pin and detect rising and falling edges.
+ * It maintains the current and previous state of the pin to determine if the signal has changed.
+ *
+ * @author Karl Berger
+ * @date 2025-05-19
+ */
 
 #include "DigitalSignalDetector.h"
 

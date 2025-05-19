@@ -1,13 +1,12 @@
 
-#include "actions.h"             // for actionScan(), actionJog(), processLimitSwitches()
+#include "actions.h" // for actionScan(), actionJog(), processLimitSwitches()
 
-#include <Arduino.h>               // Required for basic Arduino functions
-#include "buttonHandler.h"         // for webSocket buttonStates[] and updateButtonState()
-#include "h_bridge.h"              // for setMotorSpeed()
-#include "configuration.h"           // for LED colors
-#include "ledControl.h" // for colors
-
-#include "scpiControl.h"
+#include <Arduino.h>       // Required for basic Arduino functions
+#include "buttonHandler.h" // for webSocket buttonStates[] and updateButtonState()
+#include "h_bridge.h"      // for setMotorSpeed()
+#include "configuration.h" // for LED colors
+#include "ledControl.h"    // for colors
+#include "scpiControl.h"   // for motor speed and direction
 
 //! Instantiate DigitalSignalDetector objects for limit switches
 DigitalSignalDetector limitSwitchUp(LIMIT_UP_PIN);
@@ -62,7 +61,7 @@ void processLimitSwitches()
   // Check if the limit switches were triggered
   if (limitSwitchUp.rose()) // Limit switch UP was triggered
   {
-    setMotorSpeed(NO_MOTION, NO_MOTION);                       // Stop the motor
+    setMotorSpeed(NO_MOTION, NO_MOTION);                  // Stop the motor
     buttonStates[BTN_SCAN_UP].depressed = false;          // Set Scan Up button to undepressed
     buttonStates[BTN_SCAN_UP].color = BTN_DISABLED_COLOR; // Set Scan button to disabled color
     updateButtonState(BTN_SCAN_UP);                       // Send websocket message
@@ -74,7 +73,7 @@ void processLimitSwitches()
 
   if (limitSwitchDown.rose()) // Limit switch DOWN was triggered
   {
-    setMotorSpeed(NO_MOTION, NO_MOTION);                         // Stop the motor
+    setMotorSpeed(NO_MOTION, NO_MOTION);                    // Stop the motor
     buttonStates[BTN_SCAN_DOWN].depressed = false;          // Set Scan Down button to undepressed
     buttonStates[BTN_SCAN_DOWN].color = BTN_DISABLED_COLOR; // Set Scan button to disabled color
     updateButtonState(BTN_SCAN_DOWN);                       // Send websocket message

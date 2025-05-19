@@ -1,22 +1,21 @@
-//! @file ledControl.h
-//! LED control functions for webSocket clients
-//! 2025-05-10 use enum LedIndex for LED indices
+/**
+ * @file ledControl.h
+ * @brief Provides LED control functions for webSocket clients.
+ *
+ * This header defines functions and variables for controlling LEDs,
+ * including updating their state and initializing them. It also
+ * declares external variables for LED color and indices.
+ *
+ * @note As of 2025-05-10, the use of enum LedIndex for LED indices is suggested.
+ *
+ * @author Karl Berger
+ * @date 2025-05-10
+ */
 
 #ifndef LED_CONTROL_H
 #define LED_CONTROL_H
 
 #include <Arduino.h>
-// #include "DigitalSignalDetector.h" // for limit switch detection
-
-// extern DigitalSignalDetector limitSwitchUp;
-// extern DigitalSignalDetector limitSwitchDown;
-
-//! LED indices
-// enum LedIndex
-// {
-//     LED_UP = 0,
-//     LED_DOWN = 1
-// };
 
 extern String ledColor[2];
 extern int LED_UP;
