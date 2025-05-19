@@ -13,13 +13,14 @@
 #include <LittleFS.h>          // for index.html, styles.css, and script.js
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
 #include "debug_magloop.h"     // for DEBUG_PRINT, DEBUG_PRINTLN
-#include "scpiControl.h"       // for processSCPIcommand()
+// #include "scpiControl.h"       // for processSCPIcommand()
 
 // Function prototypes
 void initLedStates();                                      // ledControl.h
 void initButtonStates();                                   // buttonHandler.h
 void processButtonEvent(String &buttonId, String &action); // buttonHandler.h
 void notifyClients(const String &message);                 // webSocket.h
+String processSCPIcommand(String scpiCommand);
 
 //! Instantiate WebSocket server on port 80
 AsyncWebServer server(80);

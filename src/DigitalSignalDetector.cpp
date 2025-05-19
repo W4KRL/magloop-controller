@@ -8,14 +8,14 @@ DigitalSignalDetector::DigitalSignalDetector(int inputPin)
     : pin(inputPin)
 {
     pinMode(pin, INPUT);
-    currentState = static_cast<bool>(digitalRead(pin));
+    currentState = digitalRead(pin);
     previousState = currentState;
 }
 
 void DigitalSignalDetector::update()
 {
     previousState = currentState;
-    currentState = static_cast<bool>(digitalRead(pin));
+    currentState = digitalRead(pin);
 }
 
 bool DigitalSignalDetector::rose() const

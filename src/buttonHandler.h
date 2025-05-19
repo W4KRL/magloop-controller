@@ -4,16 +4,15 @@
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
 
-#include <Arduino.h>               // for Arduino functions
-#include "actions.h"               // for actionScan(), actionJog()
-#include "ledControl.h"            // for LED colors
-#include "h_bridge.h"              // for setMotorSpeed()
-#include "DigitalSignalDetector.h" // for limit switch detection
-
-extern DigitalSignalDetector limitSwitchUp;   // Reference the UP limit switch
-extern DigitalSignalDetector limitSwitchDown; // Reference the DOWN limit switch
-void actionScan(int btnIndx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch);
-void actionJog(int btnIdx, int moveDirection, int speed, DigitalSignalDetector &limitSwitch);
+#include <Arduino.h>       // for Arduino functions
+#include "actions.h"       // for actionScan(), actionJog()
+#include "configuration.h" // colors
+// #include "ledControl.h"            // for LED colors
+// #include "h_bridge.h"              // for setMotorSpeed()
+// #include "DigitalSignalDetector.h" // for limit switch detection
+// #include "debug_magloop.h"         // for debug print to Serial Monitor
+// #include "webSocket.h"             // for notifyClients()
+// #include "scpiControl.h" // for user parameters
 
 //! Structure to hold button state information
 struct ButtonState
@@ -41,77 +40,9 @@ enum ButtonID
   BTN_JOG_DOWN = 3
 } ButtonID;
 
-//! Send a button state update to all connected clients
-void updateButtonState(int btnIndx)
-{
-  // String id = buttonStates[btnIndx].id;
-  ButtonState &button = buttonStates[btnIndx];     // Reference to the button state
-  String message = "btn~" + String(btnIndx) + "~"; // Prefix with "btn~" for button messages
-  message += button.depressed ? "true~" + button.color : "false~" + String(BTN_UNPRESSED_COLOR);
-  DEBUG_PRINTF("%s", message.c_str());
-  notifyClients(message);
-} // updateButtonState()
-
-//! Send all button states to all clients
-void initButtonStates()
-{
-  for (int i = 0; i < sizeof(buttonStates) / sizeof(buttonStates[0]); i++)
-  {
-    updateButtonState(i);
-  }
-} // initButtonStates()
-
-//! Helper function to check if jog actions are allowed
-bool isJogActionAllowed()
-{
-  return !buttonStates[BTN_SCAN_UP].depressed && !buttonStates[BTN_SCAN_DOWN].depressed;
-}
-
-//! Call the action responses for all buttons
-void processButtonEvent(String &buttonId, String &action)
-{
-  char buttonChar = buttonId.charAt(0); // Extract the first character as a char
-  int buttonIndex = buttonChar - '0';   // Convert char to index (0-3)
-
-  switch (buttonIndex)
-  {
-  case BTN_SCAN_UP:
-    if (!buttonStates[BTN_SCAN_DOWN].depressed)
-    {
-      actionScan(BTN_SCAN_UP, MOVE_UP, speedScan, limitSwitchUp);
-    }
-    break;
-  case BTN_SCAN_DOWN:
-    if (!buttonStates[BTN_SCAN_UP].depressed)
-    {
-      actionScan(BTN_SCAN_DOWN, MOVE_DOWN, speedScan, limitSwitchDown);
-    }
-    break;
-  case BTN_JOG_UP:
-    if (action == "pressed" && isJogActionAllowed())
-    {
-      actionJog(BTN_JOG_UP, MOVE_UP, speedJog, limitSwitchUp);
-    }
-    else if (action == "released")
-    {
-      buttonStates[BTN_JOG_UP].depressed = false;
-      updateButtonState(BTN_JOG_UP);
-    }
-    break;
-  case BTN_JOG_DOWN:
-    if (action == "pressed" && isJogActionAllowed())
-    {
-      actionJog(BTN_JOG_DOWN, MOVE_DOWN, speedJog, limitSwitchDown);
-    }
-    else if (action == "released")
-    {
-      buttonStates[BTN_JOG_DOWN].depressed = false;
-      updateButtonState(BTN_JOG_DOWN);
-    }
-    break;
-  default:
-    return; // Invalid button ID, exit the function
-  }
-} // processButtonEvent()
+void updateButtonState(int btnIndx);                       //! Send a button state update to all connected clients
+void initButtonStates();                                   //! Send all button states to all clients
+bool isJogActionAllowed();                                 //! Helper function to check if jog actions are allowed
+void processButtonEvent(String &buttonId, String &action); //! Call the action responses for all buttons
 
 #endif

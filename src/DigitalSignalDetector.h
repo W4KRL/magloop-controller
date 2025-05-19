@@ -1,5 +1,5 @@
 //! @file DigitalSignalDetector.h
-//! 2025-05-09
+//! 2025-05-15
 // by Perplexity AI & Karl W. Berger, W4KRL
 
 #ifndef DIGITAL_SIGNAL_DETECTOR_H
