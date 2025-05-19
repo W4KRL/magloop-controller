@@ -33,34 +33,32 @@
  */
 #include "scpiControl.h" // Include the header file for SCPI control functions
 
+
 #define SCPI_MAX_COMMANDS 35    // Maximum number of SCPI commands
 #define SCPI_MAX_TOKENS 30      // Maximum number of tokens in a command
 #define SCPI_BUFFER_LENGTH 128  // From 64
 #define SCPI_ARRAY_SYZE 6       // Maximum number of elements in an array
 #define SCPI_HASH_TYPE uint16_t // Default value = uint8_t
 
-#include "configuration.h" // for SCPI identification
-// #include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
-#include <StreamString.h> // for StreamString class in processSCPIcommand()
-#include <Preferences.h>  // Store controller settings in flash with LittleFS
-#include <Wire.h>         // for I2C communication
-#include <SHT2x.h>        // for HTU21D temperature and humidity sensor
-#include "webSocket.h"
-#include "configuration.h" // for colors and definitions
+#include <Vrekrer_scpi_parser.h> // https://github.com/Vrekrer/Vrekrer_scpi_parser
 
-// extern AsyncWebSocket ws;                  // for debug statements
-// void notifyClients(const String &message); // for debug statements
+#include "configuration.h" // for SCPI identification
+#include <StreamString.h>  // for StreamString class in processSCPIcommand()
+#include <Preferences.h>   // Store controller settings in flash with LittleFS
+#include <Wire.h>          // for I2C communication
+#include <SHT2x.h>         // for HTU21D temperature and humidity sensor
+#include "webSocket.h"
 
 // Instantiations
 SCPI_Parser scpi;        //   SCPI parser
 Preferences preferences; //   Preferences storage
 
 // Declare global variables for Preferences:
-int speedScan;      //   motor high speed % for scan
-int speedJog;       //   motor low speed % for fine tune
-int pressDuration;  //   long button press duration ms
-int jogDuration;    //   motor jog duration ms
-int repeatInterval; //   jog repeat interval ms
+int speedScan = 100;      //   motor high speed % for scan
+int speedJog = 70;        //   motor low speed % for fine tune
+int pressDuration = 100;  //   long button press duration ms
+int jogDuration = 100;    //   motor jog duration ms
+int repeatInterval = 100; //   jog repeat interval ms
 
 //! Instantiate temperature and humidity sensor object
 SHT2x envSensor; // HTU21D temperature and humidity sensor
@@ -116,17 +114,17 @@ void restorePreferences()
 
 //! SCPI Command Functions
 
-// void scpiErrorHandler(SCPI_C commands, SCPI_P parameters, Stream &interface)
-// {
-//   interface.print("ERROR: Unrecognized command: ");
-//   for (int i = 0; i < commands.Size(); i++)
-//   {
-//     if (i > 0)
-//       interface.print(":");
-//     interface.print(commands[i]);
-//   }
-//   interface.println();
-// } // scpiErrorHandler()
+void scpiErrorHandler(SCPI_C commands, SCPI_P parameters, Stream &interface)
+{
+  interface.print("ERROR: Unrecognized command: ");
+  for (int i = 0; i < commands.Size(); i++)
+  {
+    if (i > 0)
+      interface.print(":");
+    interface.print(commands[i]);
+  }
+  interface.println();
+} // scpiErrorHandler()
 
 void instrumentClearStorage(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
@@ -149,7 +147,11 @@ void instrumentReset(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   static unsigned long resetStartTime = 0; // Track the start time
 
-  interface.print("Restarting....\n");
+  if (resetStartTime == 0)
+  {
+    resetStartTime = millis(); // Initialize reset start time
+    interface.print("Restarting....\n");
+  }
   if (millis() - resetStartTime >= 2000)
   {
     ESP.restart(); // Restart the processor
@@ -207,13 +209,14 @@ void setControlJog(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
+    speedScan = max(speedScan, 50); // Ensure speedScan has a minimum value of 50
     speedJog = constrain(String(parameters[0]).toInt(), 50, speedScan);
     preferences.putInt("speedLow", speedJog);
     interface.printf("%s: %i%%", "Jog speed", speedJog);
   }
   else
   {
-    interface.printf("Scan speed value is missing\n");
+    interface.printf("Jog speed value is missing\n");
   }
 } // setControlJogSpeed()
 
@@ -256,7 +259,7 @@ void setControlRepeat(SCPI_C commands, SCPI_P parameters, Stream &interface)
 {
   if (parameters.Size() > 0)
   {
-    repeatInterval = String(parameters[0]).toInt();
+    repeatInterval = constrain(String(parameters[0]).toInt(), 100, 300);
     preferences.putInt("repeatInterval", repeatInterval);
     interface.printf("%s: %i ms", "Repeat Interval", repeatInterval);
   }
@@ -366,10 +369,10 @@ void scpiBegin()
   }
 
   //! SCPI Command Registration called in setup()
-  scpi.hash_magic_number = 257; // set the hash magic number
+  scpi.hash_magic_number = 173; // set the hash magic number
   scpi.hash_magic_offset = 11;  // set the hash magic offset
 
-  // scpi.SetErrorHandler(scpiErrorHandler);                       // set the error handler
+  scpi.SetErrorHandler(scpiErrorHandler);                       // set the error handler
   scpi.RegisterCommand("*CLS", &instrumentClearStorage);        // clear the user preference settings stored in flash
   scpi.RegisterCommand("*IDN?", &instrumentIdentify);           // identify the device
   scpi.RegisterCommand("*RST", &instrumentReset);               // reset the device

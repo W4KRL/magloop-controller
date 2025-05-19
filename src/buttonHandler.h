@@ -28,58 +28,27 @@
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
 
-#include <Arduino.h>       // for Arduino functions
-#include "actions.h"       // for actionScan(), actionJog()
-#include "configuration.h" // colors
+#include <Arduino.h>
+#include "actions.h"
+#include "configuration.h"
 
-/**
- * @brief Structure representing a button state and its associated color.
- *
- * @var depressed Indicates whether the button is currently pressed (true) or not (false).
- * @var color The color associated with the button, represented as a String.
- */
-struct ButtonState
-{
+// Structure representing a button state and its associated color
+struct ButtonState {
   bool depressed;
   String color;
 };
 
-/**
- * @brief Array of ButtonState structures representing the state and color of each button.
- *
- * The array contains the following buttons:
- * - btn0: Scan Up button, initialized as not pressed, with BTN_SCAN_UP_COLOR.
- * - btn1: Scan Down button, initialized as not pressed, with BTN_SCAN_DOWN_COLOR.
- * - btn2: Jog Up button, initialized as not pressed, with BTN_JOG_UP_COLOR.
- * - btn3: Jog Down button, initialized as not pressed, with BTN_JOG_DOWN_COLOR.
- */
-ButtonState buttonStates[] = {
-    {false, BTN_SCAN_UP_COLOR},   // btn0 scan up
-    {false, BTN_SCAN_DOWN_COLOR}, // btn1 scan down
-    {false, BTN_JOG_UP_COLOR},    // btn2 jog up
-    {false, BTN_JOG_DOWN_COLOR}}; // btn3 jog down
+// ✅ Declare `buttonStates[]` as `extern` so it is defined elsewhere
+extern ButtonState buttonStates[];
 
-/**
- * @enum ButtonID
- * @brief Identifies the different buttons available on the controller.
- *
- * Enumerates the possible button actions:
- * - BTN_SCAN_UP:    Button to initiate scanning upwards.
- * - BTN_SCAN_DOWN:  Button to initiate scanning downwards.
- * - BTN_JOG_UP:     Button to jog (move incrementally) upwards.
- * - BTN_JOG_DOWN:   Button to jog (move incrementally) downwards.
- */
-enum ButtonID
-{
-  BTN_SCAN_UP = 0,
-  BTN_SCAN_DOWN = 1,
-  BTN_JOG_UP = 2,
-  BTN_JOG_DOWN = 3
-} ButtonID;
+extern const int BTN_SCAN_UP;
+extern const int BTN_SCAN_DOWN;
+extern const int BTN_JOG_UP;
+extern const int BTN_JOG_DOWN;
 
-void updateButtonState(int btnIndx);                       //! Send a button state update to all connected clients
-void initButtonStates();                                   //! Send all button states to all clients
-bool isJogActionAllowed();                                 //! Helper function to check if jog actions are allowed
-void processButtonEvent(String &buttonId, String &action); //! Call the action responses for all buttons
+void updateButtonState(int btnIndx);
+void initButtonStates();
+bool isJogActionAllowed();
+void processButtonEvent(String &buttonId, String &action);
 
 #endif

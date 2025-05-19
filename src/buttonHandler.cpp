@@ -10,31 +10,19 @@
 #include "scpiControl.h"           // for user parameters
 #include "configuration.h"         // for colors and designations
 
-//! Structure to hold button state information
-// struct ButtonState
-// {
-//   bool depressed;
-//   String color;
-// };
+//! Array to store the initial state of each button
+//! Each entry includes: buttonId, initial state (depressed or not), and depressedColor (ON)
+ButtonState buttonStates[] = {
+    {false, BTN_SCAN_UP_COLOR},   // btn0 scan up
+    {false, BTN_SCAN_DOWN_COLOR}, // btn1 scan down
+    {false, BTN_JOG_UP_COLOR},    // btn2 jog up
+    {false, BTN_JOG_DOWN_COLOR}}; // btn3 jog down
 
-// //! Array to store the initial state of each button
-// //! Each entry includes: buttonId, initial state (depressed or not), and depressedColor (ON)
-// // button 0 and 1 are latching buttons
-// // button 2 and 3 are momentary buttons
-// ButtonState buttonStates[] = {
-//     {false, BTN_SCAN_UP_COLOR},   // btn0 scan up
-//     {false, BTN_SCAN_DOWN_COLOR}, // btn1 scan down
-//     {false, BTN_JOG_UP_COLOR},    // btn2 jog up
-//     {false, BTN_JOG_DOWN_COLOR}}; // btn3 jog down
-
-// //! Button state constants
-// enum ButtonID
-// {
-//   BTN_SCAN_UP = 0,
-//   BTN_SCAN_DOWN = 1,
-//   BTN_JOG_UP = 2,
-//   BTN_JOG_DOWN = 3
-// } ButtonID;
+//! Button state constants
+const int BTN_SCAN_UP = 0;
+const int BTN_SCAN_DOWN = 1;
+const int BTN_JOG_UP = 2;
+const int BTN_JOG_DOWN = 3;
 
 //! Send a button state update to all connected clients
 void updateButtonState(int btnIndx)

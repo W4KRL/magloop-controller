@@ -21,11 +21,11 @@
 
 #include "ledControl.h" // for LED control by web sockets
 
-#include "configuration.h" // for LED colors
-#include "webSocket.h"     // for notifyClients()
-#include "actions.h"       // for limitSwitchUp, limitSwitchDown
-#include "debug_magloop.h" // for debug print to Serial Monitor
-#include "DigitalSignalDetector.h"
+#include "configuration.h"         // for LED colors
+#include "webSocket.h"             // for notifyClients()
+#include "actions.h"               // for limitSwitchUp, limitSwitchDown
+#include "debug_magloop.h"         // for debug print to Serial Monitor
+#include "DigitalSignalDetector.h" // limit sensors
 
 int LED_UP = 0;
 int LED_DOWN = 1;
