@@ -1,3 +1,25 @@
+
+/**
+ * @file wifiConnection.cpp
+ * @brief Implements Wi-Fi connection and OTA update functionality for the magloop-controller project.
+ *
+ * This file provides functions to initialize Wi-Fi connectivity, configure static IP,
+ * handle built-in LED status indication, and enable Arduino OTA (Over-The-Air) updates.
+ * It uses the ESP32 WiFi and ArduinoOTA libraries, and relies on configuration parameters
+ * defined in "configuration.h" for SSID, password, and network settings.
+ *
+ * Features:
+ * - Wi-Fi connection with status LED feedback.
+ * - Static IP configuration.
+ * - Built-in LED control and toggling.
+ * - Arduino OTA update support with progress and error reporting.
+ *
+ * Dependencies:
+ * - Arduino.h
+ * - WiFi.h
+ * - ArduinoOTA.h
+ * - configuration.h
+ */
 #include "wifiConnection.h" // Wi-Fi connection header
 
 #include <Arduino.h>	   // for PlatformIO
@@ -5,12 +27,6 @@
 #include <ArduinoOTA.h>	   // for OTA updates
 #include "configuration.h" // for SSID, password, static IP
 
-IPAddress localIP = LOCAL_IP;
-IPAddress gateway = GATEWAY;
-IPAddress subnet = SUBNET;
-
-//! Initialize OTA
-//! This function sets up the OTA (Over-The-Air) update process for the ESP32 device.
 void otaBegin()
 {
 	ArduinoOTA.begin();
@@ -66,20 +82,6 @@ void toggleLED_BUILTIN()
 	digitalWrite(LED_BUILTIN, ledBuiltIn); // Apply the new state
 }
 
-/**
- * @brief Connects to a Wi-Fi network using predefined SSID and password.
- *
- * This function attempts to establish a connection to a Wi-Fi network
- * using the credentials defined by WIFI_SSID and WIFI_PASSWORD. While
- * the connection is being established, the built-in LED toggles every
- * 250 milliseconds, and a dot ('.') is printed to the Serial monitor
- * to indicate progress. Once connected, the built-in LED is turned on,
- * and the assigned IP address is printed to the Serial monitor.
- *
- * @note Ensure that WIFI_SSID and WIFI_PASSWORD are defined before
- *       calling this function. The Serial monitor should also be
- *       initialized using Serial.begin() for output to be visible.
- */
 void wifiConnect()
 {
 	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -93,26 +95,6 @@ void wifiConnect()
 	Serial.printf("\n%s: %s\n", "Connected to IP Address", WiFi.localIP().toString());
 } // wifiConnect()
 
-//! Connect to WiFi
-/**
- * @brief Initializes the WiFi connection and configures the onboard LED.
- *
- * This function sets up the WiFi in station mode, disables persistent storage,
- * enables auto-reconnection, and disables WiFi sleep mode. It also configures
- * a static IP address and attempts to connect to the WiFi network using the
- * provided SSID and password. Additionally, it configures the onboard LED pin
- * and ensures it starts in the off state.
- *
- * @note Ensure that the following variables are defined and initialized before
- *       calling this function:
- *       - `WIFI_SSID`: The SSID of the WiFi network to connect to.
- *       - `localIP`: The static IP address to assign to the device.
- *       - `gateway`: The gateway address for the network.
- *       - `subnet`: The subnet mask for the network.
- *
- * @warning If the static IP configuration fails, the function will terminate
- *          without attempting to connect to the WiFi network.
- */
 void wifiBegin()
 {
 	// Configure onboard LED pin
@@ -125,7 +107,7 @@ void wifiBegin()
 	WiFi.setSleep(false);
 	Serial.printf("\n%s %s\n", "Connecting to", WIFI_SSID);
 	// Set static IP configuration
-	if (!WiFi.config(localIP, gateway, subnet))
+	if (!WiFi.config(LOCAL_IP, GATEWAY, SUBNET))
 	{
 		Serial.println("Static IP Configuration Failed!");
 		return;
