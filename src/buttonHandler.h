@@ -15,9 +15,6 @@
  * Structures:
  * - ButtonState: Holds the depressed state and color for each button.
  *
- * Enumerations:
- * - ButtonID: Identifiers for each button (scan up/down, jog up/down).
- *
  * Functions:
  * - updateButtonState(int btnIndx): Updates and broadcasts the state of a specific button.
  * - initButtonStates(): Initializes and broadcasts the state of all buttons.
@@ -31,17 +28,18 @@
 #ifndef BUTTONHANDLER_H
 #define BUTTONHANDLER_H
 
-#include <Arduino.h>
-#include "actions.h"
-#include "configuration.h"
+#include <Arduino.h>       // for String
+#include "actions.h"       // for motor control actions
+#include "configuration.h" // for button colors
 
 // Structure representing a button state and its associated color
-struct ButtonState {
+struct ButtonState
+{
   bool depressed;
   String color;
 };
 
-// ✅ Declare `buttonStates[]` as `extern` so it is defined elsewhere
+// Declare `buttonStates[]` as `extern` for use elsewhere
 extern ButtonState buttonStates[];
 
 extern const int BTN_SCAN_UP;
