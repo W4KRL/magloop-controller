@@ -1,10 +1,3 @@
-
-
-#ifndef DIGITAL_SIGNAL_DETECTOR_H
-#define DIGITAL_SIGNAL_DETECTOR_H
-
-#include <Arduino.h>
-
 /**
  * @class DigitalSignalDetector
  * @brief Detects rising and falling edges on a digital input pin.
@@ -23,6 +16,12 @@
  * @author Karl Berger
  * @date 2025-05-19
  */
+
+#ifndef DIGITAL_SIGNAL_DETECTOR_H
+#define DIGITAL_SIGNAL_DETECTOR_H
+
+#include <Arduino.h>
+
 class DigitalSignalDetector
 {
 private:
