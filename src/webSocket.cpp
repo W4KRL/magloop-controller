@@ -1,3 +1,32 @@
+
+/**
+ * @file webSocket.cpp
+ * @brief Implements WebSocket server functionality for the magloop-controller project.
+ *
+ * This file sets up an asynchronous WebSocket server using ESPAsyncWebServer and handles
+ * real-time communication between the ESP device and web clients. It serves static files
+ * (HTML, CSS, JS) from LittleFS and processes incoming WebSocket messages for button events
+ * and SCPI commands.
+ *
+ * Main Features:
+ * - Serves web interface files from LittleFS.
+ * - Handles WebSocket connections, disconnections, and data events.
+ * - Processes button events and SCPI commands received via WebSocket.
+ * - Broadcasts responses to all connected WebSocket clients.
+ *
+ * Dependencies:
+ * - LittleFS for file storage.
+ * - ESPAsyncWebServer for HTTP and WebSocket handling.
+ * - Custom modules: debug_magloop, scpiControl, ledControl, buttonHandler.
+ *
+ * Functions:
+ * - onWsEvent: Handles WebSocket events (connect, disconnect, data).
+ * - notifyClients: Sends a message to all connected WebSocket clients.
+ * - websocketBegin: Initializes the filesystem, sets up HTTP routes, and starts the server.
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
+ */
 #include "webSocket.h"
 
 #include <LittleFS.h>	   // for index.html, styles.css, and script.js

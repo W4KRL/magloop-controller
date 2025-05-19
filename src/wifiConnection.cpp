@@ -19,6 +19,9 @@
  * - WiFi.h
  * - ArduinoOTA.h
  * - configuration.h
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
  */
 #include "wifiConnection.h" // Wi-Fi connection header
 

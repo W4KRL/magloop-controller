@@ -17,6 +17,9 @@
  *
  * @note The PWM duty cycle is inverted (0 = full output, 255 = off) due to H-bridge logic.
  * @note Requires GPIO definitions from "configuration.h".
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
  */
 
 #include "h_bridge.h"

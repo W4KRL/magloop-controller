@@ -1,3 +1,28 @@
+
+/**
+ * @file buttonHandler.cpp
+ * @brief Handles button state management and actions for the magloop controller.
+ *
+ * This file manages the state of physical or virtual buttons, updates their states,
+ * communicates changes to connected clients, and triggers appropriate actions such as
+ * scanning or jogging the motor. It also ensures that button actions are mutually exclusive
+ * where necessary (e.g., jog actions are only allowed if scan buttons are not pressed).
+ *
+ * Key functionalities:
+ * - Maintains an array of button states, including their pressed status and associated colors.
+ * - Provides functions to update and broadcast button states to clients.
+ * - Processes button events and triggers corresponding actions (scan or jog).
+ * - Ensures safe operation by checking button dependencies (e.g., jog actions are blocked during scan).
+ *
+ * Dependencies:
+ * - Arduino core for basic functions.
+ * - Custom modules for actions, LED control, H-bridge motor control, limit switch detection,
+ *   debugging, WebSocket communication, SCPI control, and configuration.
+ *
+ * @author Karl Berger
+ * @date 2025-05-19
+ */
+
 #include "buttonHandler.h"
 
 #include <Arduino.h>               // for Arduino functions

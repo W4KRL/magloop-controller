@@ -6,6 +6,9 @@
  *
  * This header provides function declarations for initializing WiFi,
  * connecting to a WiFi network, and starting OTA (Over-The-Air) updates.
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
  */
 
 /**

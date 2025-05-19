@@ -23,6 +23,9 @@
  * - initButtonStates(): Initializes and broadcasts the state of all buttons.
  * - isJogActionAllowed(): Checks if jog actions are currently permitted.
  * - processButtonEvent(String &buttonId, String &action): Processes button events and triggers corresponding actions.
+ *
+ * @author Karl Berger
+ * @date 2025-05-19
  */
 
 #ifndef BUTTONHANDLER_H

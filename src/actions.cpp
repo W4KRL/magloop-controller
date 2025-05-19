@@ -1,3 +1,27 @@
+/**
+ * @file actions.cpp
+ * @brief Implements motor control actions, limit switch processing, and SWR value simulation for the magloop controller.
+ *
+ * This file contains functions to handle button actions for scanning and jogging the motor,
+ * process limit switch states, and simulate SWR values for demonstration purposes.
+ *
+ * Functions:
+ * - actionScan(): Handles scan button actions, manages motor movement and button state based on limit switches.
+ * - actionJog(): Handles jog button actions, moves the motor for a fixed duration if the limit switch allows.
+ * - processLimitSwitches(): Updates and processes the state of limit switches, updates button and LED states accordingly.
+ * - processSWR(): Generates a random SWR value string for demonstration via WebSocket.
+ *
+ * Dependencies:
+ * - Arduino.h: Basic Arduino functions.
+ * - buttonHandler.h: Button state management and WebSocket updates.
+ * - h_bridge.h: Motor speed and direction control.
+ * - configuration.h: LED color definitions.
+ * - ledControl.h: LED state management.
+ * - scpiControl.h: Motor speed and direction constants.
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
+ */
 
 #include "actions.h" // for actionScan(), actionJog(), processLimitSwitches()
 

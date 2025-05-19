@@ -6,10 +6,8 @@
  * including updating their state and initializing them. It also
  * declares external variables for LED color and indices.
  *
- * @note As of 2025-05-10, the use of enum LedIndex for LED indices is suggested.
- *
  * @author Karl Berger
- * @date 2025-05-10
+ * @date 2025-05-19
  */
 
 #ifndef LED_CONTROL_H

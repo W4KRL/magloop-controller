@@ -1,10 +1,22 @@
-//! @file webSocket.h
-// 2025-04-03 revised message parsing for button events
-// 2025-04-04 revised SCPI handling
-// 2025-04-11 added /debug page for debugging
-
-//! Use '~' as a delimiter for web socket commands
-//! to avoid conflict with SCPI commands using ':' and ';' as delimiters
+/**
+ * @file webSocket.h
+ * @brief WebSocket interface for ESP32-based magloop controller.
+ *
+ * This header defines the interface for handling WebSocket communication
+ * using the ESPAsyncWebServer library. It uses the '~' character as a delimiter
+ * for WebSocket commands to avoid conflicts with SCPI commands that use ':' and ';'.
+ *
+ * Externally declares the web server and WebSocket objects, and provides
+ * functions for handling WebSocket events, notifying clients, and initializing
+ * the WebSocket subsystem.
+ *
+ * Dependencies:
+ *   - Arduino.h
+ *   - ESPAsyncWebServer.h (https://github.com/ESP32Async/ESPAsyncWebServer)
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
+ */
 
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H

@@ -14,7 +14,7 @@
  *   - setMotorSpeed(int speed, int mode): Sets the motor speed and direction.
  *
  * @author Karl Berger
- * @date 2025-05-10
+ * @date 2025-05-19
  */
 
 #ifndef H_BRIDGE_H

@@ -17,6 +17,9 @@
  * - actions.h: limitSwitchUp and limitSwitchDown objects.
  * - debug_magloop.h: Debug print macros.
  * - DigitalSignalDetector.h: Digital signal detection utilities.
+ * 
+ * @author Karl Berger
+ * @date 2025-05-19
  */
 
 #include "ledControl.h" // for LED control by web sockets
