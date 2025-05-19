@@ -25,7 +25,7 @@
 
 #include "configuration.h"
 
-#include <Arduino.h> // Include Arduino library for IPAddress
+#include <Arduino.h> // for IPAddress
 
 const char *WIFI_SSID = "DCMNET";
 const char *WIFI_PASSWORD = "0F1A2D3E4D5G6L7O8R9Y";
@@ -46,11 +46,11 @@ const IPAddress LOCAL_IP(192, 168, 0, 234);
 const IPAddress GATEWAY(192, 168, 0, 1);
 const IPAddress SUBNET(255, 255, 255, 0);
 
-// SCPI Identification
-const String MAKER = "W4KRL";
-const String MODEL = "Mag Loop Controller";
-const String SERIAL_NUMBER = "S/N: 001";
-const String VERSION = "DevKit 2025-05-08";
+//! SCPI Identification
+const char *MAKER = "W4KRL";
+const char *MODEL = "Mag Loop Controller";
+const char *SERIAL_NUMBER = "S/N: 001";
+const char *VERSION = "DevKit 2025-05-08";
 
 //! Web Server File Dates
 const String FW_DATE = "2025-05-08";
@@ -78,14 +78,16 @@ const float R1 = 6800.0f;	   // VM voltage divider lower resistor
 const float VM_VOLTAGE = 3.3f; // VM voltage divider reference voltage
 const float ADC_MAX = 4095.0f; // ADC max value for 12-bit ADC
 
-// Web UI LED Colors
+//! Web UI LED Colors
 const char* LED_COLOR_GREEN = "LimeGreen";
 const char* LED_COLOR_RED = "Red";
 
-// Web UI Button Colors
+//! Web UI Button Colors
 const char* BTN_SCAN_UP_COLOR = "RoyalBlue";
 const char* BTN_SCAN_DOWN_COLOR = "Lime";
 const char* BTN_JOG_UP_COLOR = "RoyalBlue";
 const char* BTN_JOG_DOWN_COLOR = "Lime";
 const char* BTN_UNPRESSED_COLOR = "DimGray";
 const char* BTN_DISABLED_COLOR = "Cloud";
+
+//! end of configuration.cpp

@@ -5,6 +5,7 @@
  * This file contains configuration definitions and macros used throughout the project.
  * Add your configuration parameters and settings to configuation.cpp.
  */
+
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
@@ -12,19 +13,21 @@
 
 //! Add your configuration parameters and settings to configuation.cpp.
 
+//! Statis IP address
 extern const IPAddress LOCAL_IP;
 extern const IPAddress GATEWAY;
 extern const IPAddress SUBNET;
 
+//! WiFi credentials
 extern const char *WIFI_SSID;
 extern const char *WIFI_PASSWORD;
 extern const char *HOSTNAME;
 
 //! SCPI Identification
-extern const String MAKER;
-extern const String MODEL;
-extern const String SERIAL_NUMBER;
-extern const String VERSION;
+extern const char *MAKER;
+extern const char *MODEL;
+extern const char *SERIAL_NUMBER;
+extern const char *VERSION;
 
 //! Web Server File Dates
 extern const String FW_DATE;
@@ -32,6 +35,7 @@ extern const String HTML_DATE;
 extern const String SCRIPT_DATE;
 extern const String STYLES_DATE;
 
+//! GPIO Pins for ESP32 DevKit V1
 extern const int HB_IN1_PIN;	 // PWM IN1 logic
 extern const int HB_IN2_PIN;	 // PWM IN2 logic
 extern const int LIMIT_UP_PIN;	 // upper limit switch interrupt
@@ -51,9 +55,11 @@ extern const float R1;		   // VM voltage divider lower resistor
 extern const float VM_VOLTAGE; // VM voltage divider reference voltage
 extern const float ADC_MAX;	   // ADC max value for 12-bit ADC
 
+//! Web UI limit LED colors
 extern const char *LED_COLOR_GREEN;
 extern const char *LED_COLOR_RED;
 
+//! Web UI button colors
 extern const char *BTN_SCAN_UP_COLOR;
 extern const char *BTN_SCAN_DOWN_COLOR;
 extern const char *BTN_JOG_UP_COLOR;
@@ -62,5 +68,4 @@ extern const char *BTN_UNPRESSED_COLOR;
 extern const char *BTN_DISABLED_COLOR;
 
 #endif // CONFIGURATION_H
-
 //! end of configuration.h
