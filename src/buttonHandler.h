@@ -7,12 +7,6 @@
 #include <Arduino.h>       // for Arduino functions
 #include "actions.h"       // for actionScan(), actionJog()
 #include "configuration.h" // colors
-// #include "ledControl.h"            // for LED colors
-// #include "h_bridge.h"              // for setMotorSpeed()
-// #include "DigitalSignalDetector.h" // for limit switch detection
-// #include "debug_magloop.h"         // for debug print to Serial Monitor
-// #include "webSocket.h"             // for notifyClients()
-// #include "scpiControl.h" // for user parameters
 
 //! Structure to hold button state information
 struct ButtonState

@@ -5,9 +5,9 @@
 #include <ArduinoOTA.h>	   // for OTA updates
 #include "configuration.h" // for SSID, password, static IP
 
-IPAddress localIP(LOCAL_IP);
-IPAddress gateway(GATEWAY);
-IPAddress subnet(SUBNET);
+IPAddress localIP = LOCAL_IP;
+IPAddress gateway = GATEWAY;
+IPAddress subnet = SUBNET;
 
 //! Initialize OTA
 //! This function sets up the OTA (Over-The-Air) update process for the ESP32 device.

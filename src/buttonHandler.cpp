@@ -7,7 +7,8 @@
 #include "DigitalSignalDetector.h" // for limit switch detection
 #include "debug_magloop.h"         // for debug print to Serial Monitor
 #include "webSocket.h"             // for notifyClients()
-#include "scpiControl.h" // for user parameters
+#include "scpiControl.h"           // for user parameters
+#include "configuration.h"         // for colors and designations
 
 //! Structure to hold button state information
 // struct ButtonState
