@@ -15,13 +15,13 @@
  * - limitSwitchDown: Digital signal detector for the lower limit switch.
  * 
  * @author Karl Berger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
 
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include "DigitalSignalDetector.h"
+#include "DigitalSignalDetector.h" // for limitSwitch argument
 
 extern DigitalSignalDetector limitSwitchUp;
 extern DigitalSignalDetector limitSwitchDown;

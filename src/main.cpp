@@ -1,44 +1,36 @@
-//! @file main.cpp
-// MagLoop-Controller firmware for ESP32 DevKit board
-//! 2025-05-11 conform to extensive updates
-
-// !!!Save this file!!!
-// C:\Users\KarlB\OneDrive\Documents\PlatformIO\Projects\magloop-controller
-
-/*
-This code is for the ESP32 DevKit board, in PlatformIO with Arduino framework 3.x.
-It uses the WebSocket protocol to communicate with the web interface.
-The web interface is defined by html, JavaScript and CSS in flash memory.
-The device employs Standard Commands for Programmable Instruments
-(SCPI; often pronounced "skippy") for command and control.
-The delimiter for web socket commands is "~" to avoid conflict
-with SCPI commands using ':' and ';' as delimiters.
-
-The vacuum capacitor motor is stopped if travel reaches upper or lower limits.
-The limit switches are normally closed (NC) reed switches with software
-debouncing and external pullup resistors. The input signal is HIGH when a
-corresponding limit is reached.
-*/
-
-/*
-Copyright (C) 2025 Karl W. Berger, W4KRL
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the “Software”), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is furnished
-to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/**
+ * @file main.cpp
+ * @brief MagLoop-Controller firmware for ESP32 DevKit board.
+ *
+ * This firmware manages the operation of a magnetic loop antenna controller using an ESP32 DevKit board.
+ * It provides WiFi connectivity, OTA updates, web socket communication, SCPI command parsing, motor control,
+ * limit switch monitoring, SWR calculation, and LED control.
+ *
+ * Included Libraries:
+ * - Arduino.h: Core Arduino functions.
+ * - actions.h: Handles button commands and sensor responses.
+ * - ArduinoOTA.h: Enables Over-The-Air firmware updates.
+ * - buttonHandler.h: Manages button control via web sockets.
+ * - configuration.h: Stores WiFi credentials and configuration.
+ * - debug_magloop.h: Provides debug output to the Serial Monitor.
+ * - DigitalSignalDetector.h: Handles limit switch control.
+ * - h_bridge.h: Controls the motor via an H-bridge.
+ * - ledControl.h: Manages LED indicators via web sockets.
+ * - scpiControl.h: Parses and executes SCPI commands.
+ * - swrCalc.h: Reads and calculates Standing Wave Ratio (SWR).
+ * - webSocket.h: Sets up web socket communication.
+ * - wifiConnection.h: Manages WiFi connection.
+ *
+ * Setup Function:
+ * - Initializes serial communication, WiFi, OTA updates, web sockets, SCPI parser, and motor control.
+ *
+ * Loop Function:
+ * - Maintains WiFi connection, handles OTA updates, cleans up web clients, processes limit switches,
+ *   and updates SWR values for connected clients.
+ *
+ * @author Karl Berger
+ * @date 2025-05-20
+ */
 
 #define DEBUG_MAGLOOP //! uncomment for debug output to Serial Monitor
 
@@ -75,18 +67,19 @@ void setup()
   Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
   wifiBegin();          // Setup WiFi
   wifiConnect();        // Connect to WiFi
-  otaBegin();           // Initialize OTA updates
-  websocketBegin();     // Initialize webSocket for bi-directional communication
+  otaBegin();           // Initialize Over-The-Air update service
+  websocketBegin();     // Initialize webSocket for bi-directional communication with web UI
   scpiBegin();          // Initialize SCPI parser, define commands, load user Preferences
   h_bridgeBegin();      // Initialize h-bridge for motor control
 } // setup()
 
 //! **************** Loop function ******************
+
 void loop()
 {
-  wifiConnect();          //! Reconnect to Wi-Fi if disconnected
-  ArduinoOTA.handle();    //! Check for OTA updates
-  websocketCleanup();     //! Perform web client cleanup
-  processLimitSwitches(); //! Shut down motor if limits of travel are reached
-  swrUpdate();            //! Push random SWR value to all clients every 5 seconds
+  wifiConnect();          // Reconnect to Wi-Fi if disconnected
+  ArduinoOTA.handle();    // Check for OTA updates
+  websocketCleanup();     // Perform web client cleanup
+  processLimitSwitches(); // Shut down motor if limits of travel are reached
+  swrUpdate();            // Push random SWR value to all clients every 5 seconds
 } // loop()

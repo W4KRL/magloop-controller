@@ -1,5 +1,3 @@
-
-
 /**
  * @file wifiConnection.h
  * @brief Declarations for WiFi and OTA connection management functions.
@@ -8,7 +6,7 @@
  * connecting to a WiFi network, and starting OTA (Over-The-Air) updates.
  * 
  * @author Karl Berger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
 
 /**

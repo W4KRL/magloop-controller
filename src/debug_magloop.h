@@ -1,5 +1,3 @@
-
-
 /**
  * @file debug_magloop.h
  * @brief Debugging utilities for the magloop controller project.
@@ -14,16 +12,12 @@
  *
  * Notes:
  * - The buffer size for formatted messages can be adjusted as needed.
- * - The macro uses a line continuation character (backslash) for multi-line definition.
+ * - The macro uses a line continuation character '\' (backslash) for multi-line definition.
  * - Do not autoformat this file to preserve macro formatting.
+ * 
+ * @author Karl Berger
+ * @date 2025-05-20
  */
-
-/* 
-  In C++, a backslash (\) at the end of a line is used as a 
-  line continuation character in preprocessor directives (such as macros). 
-  It tells the preprocessor that the current line continues onto the next 
-  line, effectively joining them into a single logical line.
-*/
 
 #ifndef DEBUG_MAGLOOP_H
 #define DEBUG_MAGLOOP_H

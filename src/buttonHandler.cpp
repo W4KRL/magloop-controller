@@ -20,20 +20,18 @@
  *   debugging, WebSocket communication, SCPI control, and configuration.
  *
  * @author Karl Berger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
 
 #include "buttonHandler.h"
 
 #include <Arduino.h>               // for Arduino functions
 #include "actions.h"               // for actionScan(), actionJog()
-#include "ledControl.h"            // for LED colors
-#include "h_bridge.h"              // for setMotorSpeed()
-#include "DigitalSignalDetector.h" // for limit switch detection
+#include "h_bridge.h"              // for MOVE_UP, MOVE_DOWN
 #include "debug_magloop.h"         // for debug print to Serial Monitor
 #include "webSocket.h"             // for notifyClients()
 #include "scpiControl.h"           // for user parameters
-#include "configuration.h"         // for colors and designations
+#include "configuration.h"         // for web LED colors and button designations
 
 //! Array to store the initial state of each button
 //! Each entry includes: buttonId, initial state (depressed or not), and depressedColor (ON)

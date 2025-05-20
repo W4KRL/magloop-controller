@@ -19,7 +19,7 @@
  * - scpiControl.h: Motor speed and direction constants.
  * 
  * @author Karl Berger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
 
 #include "actions.h" // for actionScan(), actionJog(), processLimitSwitches()
@@ -27,8 +27,7 @@
 #include <Arduino.h>       // Required for basic Arduino functions
 #include "buttonHandler.h" // for webSocket buttonStates[] and updateButtonState()
 #include "h_bridge.h"      // for setMotorSpeed()
-#include "configuration.h" // for LED colors
-#include "ledControl.h"    // for colors
+#include "ledControl.h"    // for updateLedState()
 #include "scpiControl.h"   // for motor speed and direction
 
 //! Instantiate DigitalSignalDetector objects for limit switches

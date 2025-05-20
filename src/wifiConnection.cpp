@@ -21,7 +21,7 @@
  * - configuration.h
  *
  * @author Karl Berger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
 #include "wifiConnection.h" // Wi-Fi connection header
 
@@ -30,6 +30,19 @@
 #include <ArduinoOTA.h>	   // for OTA updates
 #include "configuration.h" // for SSID, password, static IP
 
+/**
+ * @brief Initializes and configures Over-The-Air (OTA) update functionality.
+ *
+ * This function sets up the ArduinoOTA library, registering event handlers for OTA start,
+ * end, progress, and error events. It enables the device to receive firmware or filesystem
+ * updates wirelessly. Upon successful initialization, a message is printed to the serial console.
+ *
+ * Event handlers:
+ * - onStart: Prints the type of update being started ("sketch" or "filesystem").
+ * - onEnd: Prints a message when the update is complete.
+ * - onProgress: Prints the update progress as a percentage.
+ * - onError: Prints an error message corresponding to the OTA error encountered.
+ */
 void otaBegin()
 {
 	ArduinoOTA.begin();
@@ -43,15 +56,14 @@ void otaBegin()
 						  { Serial.printf("Progress: %u%%\r", (progress * 100) / total); });
 	ArduinoOTA.onError([](ota_error_t error)
 					   {
-Serial.printf("Error[%u]: ", error);
-if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
-	ArduinoOTA.begin();
+					   Serial.printf("Error[%u]: ", error);
+					   if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+					   else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+					   else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+					   else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+					   else if (error == OTA_END_ERROR) Serial.println("End Failed"); });
 	Serial.println("OTA Ready");
-}
+} // otaBegin()
 
 //! Global variables
 static bool ledBuiltIn = LOW; // Built-in LED LOW = OFF, HIGH = ON
@@ -85,6 +97,17 @@ void toggleLED_BUILTIN()
 	digitalWrite(LED_BUILTIN, ledBuiltIn); // Apply the new state
 }
 
+/**
+ * @brief Attempts to connect to a WiFi network using predefined SSID and password.
+ *
+ * If the device is not already connected to WiFi, this function initiates the connection
+ * process. While attempting to connect, it toggles the built-in LED and prints a dot to
+ * the serial monitor every 250 milliseconds. Once connected, it turns on the built-in LED
+ * and prints the assigned local IP address to the serial monitor.
+ *
+ * @note Requires WIFI_SSID and WIFI_PASSWORD to be defined.
+ * @note Assumes Serial and WiFi have been initialized.
+ */
 void wifiConnect()
 {
 	if (!WiFi.isConnected())
@@ -101,6 +124,16 @@ void wifiConnect()
 	}
 } // wifiConnect()
 
+/**
+ * @brief Initializes the WiFi connection with specific settings.
+ *
+ * This function configures the onboard LED as an output and turns it off.
+ * It sets the WiFi mode to station (WIFI_STA), disables WiFi persistence,
+ * enables automatic reconnection, and disables WiFi sleep mode.
+ * It then attempts to configure the WiFi with a static IP address using
+ * the predefined LOCAL_IP, GATEWAY, and SUBNET values.
+ * If static IP configuration fails, an error message is printed to Serial.
+ */
 void wifiBegin()
 {
 	// Configure onboard LED pin

@@ -22,7 +22,7 @@
  * - processButtonEvent(String &buttonId, String &action): Processes button events and triggers corresponding actions.
  *
  * @author Karl Berger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
 
 #ifndef BUTTONHANDLER_H
@@ -39,9 +39,7 @@ struct ButtonState
   String color;
 };
 
-// Declare `buttonStates[]` as `extern` for use elsewhere
 extern ButtonState buttonStates[];
-
 extern const int BTN_SCAN_UP;
 extern const int BTN_SCAN_DOWN;
 extern const int BTN_JOG_UP;

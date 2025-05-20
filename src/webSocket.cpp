@@ -122,7 +122,7 @@ void websocketBegin()
 
 void websocketCleanup()
 {
-	/*
+/*
   The cleanupClients() function is called periodically to free up
   resources by removing disconnected or inactive clients from
   the server's client list. Otherwise, you might encounter

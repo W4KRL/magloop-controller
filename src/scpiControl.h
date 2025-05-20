@@ -1,5 +1,3 @@
-
-
 /**
  * @file scpiControl.h
  * @brief SCPI (Standard Commands for Programmable Instruments) command handling for the magloop-controller project.
@@ -41,10 +39,10 @@
  * - SCPI_Parameters:    Structure representing SCPI command parameters.
  * - SCPI_Parser:        Class responsible for parsing SCPI commands.
  *
- * @note This file is intended for use with PlatformIO and Arduino environments.
  * @author Karl Berrger
- * @date 2025-05-19
+ * @date 2025-05-20
  */
+
 #ifndef SCPICONTROL_H
 #define SCPICONTROL_H
 
