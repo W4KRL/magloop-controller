@@ -1,5 +1,5 @@
 //! \file script.js
-//! 2025-04-17 zero-based indexing for button and LEDs
+//! 2025-05-20 mid-swr color changed to orange
 
 // Global variables
 let socket;
@@ -180,7 +180,7 @@ function updateSWRgauge(swrValue) {
     if (swrValue < 3) {
       color = "green";
     } else if (swrValue < 5) {
-      color = "yellow";
+      color = "orange";
     } else {
       color = "red";
     }
