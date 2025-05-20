@@ -14,10 +14,13 @@
  * - The buffer size for formatted messages can be adjusted as needed.
  * - The macro uses a line continuation character '\' (backslash) for multi-line definition.
  * - Do not autoformat this file to preserve macro formatting.
+ * - DEBUG_MAGLOOP may be defined in platformIO by adding:
+ * build_flags = -DDEBUG_MAGLOOP
  * 
  * @author Karl Berger
  * @date 2025-05-20
  */
+// #define DEBUG_MAGLOOP
 
 #ifndef DEBUG_MAGLOOP_H
 #define DEBUG_MAGLOOP_H
@@ -26,7 +29,7 @@
 #define DEBUG_PRINTF(fmt, ...) do { \
     char buffer[128]; /* Adjust buffer size as needed */ \
     snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); /* Format the message */ \
-    String message = String("dbg~") + String(buffer); /* Prefix with 'dbg~' */ \
+    String message = "dbg~" + String(buffer); /* Prefix with 'dbg~' */ \
     Serial.println(message); /* Output to Serial Monitor */ \
     notifyClients(message); /* Send to WebSocket clients */ \
 } while (0)

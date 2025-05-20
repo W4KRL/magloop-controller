@@ -32,7 +32,12 @@
  * @date 2025-05-20
  */
 
-#define DEBUG_MAGLOOP //! uncomment for debug output to Serial Monitor
+//! DEBUG PRINTING INSTRUCTIONS
+/*  Enable DEBUG printing by adding
+ *  build_flags = -DDEBUG_MAGLOOP
+ *  to platformIO.ini
+ *  debug will print to the website and Serial
+*/
 
 #include <Arduino.h>               // required by PlatformIO
 #include "actions.h"               // responses to button commands & sensors
